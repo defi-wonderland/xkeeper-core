@@ -4,18 +4,16 @@ node_modules
 .DS_STORE
 
 # Foundry files
-cache
+cache/
+out/*/*
 out-via-ir
 
 # Config files
 .env
+.vscode
 
-# Avoid ignoring gitkeep
+# Not ignore gitkeep
 !/**/.gitkeep
 
-# Keep related abi
-out/*/*
-!out/Greeter.sol/*
-
-# Keep the latest deployment only
+# Ignore the deployment files
 broadcast/*/*/*

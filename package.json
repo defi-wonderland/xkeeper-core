@@ -1,20 +1,15 @@
 {
-  "name": "solidity-foundry-boilerplate",
-  "version": "1.0.0",
+  "name": "keeper-framework-private",
+  "version": "0.0.1",
   "private": true,
-  "description": "Production ready Solidity boilerplate with Foundry",
-  "homepage": "https://github.com/defi-wonderland/solidity-foundry-boilerplate#readme",
+  "description": "Keep3r framework core",
+  "homepage": "https://github.com/defi-wonderland/keep3r-framework-private#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/defi-wonderland/solidity-foundry-boilerplate.git"
+    "url": "git+https://github.com/defi-wonderland/keep3r-framework-private.git"
   },
   "license": "MIT",
   "author": "Wonderland",
-  "contributors": [
-    "0xGorilla (https://github.com/0xGorilla)",
-    "0xng (https://github.com/0xng)",
-    "gas1cent (https://github.com/gas1cent)"
-  ],
   "scripts": {
     "build": "forge build",
     "build:optimized": "FOUNDRY_PROFILE=optimized forge build",

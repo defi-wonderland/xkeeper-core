@@ -2,13 +2,22 @@
 pragma solidity ^0.8.19;
 
 interface IAutomationVault {
+  event DepositFunds(address indexed _job, address indexed _token, uint256 _amount);
+  event WithdrawFunds(address indexed _job, address indexed _token, uint256 _amount, address indexed _receiver);
+
+  error AutomationVault_OnlyJobOwner(address _jobOwner);
+  error AutomationVault_InvalidEthValue();
+  error AutomationVault_InvalidAmount();
+  error AutomationVault_ReceiveEthNotAvailable();
+  error AutomationVault_EthTransferFailed();
+
   function jobOwner(address _job) external returns (address _owner);
 
   function jobPendingOwner(address _job) external returns (address _pendingOwner);
 
   function jobApprovedRelays(address _job, address _relay) external returns (bool _approved);
 
-  function jobsBalances(address _job, address _relay) external returns (uint256 _balance);
+  function jobsBalances(address _job, address _token) external returns (uint256 _balance);
 
   function registerJob(address _job, address _jobOwner) external;
 

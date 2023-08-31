@@ -14,7 +14,8 @@ contract AutomationVault is IAutomationVault {
   /// @inheritdoc IAutomationVault
   mapping(address _job => address _pendingOwner) public jobPendingOwner;
   /// @inheritdoc IAutomationVault
-  mapping(address _job => mapping(address _relay => bool _approved)) public jobApprovedRelays;
+  mapping(address _job => mapping(bytes4 _jobSelector => mapping(address _relay => bool _approved))) public
+    jobApprovedRelays;
   /// @inheritdoc IAutomationVault
   mapping(address _job => mapping(address _token => uint256 _balance)) public jobsBalances;
 
@@ -25,7 +26,7 @@ contract AutomationVault is IAutomationVault {
   function changeJobOwner(address _job, address _jobOwner) external onlyJobOwner(_job) {}
 
   /// @inheritdoc IAutomationVault
-  function acceptJobOwner(address _job, address _jobOwner) external onlyJobPendingOwner {}
+  function acceptJobOwner(address _job, address _jobOwner) external onlyJobPendingOwner(_job) {}
 
   /// @inheritdoc IAutomationVault
   function depositFunds(address _job, address _token, uint256 _amount) external payable {
@@ -50,7 +51,7 @@ contract AutomationVault is IAutomationVault {
     jobsBalances[_job][_token] -= _amount;
     if (_token == _ETH) {
       (bool _success,) = _receiver.call{value: _amount}('');
-      if (!_success) revert AutomationVault_EthTransferFailed();
+      if (!_success) revert AutomationVault_ETHTransferFailed();
     } else {
       IERC20(_token).safeTransfer(_receiver, _amount);
     }
@@ -59,27 +60,35 @@ contract AutomationVault is IAutomationVault {
   }
 
   /// @inheritdoc IAutomationVault
-  function approveRelays(address _job, address[] calldata _relaysToApprove) external onlyJobOwner(_job) {}
+  function approveRelay(address _job, bytes4 _jobSelector, address _relayToApprove) external onlyJobOwner(_job) {
+    if (jobApprovedRelays[_job][_jobSelector][_relayToApprove]) revert AutomationVault_AlreadyApprovedRelay();
+    jobApprovedRelays[_job][_jobSelector][_relayToApprove] = true;
+    emit ApproveRelay(_job, _jobSelector, _relayToApprove);
+  }
 
   /// @inheritdoc IAutomationVault
-  function revokeRelays(address _job, address[] calldata _relaysToRevoke) external onlyJobOwner(_job) {}
+  function revokeRelay(address _job, bytes4 _jobSelector, address _relayToRevoke) external onlyJobOwner(_job) {
+    if (!jobApprovedRelays[_job][_jobSelector][_relayToRevoke]) revert AutomationVault_NotApprovedRelay();
+    jobApprovedRelays[_job][_jobSelector][_relayToRevoke] = false;
+    emit RevokeRelay(_job, _jobSelector, _relayToRevoke);
+  }
 
   /// @inheritdoc IAutomationVault
   function issuePayment(address _job, uint256 _fee, address _feeToken, address _feeRecipient) external {}
 
   modifier onlyJobOwner(address _job) {
     address _jobOwner = jobOwner[_job];
-    if (msg.sender != _jobOwner) {
-      revert AutomationVault_OnlyJobOwner(_jobOwner);
-    }
+    if (msg.sender != _jobOwner) revert AutomationVault_OnlyJobOwner(_jobOwner);
     _;
   }
 
-  modifier onlyJobPendingOwner() {
+  modifier onlyJobPendingOwner(address _job) {
+    address _jobPendingOwner = jobPendingOwner[_job];
+    if (msg.sender != _jobPendingOwner) revert AutomationVault_OnlyJobPendingOwner(_jobPendingOwner);
     _;
   }
 
   receive() external payable {
-    revert AutomationVault_ReceiveEthNotAvailable();
+    revert AutomationVault_ReceiveETHNotAvailable();
   }
 }

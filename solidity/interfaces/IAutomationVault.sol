@@ -1,21 +1,25 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity 0.8.19;
 
 interface IAutomationVault {
   event DepositFunds(address indexed _job, address indexed _token, uint256 _amount);
   event WithdrawFunds(address indexed _job, address indexed _token, uint256 _amount, address indexed _receiver);
+  event ApproveRelay(address indexed _job, bytes4 _jobSelector, address indexed _relay);
+  event RevokeRelay(address indexed _job, bytes4 _jobSelector, address indexed _relay);
 
-  error AutomationVault_OnlyJobOwner(address _jobOwner);
-  error AutomationVault_InvalidEthValue();
   error AutomationVault_InvalidAmount();
-  error AutomationVault_ReceiveEthNotAvailable();
-  error AutomationVault_EthTransferFailed();
+  error AutomationVault_ETHTransferFailed();
+  error AutomationVault_AlreadyApprovedRelay();
+  error AutomationVault_NotApprovedRelay();
+  error AutomationVault_OnlyJobOwner(address _jobOwner);
+  error AutomationVault_OnlyJobPendingOwner(address _jobPendingOwner);
+  error AutomationVault_ReceiveETHNotAvailable();
 
   function jobOwner(address _job) external returns (address _owner);
 
   function jobPendingOwner(address _job) external returns (address _pendingOwner);
 
-  function jobApprovedRelays(address _job, address _relay) external returns (bool _approved);
+  function jobApprovedRelays(address _job, bytes4 _jobSelector, address _relay) external returns (bool _approved);
 
   function jobsBalances(address _job, address _token) external returns (uint256 _balance);
 
@@ -29,9 +33,9 @@ interface IAutomationVault {
 
   function withdrawFunds(address _job, address _token, uint256 _amount, address _receiver) external payable;
 
-  function approveRelays(address _job, address[] memory _relaysToApprove) external;
+  function approveRelay(address _job, bytes4 _jobSelector, address _relayToApprove) external;
 
-  function revokeRelays(address _job, address[] memory _relaysToRevoke) external;
+  function revokeRelay(address _job, bytes4 _jobSelector, address _relayToRevoke) external;
 
   function issuePayment(address _job, uint256 _fee, address _feeToken, address _feeRecipient) external;
 }

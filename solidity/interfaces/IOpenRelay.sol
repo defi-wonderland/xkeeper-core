@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity 0.8.19;
 
 interface IOpenRelay {
   function automationVault() external returns (address _automationVault);

@@ -5,7 +5,7 @@ import {IGelatoRelay} from '@interfaces/IGelatoRelay.sol';
 import {AutomateReady} from './utils/AutomateReady.sol';
 
 contract GelatoRelay is IGelatoRelay, AutomateReady {
-  /// Inheritdoc IGelatoRelay
+  /// @inheritdoc IGelatoRelay
   address public automationVault;
 
   constructor(
@@ -16,6 +16,6 @@ contract GelatoRelay is IGelatoRelay, AutomateReady {
     automationVault = _automationVault;
   }
 
-  /// Inheritdoc IGelatoRelay
+  /// @inheritdoc IGelatoRelay
   function exec(address _job, bytes32 _jobData, uint256 _fee, address _feeToken, address _feeRecipient) external {}
 }

@@ -26,6 +26,7 @@ contract AutomationVaultForTest is AutomationVault {
  */
 abstract contract AutomationVaultUnitTest is Test {
   // Events
+  event RegisterJob(address indexed _job, address indexed _jobOwner);
   event DepositFunds(address indexed _job, address indexed _token, uint256 _amount);
   event WithdrawFunds(address indexed _job, address indexed _token, uint256 _amount, address indexed _receiver);
   event ApproveRelay(address indexed _job, bytes4 _jobSelector, address indexed _relay);
@@ -68,6 +69,27 @@ abstract contract AutomationVaultUnitTest is Test {
 
   function _mockTokenTransfer(address _token) internal {
     vm.mockCall(_token, abi.encodeWithSelector(IERC20.transfer.selector), abi.encode(true));
+  }
+}
+
+contract UnitAutomationVaultRegisterJob is AutomationVaultUnitTest {
+  function testRevertIfJobAlreadyRegisted(address _fakeOwner) public {
+    automationVault.setJobOwnerForTest(job, jobOwner);
+    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_JobAlreadyRegistered.selector, jobOwner));
+
+    automationVault.registerJob(job, _fakeOwner);
+  }
+
+  function testJobIsRegisteredCorrectly(address _jobOwner) public {
+    automationVault.registerJob(job, _jobOwner);
+    assertEq(automationVault.jobOwner(job), _jobOwner);
+  }
+
+  function testEmitRegisterJob(address _jobOwner) public {
+    vm.expectEmit();
+    emit RegisterJob(job, _jobOwner);
+
+    automationVault.registerJob(job, _jobOwner);
   }
 }
 

@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 interface IAutomationVault {
+  event RegisterJob(address indexed _job, address indexed _jobOwner);
   event DepositFunds(address indexed _job, address indexed _token, uint256 _amount);
   event WithdrawFunds(address indexed _job, address indexed _token, uint256 _amount, address indexed _receiver);
   event ApproveRelay(address indexed _job, bytes4 _jobSelector, address indexed _relay);
@@ -10,6 +11,7 @@ interface IAutomationVault {
     address indexed _job, bytes4 _jobSelector, uint256 _fee, address indexed _feeToken, address indexed _feeRecipient
   );
 
+  error AutomationVault_JobAlreadyRegistered(address _jobOwner);
   error AutomationVault_InvalidAmount();
   error AutomationVault_InsufficientFunds();
   error AutomationVault_ETHTransferFailed();

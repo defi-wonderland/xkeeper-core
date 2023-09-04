@@ -20,7 +20,13 @@ contract AutomationVault is IAutomationVault {
   mapping(address _job => mapping(address _token => uint256 _balance)) public jobsBalances;
 
   /// @inheritdoc IAutomationVault
-  function registerJob(address _job, address _jobOwner) external {}
+  function registerJob(address _job, address _jobOwner) external {
+    address _currentOwner = jobOwner[_job];
+    if (_currentOwner != address(0)) revert AutomationVault_JobAlreadyRegistered(_currentOwner);
+    jobOwner[_job] = _jobOwner;
+
+    emit RegisterJob(_job, _jobOwner);
+  }
 
   /// @inheritdoc IAutomationVault
   function changeJobOwner(address _job, address _jobOwner) external onlyJobOwner(_job) {}

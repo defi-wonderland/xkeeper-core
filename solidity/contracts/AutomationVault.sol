@@ -47,7 +47,7 @@ contract AutomationVault is IAutomationVault {
     address _receiver
   ) external payable onlyJobOwner(_job) {
     uint256 _balance = jobsBalances[_job][_token];
-    if (_amount > _balance) revert AutomationVault_InvalidAmount();
+    if (_amount > _balance) revert AutomationVault_InsufficientFunds();
     jobsBalances[_job][_token] -= _amount;
     if (_token == _ETH) {
       (bool _success,) = _receiver.call{value: _amount}('');
@@ -74,7 +74,25 @@ contract AutomationVault is IAutomationVault {
   }
 
   /// @inheritdoc IAutomationVault
-  function issuePayment(address _job, uint256 _fee, address _feeToken, address _feeRecipient) external {}
+  function issuePayment(
+    address _job,
+    bytes4 _jobSelector,
+    uint256 _fee,
+    address _feeToken,
+    address _feeRecipient
+  ) external {
+    if (!jobApprovedRelays[_job][_jobSelector][msg.sender]) revert AutomationVault_NotApprovedRelay();
+    if (_fee > jobsBalances[_job][_feeToken]) revert AutomationVault_InsufficientFunds();
+
+    if (_feeToken == _ETH) {
+      (bool _success,) = _feeRecipient.call{value: _fee}('');
+      if (!_success) revert AutomationVault_ETHTransferFailed();
+    } else {
+      IERC20(_feeToken).safeTransfer(_feeRecipient, _fee);
+    }
+
+    emit IssuePayment(_job, _jobSelector, _fee, _feeToken, _feeRecipient);
+  }
 
   modifier onlyJobOwner(address _job) {
     address _jobOwner = jobOwner[_job];

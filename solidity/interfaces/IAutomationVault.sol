@@ -6,8 +6,12 @@ interface IAutomationVault {
   event WithdrawFunds(address indexed _job, address indexed _token, uint256 _amount, address indexed _receiver);
   event ApproveRelay(address indexed _job, bytes4 _jobSelector, address indexed _relay);
   event RevokeRelay(address indexed _job, bytes4 _jobSelector, address indexed _relay);
+  event IssuePayment(
+    address indexed _job, bytes4 _jobSelector, uint256 _fee, address indexed _feeToken, address indexed _feeRecipient
+  );
 
   error AutomationVault_InvalidAmount();
+  error AutomationVault_InsufficientFunds();
   error AutomationVault_ETHTransferFailed();
   error AutomationVault_AlreadyApprovedRelay();
   error AutomationVault_NotApprovedRelay();
@@ -37,5 +41,11 @@ interface IAutomationVault {
 
   function revokeRelay(address _job, bytes4 _jobSelector, address _relayToRevoke) external;
 
-  function issuePayment(address _job, uint256 _fee, address _feeToken, address _feeRecipient) external;
+  function issuePayment(
+    address _job,
+    bytes4 _jobSelector,
+    uint256 _fee,
+    address _feeToken,
+    address _feeRecipient
+  ) external;
 }

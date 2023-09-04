@@ -16,20 +16,23 @@ contract AutomationVaultForTest is AutomationVault {
     jobApprovedRelays[_job][_jobSelector][_relay] = _approved;
   }
 
-  function setJobsBalancesForTest(address _job, address _token, uint256 _amount) public {
-    jobsBalances[_job][_token] = _amount;
+  function setJobsBalancesForTest(address _job, address _token, uint256 _balance) public {
+    jobsBalances[_job][_token] = _balance;
   }
 }
 
 /**
  * @title AutomationVault Unit tests
  */
-contract AutomationVaultUnitTest is Test {
+abstract contract AutomationVaultUnitTest is Test {
   // Events
   event DepositFunds(address indexed _job, address indexed _token, uint256 _amount);
   event WithdrawFunds(address indexed _job, address indexed _token, uint256 _amount, address indexed _receiver);
   event ApproveRelay(address indexed _job, bytes4 _jobSelector, address indexed _relay);
   event RevokeRelay(address indexed _job, bytes4 _jobSelector, address indexed _relay);
+  event IssuePayment(
+    address indexed _job, bytes4 _jobSelector, uint256 _fee, address indexed _feeToken, address indexed _feeRecipient
+  );
 
   // AutomationVault contract
   AutomationVaultForTest public automationVault;
@@ -61,6 +64,10 @@ contract AutomationVaultUnitTest is Test {
     relay = makeAddr('Relay');
 
     automationVault = new AutomationVaultForTest();
+  }
+
+  function _mockTokenTransfer(address _token) internal {
+    vm.mockCall(_token, abi.encodeWithSelector(IERC20.transfer.selector), abi.encode(true));
   }
 }
 
@@ -139,7 +146,7 @@ contract UnitAutomationVaultWithdrawFunds is AutomationVaultUnitTest {
     vm.assume(_amount > _balance);
     automationVault.setJobsBalancesForTest(job, token, _balance);
 
-    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_InvalidAmount.selector));
+    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_InsufficientFunds.selector));
 
     vm.prank(jobOwner);
     automationVault.withdrawFunds(job, token, _amount, receiver);
@@ -266,5 +273,61 @@ contract UnitAutomationVaultRevokeRelay is AutomationVaultUnitTest {
     emit RevokeRelay(job, jobSelector, relay);
 
     automationVault.revokeRelay(job, jobSelector, relay);
+  }
+}
+
+contract UnitAutomationVaultIssuePayment is AutomationVaultUnitTest {
+  function setUp() public override {
+    AutomationVaultUnitTest.setUp();
+
+    automationVault.setJobApprovedRelaysForTest(job, jobSelector, relay, true);
+    automationVault.setJobsBalancesForTest(job, eth, type(uint256).max);
+    automationVault.setJobsBalancesForTest(job, token, type(uint256).max);
+    _mockTokenTransfer(token);
+
+    deal(address(automationVault), type(uint256).max);
+
+    vm.startPrank(relay);
+  }
+
+  function testRevertIfNotApprovedRelay(uint256 _fee) public {
+    vm.expectRevert(IAutomationVault.AutomationVault_NotApprovedRelay.selector);
+
+    changePrank(jobOwner);
+    automationVault.issuePayment(job, jobSelector, _fee, token, receiver);
+  }
+
+  function testRevertIfInsufficientFunds(uint256 _fee, uint256 _jobBalance) public {
+    vm.assume(_fee > _jobBalance);
+    automationVault.setJobsBalancesForTest(job, token, _jobBalance);
+
+    vm.expectRevert(IAutomationVault.AutomationVault_InsufficientFunds.selector);
+
+    automationVault.issuePayment(job, jobSelector, _fee, token, receiver);
+  }
+
+  function testRevertIfETHTransferFailed(uint256 _fee) public {
+    vm.expectRevert(IAutomationVault.AutomationVault_ETHTransferFailed.selector);
+
+    automationVault.issuePayment(job, jobSelector, _fee, eth, address(automationVault));
+  }
+
+  function testCallETHTransfer(uint256 _fee) public {
+    automationVault.issuePayment(job, jobSelector, _fee, eth, receiver);
+
+    assertEq(receiver.balance, _fee);
+  }
+
+  function testCallTokenTransfer(uint256 _fee) public {
+    vm.expectCall(token, abi.encodeCall(IERC20.transfer, (receiver, _fee)), 1);
+
+    automationVault.issuePayment(job, jobSelector, _fee, token, receiver);
+  }
+
+  function testEmitIssuePayment(uint256 _fee) public {
+    vm.expectEmit();
+    emit IssuePayment(job, jobSelector, _fee, token, receiver);
+
+    automationVault.issuePayment(job, jobSelector, _fee, token, receiver);
   }
 }

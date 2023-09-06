@@ -29,10 +29,17 @@ contract AutomationVault is IAutomationVault {
   }
 
   /// @inheritdoc IAutomationVault
-  function changeJobOwner(address _job, address _jobOwner) external onlyJobOwner(_job) {}
+  function changeJobOwner(address _job, address _jobPendingOwner) external onlyJobOwner(_job) {
+    jobPendingOwner[_job] = _jobPendingOwner;
+    emit ChangeJobOwner(_job, _jobPendingOwner);
+  }
 
   /// @inheritdoc IAutomationVault
-  function acceptJobOwner(address _job, address _jobOwner) external onlyJobPendingOwner(_job) {}
+  function acceptJobOwner(address _job) external onlyJobPendingOwner(_job) {
+    jobOwner[_job] = msg.sender;
+    delete jobPendingOwner[_job];
+    emit AcceptJobOwner(_job, msg.sender);
+  }
 
   /// @inheritdoc IAutomationVault
   function depositFunds(address _job, address _token, uint256 _amount) external payable {

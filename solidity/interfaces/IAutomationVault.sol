@@ -3,6 +3,8 @@ pragma solidity 0.8.19;
 
 interface IAutomationVault {
   event RegisterJob(address indexed _job, address indexed _jobOwner);
+  event ChangeJobOwner(address indexed _job, address indexed _jobPendingOwner);
+  event AcceptJobOwner(address indexed _job, address indexed _jobOwner);
   event DepositFunds(address indexed _job, address indexed _token, uint256 _amount);
   event WithdrawFunds(address indexed _job, address indexed _token, uint256 _amount, address indexed _receiver);
   event ApproveRelay(address indexed _job, bytes4 _jobSelector, address indexed _relay);
@@ -31,9 +33,9 @@ interface IAutomationVault {
 
   function registerJob(address _job, address _jobOwner) external;
 
-  function changeJobOwner(address _job, address _jobOwner) external;
+  function changeJobOwner(address _job, address _jobPendingOwner) external;
 
-  function acceptJobOwner(address _job, address _jobOwner) external;
+  function acceptJobOwner(address _job) external;
 
   function depositFunds(address _job, address _token, uint256 _amount) external payable;
 

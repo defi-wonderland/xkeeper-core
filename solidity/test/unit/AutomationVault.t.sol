@@ -12,6 +12,10 @@ contract AutomationVaultForTest is AutomationVault {
     jobOwner[_job] = _jobOwner;
   }
 
+  function setJobPendingOwnerForTest(address _job, address _jobPendingOwner) public {
+    jobPendingOwner[_job] = _jobPendingOwner;
+  }
+
   function setJobApprovedRelaysForTest(address _job, bytes4 _jobSelector, address _relay, bool _approved) public {
     jobApprovedRelays[_job][_jobSelector][_relay] = _approved;
   }
@@ -27,6 +31,8 @@ contract AutomationVaultForTest is AutomationVault {
 abstract contract AutomationVaultUnitTest is Test {
   // Events
   event RegisterJob(address indexed _job, address indexed _jobOwner);
+  event ChangeJobOwner(address indexed _job, address indexed _jobPendingOwner);
+  event AcceptJobOwner(address indexed _job, address indexed _jobOwner);
   event DepositFunds(address indexed _job, address indexed _token, uint256 _amount);
   event WithdrawFunds(address indexed _job, address indexed _token, uint256 _amount, address indexed _receiver);
   event ApproveRelay(address indexed _job, bytes4 _jobSelector, address indexed _relay);
@@ -90,6 +96,74 @@ contract UnitAutomationVaultRegisterJob is AutomationVaultUnitTest {
     emit RegisterJob(job, _jobOwner);
 
     automationVault.registerJob(job, _jobOwner);
+  }
+}
+
+contract UnitAutomationVaultChangeJobOwner is AutomationVaultUnitTest {
+  function setUp() public override {
+    AutomationVaultUnitTest.setUp();
+
+    automationVault.setJobOwnerForTest(job, jobOwner);
+
+    vm.startPrank(jobOwner);
+  }
+
+  function testRevertIfCallerIsNotJobOwner() public {
+    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyJobOwner.selector, jobOwner));
+
+    changePrank(jobPendingOwner);
+    automationVault.changeJobOwner(job, jobPendingOwner);
+  }
+
+  function testSetJobPendingOwner() public {
+    automationVault.changeJobOwner(job, jobPendingOwner);
+
+    assertEq(automationVault.jobPendingOwner(job), jobPendingOwner);
+  }
+
+  function testEmitChangeJobOwner() public {
+    vm.expectEmit();
+    emit ChangeJobOwner(job, jobPendingOwner);
+
+    automationVault.changeJobOwner(job, jobPendingOwner);
+  }
+}
+
+contract UnitAutomationVaultAcceptJobOwner is AutomationVaultUnitTest {
+  function setUp() public override {
+    AutomationVaultUnitTest.setUp();
+
+    automationVault.setJobPendingOwnerForTest(job, jobPendingOwner);
+
+    vm.startPrank(jobPendingOwner);
+  }
+
+  function testRevertIfCallerIsNotJobPendingOwner() public {
+    vm.expectRevert(
+      abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyJobPendingOwner.selector, jobPendingOwner)
+    );
+
+    changePrank(jobOwner);
+    automationVault.acceptJobOwner(job);
+  }
+
+  function testSetJobOwner() public {
+    automationVault.acceptJobOwner(job);
+
+    assertEq(automationVault.jobOwner(job), jobPendingOwner);
+  }
+
+  function testDeleteJobPendingOwner() public {
+    automationVault.acceptJobOwner(job);
+
+    assertEq(automationVault.jobPendingOwner(job), address(0));
+  }
+
+  function testEmitAcceptJobOwner() public {
+    vm.expectEmit();
+    emit AcceptJobOwner(job, jobPendingOwner);
+
+    automationVault.acceptJobOwner(job);
   }
 }
 
@@ -158,7 +232,7 @@ contract UnitAutomationVaultWithdrawFunds is AutomationVaultUnitTest {
     automationVault.setJobOwnerForTest(job, jobOwner);
   }
 
-  function testRevertIfCallerIsNotOwner(uint128 _amount) public {
+  function testRevertIfCallerIsNotJobOwner(uint128 _amount) public {
     vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyJobOwner.selector, jobOwner));
 
     automationVault.withdrawFunds(job, eth, _amount, jobOwner);
@@ -230,7 +304,7 @@ contract UnitAutomationVaultApproveRelay is AutomationVaultUnitTest {
     vm.startPrank(jobOwner);
   }
 
-  function testRevertIfCallerIsNotOwner(bytes4 _jobSelector, address _relay) public {
+  function testRevertIfCallerIsNotJobOwner(bytes4 _jobSelector, address _relay) public {
     vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyJobOwner.selector, jobOwner));
 
     changePrank(jobPendingOwner);
@@ -269,7 +343,7 @@ contract UnitAutomationVaultRevokeRelay is AutomationVaultUnitTest {
     vm.startPrank(jobOwner);
   }
 
-  function testRevertIfCallerIsNotOwner() public {
+  function testRevertIfCallerIsNotJobOwner() public {
     vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyJobOwner.selector, jobOwner));
 
     changePrank(jobPendingOwner);

@@ -10,6 +10,11 @@ contract AutomationVault is IAutomationVault {
   address internal constant _ETH = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
   /// @inheritdoc IAutomationVault
+  address public owner;
+  /// @inheritdoc IAutomationVault
+  string public organizationName;
+
+  /// @inheritdoc IAutomationVault
   mapping(address _job => address _owner) public jobOwner;
   /// @inheritdoc IAutomationVault
   mapping(address _job => address _pendingOwner) public jobPendingOwner;
@@ -18,6 +23,11 @@ contract AutomationVault is IAutomationVault {
     jobApprovedRelays;
   /// @inheritdoc IAutomationVault
   mapping(address _job => mapping(address _token => uint256 _balance)) public jobsBalances;
+
+  constructor(address _owner, string memory _organizationName) payable {
+    owner = _owner;
+    organizationName = _organizationName;
+  }
 
   /// @inheritdoc IAutomationVault
   function registerJob(address _job, address _jobOwner) external {

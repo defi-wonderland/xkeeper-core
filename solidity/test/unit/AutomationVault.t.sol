@@ -8,6 +8,8 @@ import {AutomationVault, IAutomationVault} from '@contracts/AutomationVault.sol'
 import {IERC20} from '@openzeppelin/token/ERC20/IERC20.sol';
 
 contract AutomationVaultForTest is AutomationVault {
+  constructor(address _owner, string memory _organizationName) AutomationVault(_owner, _organizationName) {}
+
   function setJobOwnerForTest(address _job, address _jobOwner) public {
     jobOwner[_job] = _jobOwner;
   }
@@ -56,10 +58,12 @@ abstract contract AutomationVaultUnitTest is Test {
 
   // Data
   address public eth;
+  string public organizationName;
   bytes4 public jobSelector;
 
   function setUp() public virtual {
     eth = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    organizationName = 'Organization';
     jobSelector = bytes4(keccak256('jobSelector()'));
 
     jobOwner = makeAddr('JobOwner');
@@ -70,11 +74,21 @@ abstract contract AutomationVaultUnitTest is Test {
     job = makeAddr('Job');
     relay = makeAddr('Relay');
 
-    automationVault = new AutomationVaultForTest();
+    automationVault = new AutomationVaultForTest(jobOwner, organizationName);
   }
 
   function _mockTokenTransfer(address _token) internal {
     vm.mockCall(_token, abi.encodeWithSelector(IERC20.transfer.selector), abi.encode(true));
+  }
+}
+
+contract UnitAutomationVaultConstructor is AutomationVaultUnitTest {
+  function testSetOwner() public {
+    assertEq(automationVault.owner(), jobOwner);
+  }
+
+  function testSetOrganizationName() public {
+    assertEq(automationVault.organizationName(), organizationName);
   }
 }
 

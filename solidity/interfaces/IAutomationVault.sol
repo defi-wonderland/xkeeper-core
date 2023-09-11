@@ -23,6 +23,10 @@ interface IAutomationVault {
   error AutomationVault_OnlyJobPendingOwner(address _jobPendingOwner);
   error AutomationVault_ReceiveETHNotAvailable();
 
+  function owner() external view returns (address _owner);
+
+  function organizationName() external view returns (string calldata _organizationName);
+
   function jobOwner(address _job) external returns (address _owner);
 
   function jobPendingOwner(address _job) external returns (address _pendingOwner);

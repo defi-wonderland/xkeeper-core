@@ -14,18 +14,18 @@ src = 'solidity'
 test = 'solidity/test'
 out = 'out'
 libs = ['lib']
-fuzz_runs = 1000
+fuzz_runs = 2000
 optimizer_runs = 10_000
 
 [profile.optimized]
 via_ir = true
 out = 'out-via-ir'
-fuzz_runs = 5000
+fuzz_runs = 2000
 
 [profile.test]
 via_ir = true
 out = 'out-via-ir'
-fuzz_runs = 5000
+fuzz_runs = 2000
 src = 'solidity/test'
 
 [rpc_endpoints]

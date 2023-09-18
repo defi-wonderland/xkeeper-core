@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
 import {IERC20, SafeERC20} from '@openzeppelin/token/ERC20/utils/SafeERC20.sol';
 import {EnumerableSet} from '@openzeppelin/utils/structs/EnumerableSet.sol';
-import {_ETH} from '@contracts/utils/Constants.sol';
+import {_ETH, _NULL} from '@contracts/utils/Constants.sol';
 
 contract AutomationVault is IAutomationVault {
   using SafeERC20 for IERC20;
@@ -150,9 +150,12 @@ contract AutomationVault is IAutomationVault {
 
   /// @inheritdoc IAutomationVault
   function exec(address _relayCaller, ExecData[] calldata _execData, FeeData[] calldata _feeData) external payable {
-    if (!_relayEnabledCallers[msg.sender].contains(_relayCaller)) revert AutomationVault_NotApprovedRelayCaller();
+    if (!_relayEnabledCallers[msg.sender].contains(_relayCaller) && !_relayEnabledCallers[msg.sender].contains(_NULL)) {
+      revert AutomationVault_NotApprovedRelayCaller();
+    }
 
     ExecData memory _execDatum;
+
     uint256 _dataLength = _execData.length;
     uint256 _i;
     bool _success;

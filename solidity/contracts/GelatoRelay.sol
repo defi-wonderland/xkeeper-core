@@ -1,21 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {IGelatoRelay} from '@interfaces/IGelatoRelay.sol';
-import {AutomateReady} from './utils/AutomateReady.sol';
+import {IGelatoRelay, IAutomationVault} from '@interfaces/IGelatoRelay.sol';
 
-contract GelatoRelay is IGelatoRelay, AutomateReady {
+contract GelatoRelay is IGelatoRelay {
   /// @inheritdoc IGelatoRelay
-  address public automationVault;
-
-  constructor(
+  function exec(
     address _automationVault,
-    address _automate,
-    address _taskCreator
-  ) payable AutomateReady(_automate, _taskCreator) {
-    automationVault = _automationVault;
-  }
+    IAutomationVault.ExecData[] calldata _execData,
+    IAutomationVault.FeeData[] calldata _feeData
+  ) external {
+    IAutomationVault(_automationVault).exec(msg.sender, _execData, _feeData);
 
-  /// @inheritdoc IGelatoRelay
-  function exec(address _job, bytes32 _jobData, uint256 _fee, address _feeToken, address _feeRecipient) external {}
+    emit AutomationVaultExecuted(msg.sender, _execData, _feeData);
+  }
 }

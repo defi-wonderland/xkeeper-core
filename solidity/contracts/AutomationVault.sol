@@ -3,26 +3,44 @@ pragma solidity 0.8.19;
 
 import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
 import {IERC20, SafeERC20} from '@openzeppelin/token/ERC20/utils/SafeERC20.sol';
+import {EnumerableSet} from '@openzeppelin/utils/structs/EnumerableSet.sol';
+import {_ETH} from '@contracts/utils/Constants.sol';
 
 contract AutomationVault is IAutomationVault {
   using SafeERC20 for IERC20;
-
-  address internal constant _ETH = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+  using EnumerableSet for EnumerableSet.AddressSet;
+  using EnumerableSet for EnumerableSet.Bytes32Set;
 
   /// @inheritdoc IAutomationVault
   address public owner;
   /// @inheritdoc IAutomationVault
+  address public pendingOwner;
+  /// @inheritdoc IAutomationVault
   string public organizationName;
 
-  /// @inheritdoc IAutomationVault
-  mapping(address _job => address _owner) public jobOwner;
-  /// @inheritdoc IAutomationVault
-  mapping(address _job => address _pendingOwner) public jobPendingOwner;
-  /// @inheritdoc IAutomationVault
-  mapping(address _job => mapping(bytes4 _jobSelector => mapping(address _relay => bool _approved))) public
-    jobApprovedRelays;
-  /// @inheritdoc IAutomationVault
-  mapping(address _job => mapping(address _token => uint256 _balance)) public jobsBalances;
+  mapping(address _relay => EnumerableSet.AddressSet _enabledCallers) internal _relayEnabledCallers;
+
+  function relayEnabledCallers(address _relay) external view returns (address[] memory _enabledCallers) {
+    return _relayEnabledCallers[_relay].values();
+  }
+
+  mapping(address _job => EnumerableSet.Bytes32Set _enabledSelectors) internal _jobEnabledFunctions;
+
+  function jobEnabledFunctions(address _job) external view returns (bytes32[] memory _enabledSelectors) {
+    return _jobEnabledFunctions[_job].values();
+  }
+
+  EnumerableSet.AddressSet internal _relays;
+
+  function relays() external view returns (address[] memory __relays) {
+    return _relays.values();
+  }
+
+  EnumerableSet.AddressSet internal _jobs;
+
+  function jobs() external view returns (address[] memory __jobs) {
+    return _jobs.values();
+  }
 
   constructor(address _owner, string memory _organizationName) payable {
     owner = _owner;
@@ -30,48 +48,20 @@ contract AutomationVault is IAutomationVault {
   }
 
   /// @inheritdoc IAutomationVault
-  function registerJob(address _job, address _jobOwner) external {
-    address _currentOwner = jobOwner[_job];
-    if (_currentOwner != address(0)) revert AutomationVault_JobAlreadyRegistered(_currentOwner);
-    jobOwner[_job] = _jobOwner;
-
-    emit RegisterJob(_job, _jobOwner);
+  function changeOwner(address _pendingOwner) external onlyOwner {
+    pendingOwner = _pendingOwner;
+    emit ChangeOwner(_pendingOwner);
   }
 
   /// @inheritdoc IAutomationVault
-  function changeJobOwner(address _job, address _jobPendingOwner) external onlyJobOwner(_job) {
-    jobPendingOwner[_job] = _jobPendingOwner;
-    emit ChangeJobOwner(_job, _jobPendingOwner);
+  function acceptOwner() external onlyPendingOwner {
+    pendingOwner = address(0);
+    owner = msg.sender;
+    emit AcceptOwner(msg.sender);
   }
 
   /// @inheritdoc IAutomationVault
-  function acceptJobOwner(address _job) external onlyJobPendingOwner(_job) {
-    jobOwner[_job] = msg.sender;
-    delete jobPendingOwner[_job];
-    emit AcceptJobOwner(_job, msg.sender);
-  }
-
-  /// @inheritdoc IAutomationVault
-  function depositFunds(address _job, address _token, uint256 _amount) external payable {
-    if (_token == _ETH) {
-      if (_amount != msg.value) revert AutomationVault_InvalidAmount();
-    } else {
-      IERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
-    }
-    jobsBalances[_job][_token] += _amount;
-    emit DepositFunds(_job, _token, _amount);
-  }
-
-  /// @inheritdoc IAutomationVault
-  function withdrawFunds(
-    address _job,
-    address _token,
-    uint256 _amount,
-    address _receiver
-  ) external payable onlyJobOwner(_job) {
-    uint256 _balance = jobsBalances[_job][_token];
-    if (_amount > _balance) revert AutomationVault_InsufficientFunds();
-    jobsBalances[_job][_token] -= _amount;
+  function withdrawFunds(address _token, uint256 _amount, address _receiver) external payable onlyOwner {
     if (_token == _ETH) {
       (bool _success,) = _receiver.call{value: _amount}('');
       if (!_success) revert AutomationVault_ETHTransferFailed();
@@ -79,57 +69,143 @@ contract AutomationVault is IAutomationVault {
       IERC20(_token).safeTransfer(_receiver, _amount);
     }
 
-    emit WithdrawFunds(_job, _token, _amount, _receiver);
+    emit WithdrawFunds(_token, _amount, _receiver);
   }
 
   /// @inheritdoc IAutomationVault
-  function approveRelay(address _job, bytes4 _jobSelector, address _relayToApprove) external onlyJobOwner(_job) {
-    if (jobApprovedRelays[_job][_jobSelector][_relayToApprove]) revert AutomationVault_AlreadyApprovedRelay();
-    jobApprovedRelays[_job][_jobSelector][_relayToApprove] = true;
-    emit ApproveRelay(_job, _jobSelector, _relayToApprove);
-  }
-
-  /// @inheritdoc IAutomationVault
-  function revokeRelay(address _job, bytes4 _jobSelector, address _relayToRevoke) external onlyJobOwner(_job) {
-    if (!jobApprovedRelays[_job][_jobSelector][_relayToRevoke]) revert AutomationVault_NotApprovedRelay();
-    jobApprovedRelays[_job][_jobSelector][_relayToRevoke] = false;
-    emit RevokeRelay(_job, _jobSelector, _relayToRevoke);
-  }
-
-  /// @inheritdoc IAutomationVault
-  function issuePayment(
-    address _job,
-    bytes4 _jobSelector,
-    uint256 _fee,
-    address _feeToken,
-    address _feeRecipient
-  ) external {
-    if (!jobApprovedRelays[_job][_jobSelector][msg.sender]) revert AutomationVault_NotApprovedRelay();
-    if (_fee > jobsBalances[_job][_feeToken]) revert AutomationVault_InsufficientFunds();
-
-    if (_feeToken == _ETH) {
-      (bool _success,) = _feeRecipient.call{value: _fee}('');
-      if (!_success) revert AutomationVault_ETHTransferFailed();
-    } else {
-      IERC20(_feeToken).safeTransfer(_feeRecipient, _fee);
+  function approveRelayCallers(address _relay, address[] calldata _callers) external onlyOwner {
+    EnumerableSet.AddressSet storage _enabledCallers = _relayEnabledCallers[_relay];
+    if (_relays.add(_relay)) {
+      emit ApproveRelay(_relay);
     }
 
-    emit IssuePayment(_job, _jobSelector, _fee, _feeToken, _feeRecipient);
+    for (uint256 _i; _i < _callers.length;) {
+      if (_enabledCallers.add(_callers[_i])) {
+        emit ApproveRelayCaller(_relay, _callers[_i]);
+      }
+
+      unchecked {
+        ++_i;
+      }
+    }
   }
 
-  modifier onlyJobOwner(address _job) {
-    address _jobOwner = jobOwner[_job];
-    if (msg.sender != _jobOwner) revert AutomationVault_OnlyJobOwner(_jobOwner);
+  /// @inheritdoc IAutomationVault
+  function revokeRelayCallers(address _relay, address[] calldata _callers) external onlyOwner {
+    EnumerableSet.AddressSet storage _enabledCallers = _relayEnabledCallers[_relay];
+
+    for (uint256 _i; _i < _callers.length;) {
+      if (_enabledCallers.remove(_callers[_i])) {
+        emit RevokeRelayCaller(_relay, _callers[_i]);
+      }
+
+      unchecked {
+        ++_i;
+      }
+    }
+
+    if (_enabledCallers.length() == 0) {
+      _relays.remove(_relay);
+      emit RevokeRelay(_relay);
+    }
+  }
+
+  /// @inheritdoc IAutomationVault
+  function approveJobFunctions(address _job, bytes4[] calldata _functionSelectors) external onlyOwner {
+    EnumerableSet.Bytes32Set storage _enabledSelectors = _jobEnabledFunctions[_job];
+    if (_jobs.add(_job)) {
+      emit ApproveJob(_job);
+    }
+
+    for (uint256 _i; _i < _functionSelectors.length;) {
+      if (_enabledSelectors.add(_functionSelectors[_i])) {
+        emit ApproveJobFunction(_job, _functionSelectors[_i]);
+      }
+
+      unchecked {
+        ++_i;
+      }
+    }
+  }
+
+  /// @inheritdoc IAutomationVault
+  function revokeJobFunctions(address _job, bytes4[] calldata _functionSelectors) external onlyOwner {
+    EnumerableSet.Bytes32Set storage _enabledSelectors = _jobEnabledFunctions[_job];
+
+    for (uint256 _i; _i < _functionSelectors.length;) {
+      if (_enabledSelectors.remove(_functionSelectors[_i])) {
+        emit RevokeJobFunction(_job, _functionSelectors[_i]);
+      }
+
+      unchecked {
+        ++_i;
+      }
+    }
+
+    if (_enabledSelectors.length() == 0) {
+      _jobs.remove(_job);
+      emit RevokeJob(_job);
+    }
+  }
+
+  /// @inheritdoc IAutomationVault
+  function exec(address _relayCaller, ExecData[] calldata _execData, FeeData[] calldata _feeData) external payable {
+    if (!_relayEnabledCallers[msg.sender].contains(_relayCaller)) revert AutomationVault_NotApprovedRelayCaller();
+
+    ExecData memory _execDatum;
+    uint256 _dataLength = _execData.length;
+    uint256 _i;
+    bool _success;
+
+    for (_i; _i < _dataLength;) {
+      _execDatum = _execData[_i];
+
+      if (!_jobEnabledFunctions[_execDatum.job].contains(bytes4(_execDatum.jobData))) {
+        revert AutomationVault_NotApprovedJobFunction();
+      }
+      (_success,) = _execDatum.job.call(_execDatum.jobData);
+      if (!_success) revert AutomationVault_ExecFailed();
+
+      emit JobExecuted(msg.sender, _relayCaller, _execDatum.job, _execDatum.jobData);
+
+      unchecked {
+        ++_i;
+      }
+    }
+
+    FeeData memory _feeDatum;
+    _dataLength = _feeData.length;
+    _i = 0;
+
+    for (_i; _i < _dataLength;) {
+      _feeDatum = _feeData[_i];
+
+      if (_feeDatum.feeToken == _ETH) {
+        (_success,) = _feeDatum.feeRecipient.call{value: _feeDatum.fee}('');
+        if (!_success) revert AutomationVault_ETHTransferFailed();
+      } else {
+        IERC20(_feeDatum.feeToken).safeTransfer(_feeDatum.feeRecipient, _feeDatum.fee);
+      }
+
+      emit IssuePayment(msg.sender, _relayCaller, _feeDatum.feeRecipient, _feeDatum.feeToken, _feeDatum.fee);
+
+      unchecked {
+        ++_i;
+      }
+    }
+  }
+
+  modifier onlyOwner() {
+    address _owner = owner;
+    if (msg.sender != _owner) revert AutomationVault_OnlyOwner(_owner);
     _;
   }
 
-  modifier onlyJobPendingOwner(address _job) {
-    address _jobPendingOwner = jobPendingOwner[_job];
-    if (msg.sender != _jobPendingOwner) revert AutomationVault_OnlyJobPendingOwner(_jobPendingOwner);
+  modifier onlyPendingOwner() {
+    address _pendingOwner = pendingOwner;
+    if (msg.sender != _pendingOwner) revert AutomationVault_OnlyPendingOwner(_pendingOwner);
     _;
   }
 
-  receive() external payable {
-    revert AutomationVault_ReceiveETHNotAvailable();
-  }
+  receive() external payable {}
 }

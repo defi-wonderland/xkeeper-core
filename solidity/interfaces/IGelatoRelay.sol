@@ -1,8 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-interface IGelatoRelay {
-  function automationVault() external returns (address _automationVault);
+import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
 
-  function exec(address _job, bytes32 _jobData, uint256 _fee, address _feeToken, address _feeRecipient) external;
+interface IGelatoRelay {
+  /// EVENTS ///
+  event AutomationVaultExecuted(
+    address indexed _relayCaller, IAutomationVault.ExecData[] _execData, IAutomationVault.FeeData[] _feeData
+  );
+
+  /// EXTERNAL FUNCTIONS ///
+  function exec(
+    address _automationVault,
+    IAutomationVault.ExecData[] calldata _execData,
+    IAutomationVault.FeeData[] calldata _feeData
+  ) external;
 }

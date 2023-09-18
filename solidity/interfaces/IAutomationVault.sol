@@ -2,58 +2,72 @@
 pragma solidity 0.8.19;
 
 interface IAutomationVault {
-  event RegisterJob(address indexed _job, address indexed _jobOwner);
-  event ChangeJobOwner(address indexed _job, address indexed _jobPendingOwner);
-  event AcceptJobOwner(address indexed _job, address indexed _jobOwner);
-  event DepositFunds(address indexed _job, address indexed _token, uint256 _amount);
-  event WithdrawFunds(address indexed _job, address indexed _token, uint256 _amount, address indexed _receiver);
-  event ApproveRelay(address indexed _job, bytes4 _jobSelector, address indexed _relay);
-  event RevokeRelay(address indexed _job, bytes4 _jobSelector, address indexed _relay);
+  /// EVENTS ///
+  event ChangeOwner(address indexed _pendingOwner);
+  event AcceptOwner(address indexed _owner);
+  event WithdrawFunds(address indexed _token, uint256 _amount, address indexed _receiver);
+  event ApproveRelay(address indexed _relay);
+  event ApproveRelayCaller(address indexed _relay, address indexed _caller);
+  event RevokeRelay(address indexed _relay);
+  event RevokeRelayCaller(address indexed _relay, address indexed _caller);
+  event ApproveJob(address indexed _job);
+  event ApproveJobFunction(address indexed _job, bytes4 indexed _functionSelector);
+  event RevokeJob(address indexed _job);
+  event RevokeJobFunction(address indexed _job, bytes4 indexed _functionSelector);
+  event JobExecuted(address indexed _relay, address indexed _relayCaller, address indexed _job, bytes _jobData);
   event IssuePayment(
-    address indexed _job, bytes4 _jobSelector, uint256 _fee, address indexed _feeToken, address indexed _feeRecipient
+    address indexed _relay, address indexed _relayCaller, address indexed _feeRecipient, address _feeToken, uint256 _fee
   );
 
-  error AutomationVault_JobAlreadyRegistered(address _jobOwner);
-  error AutomationVault_InvalidAmount();
-  error AutomationVault_InsufficientFunds();
+  /// ERRORS ///
   error AutomationVault_ETHTransferFailed();
-  error AutomationVault_AlreadyApprovedRelay();
-  error AutomationVault_NotApprovedRelay();
-  error AutomationVault_OnlyJobOwner(address _jobOwner);
-  error AutomationVault_OnlyJobPendingOwner(address _jobPendingOwner);
-  error AutomationVault_ReceiveETHNotAvailable();
+  error AutomationVault_NotApprovedRelayCaller();
+  error AutomationVault_NotApprovedJobFunction();
+  error AutomationVault_ExecFailed();
+  error AutomationVault_OnlyOwner(address _owner);
+  error AutomationVault_OnlyPendingOwner(address _pendingOwner);
 
+  /// STRUCTS ///
+  struct ExecData {
+    address job;
+    bytes jobData;
+  }
+
+  struct FeeData {
+    address feeRecipient;
+    address feeToken;
+    uint256 fee;
+  }
+
+  /// VIEW FUNCTIONS ///
   function owner() external view returns (address _owner);
+
+  function pendingOwner() external view returns (address _pendingOwner);
 
   function organizationName() external view returns (string calldata _organizationName);
 
-  function jobOwner(address _job) external returns (address _owner);
+  function relayEnabledCallers(address _relay) external view returns (address[] memory _enabledCallers);
 
-  function jobPendingOwner(address _job) external returns (address _pendingOwner);
+  function jobEnabledFunctions(address _job) external view returns (bytes32[] memory _enabledSelectors);
 
-  function jobApprovedRelays(address _job, bytes4 _jobSelector, address _relay) external returns (bool _approved);
+  function relays() external view returns (address[] memory __relays);
 
-  function jobsBalances(address _job, address _token) external returns (uint256 _balance);
+  function jobs() external view returns (address[] memory __jobs);
 
-  function registerJob(address _job, address _jobOwner) external;
+  /// EXTERNAL FUNCTIONS ///
+  function changeOwner(address _pendingOwner) external;
 
-  function changeJobOwner(address _job, address _jobPendingOwner) external;
+  function acceptOwner() external;
 
-  function acceptJobOwner(address _job) external;
+  function withdrawFunds(address _token, uint256 _amount, address _receiver) external payable;
 
-  function depositFunds(address _job, address _token, uint256 _amount) external payable;
+  function approveRelayCallers(address _relay, address[] calldata _callers) external;
 
-  function withdrawFunds(address _job, address _token, uint256 _amount, address _receiver) external payable;
+  function revokeRelayCallers(address _relay, address[] calldata _callers) external;
 
-  function approveRelay(address _job, bytes4 _jobSelector, address _relayToApprove) external;
+  function approveJobFunctions(address _job, bytes4[] calldata _functionSelectors) external;
 
-  function revokeRelay(address _job, bytes4 _jobSelector, address _relayToRevoke) external;
+  function revokeJobFunctions(address _job, bytes4[] calldata _functionSelectors) external;
 
-  function issuePayment(
-    address _job,
-    bytes4 _jobSelector,
-    uint256 _fee,
-    address _feeToken,
-    address _feeRecipient
-  ) external;
+  function exec(address _relayCaller, ExecData[] calldata _execData, FeeData[] calldata _feeData) external payable;
 }

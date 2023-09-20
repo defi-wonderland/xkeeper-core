@@ -408,6 +408,7 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
       assumeNoPrecompiles(_feeData[_i].feeRecipient);
       assumePayable(_feeData[_i].feeRecipient);
       assumeNoPrecompiles(_feeData[_i].feeToken);
+      vm.assume(_feeData[_i].feeToken != address(vm));
       _mockTokenTransfer(_feeData[_i].feeToken);
     }
 

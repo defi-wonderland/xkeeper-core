@@ -155,7 +155,6 @@ contract AutomationVault is IAutomationVault {
     }
 
     ExecData memory _execDatum;
-
     uint256 _dataLength = _execData.length;
     uint256 _i;
     bool _success;

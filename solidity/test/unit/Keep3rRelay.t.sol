@@ -4,20 +4,18 @@ pragma solidity 0.8.19;
 // solhint-disable-next-line
 import 'forge-std/Test.sol';
 
-import {IKeep3rRelay, Keep3rRelay, IAutomationVault} from '@contracts/Keep3rRelay.sol';
+import {Keep3rRelay, IAutomationVault} from '@contracts/Keep3rRelay.sol';
 
 /**
  * @title Keep3rRelay Unit tests
  */
 contract Keep3rRelayUnitTest is Test {
-  using stdStorage for StdStorage;
-
-  // Events tested
+  // Events
   event AutomationVaultExecuted(
     address indexed _automationVault, address indexed _relayCaller, IAutomationVault.ExecData[] _execData
   );
 
-  // The target contract
+  // Keep3rRelay contract
   Keep3rRelay public keep3rRelay;
 
   function setUp() public virtual {
@@ -26,15 +24,10 @@ contract Keep3rRelayUnitTest is Test {
 }
 
 contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
-  modifier happyPath(address _relayCaller, address _automationVault, IAutomationVault.ExecData[] memory _execData) {
+  modifier happyPath(address _relayCaller, address _automationVault) {
     assumeNoPrecompiles(_automationVault);
     vm.assume(_automationVault != address(vm));
-
-    vm.mockCall(
-      address(_automationVault),
-      abi.encodeWithSelector(IAutomationVault.exec.selector, _relayCaller, _execData, new IAutomationVault.FeeData[](0)),
-      abi.encode()
-    );
+    vm.mockCall(_automationVault, abi.encodeWithSelector(IAutomationVault.exec.selector), abi.encode());
 
     vm.startPrank(_relayCaller);
     _;
@@ -44,9 +37,9 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
     address _relayCaller,
     address _automationVault,
     IAutomationVault.ExecData[] memory _execData
-  ) public happyPath(_relayCaller, _automationVault, _execData) {
+  ) public happyPath(_relayCaller, _automationVault) {
     vm.expectCall(
-      address(_automationVault),
+      _automationVault,
       abi.encodeWithSelector(IAutomationVault.exec.selector, _relayCaller, _execData, new IAutomationVault.FeeData[](0))
     );
 
@@ -57,7 +50,7 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
     address _relayCaller,
     address _automationVault,
     IAutomationVault.ExecData[] memory _execData
-  ) public happyPath(_relayCaller, _automationVault, _execData) {
+  ) public happyPath(_relayCaller, _automationVault) {
     vm.expectEmit();
     emit AutomationVaultExecuted(_automationVault, _relayCaller, _execData);
 

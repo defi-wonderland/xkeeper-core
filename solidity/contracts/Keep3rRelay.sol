@@ -1,27 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {IKeep3rRelay} from '@interfaces/IKeep3rRelay.sol';
+import {IKeep3rRelay, IAutomationVault} from '@interfaces/IKeep3rRelay.sol';
 
 contract Keep3rRelay is IKeep3rRelay {
   /// @inheritdoc IKeep3rRelay
-  address public automationVault;
-  /// @inheritdoc IKeep3rRelay
-  mapping(address _job => address _childJob) public jobToChild;
+  function exec(address _automationVault, IAutomationVault.ExecData[] calldata _execData) external {
+    IAutomationVault(_automationVault).exec(msg.sender, _execData, new IAutomationVault.FeeData[](0));
 
-  constructor(address _automationVault) payable {
-    automationVault = _automationVault;
+    emit AutomationVaultExecuted(_automationVault, msg.sender, _execData);
   }
-
-  /// @inheritdoc IKeep3rRelay
-  function exec(address _job, bytes32 _jobData) external {}
-
-  /// @inheritdoc IKeep3rRelay
-  function registerJob(address _job, address _jobOwner) external {}
-
-  /// @inheritdoc IKeep3rRelay
-  function relay(address _keep3rV2, bytes32 _data) external {}
-
-  /// @inheritdoc IKeep3rRelay
-  function deployChildJob() external returns (address _childJob) {}
 }

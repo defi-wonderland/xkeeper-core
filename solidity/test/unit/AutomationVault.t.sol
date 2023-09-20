@@ -97,7 +97,7 @@ abstract contract AutomationVaultUnitTest is Test {
 }
 
 contract UnitAutomationVaultConstructor is AutomationVaultUnitTest {
-  function testParamsAreSetted() public {
+  function testParamsAreSet() public {
     assertEq(automationVault.owner(), owner);
     assertEq(automationVault.organizationName(), organizationName);
   }
@@ -400,6 +400,7 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     for (uint256 _i; _i < _execData.length; ++_i) {
       automationVault.addJobEnabledFunctionsForTest(_execData[_i].job, bytes4(_execData[_i].jobData));
       assumeNoPrecompiles(_execData[_i].job);
+      vm.assume(_execData[_i].job != address(vm));
       vm.mockCall(_execData[_i].job, abi.encodeWithSelector(bytes4(_execData[_i].jobData)), abi.encode());
     }
 
@@ -420,7 +421,6 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     IAutomationVault.ExecData[] memory _execData,
     IAutomationVault.FeeData[] memory _feeData
   ) public happyPath(_execData, _feeData) {
-    vm.assume(_execData.length > 3);
     vm.expectRevert(IAutomationVault.AutomationVault_NotApprovedRelayCaller.selector);
 
     changePrank(owner);
@@ -462,6 +462,7 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     for (uint256 _i; _i < _execData.length; ++_i) {
       vm.expectCall(_execData[_i].job, _execData[_i].jobData, 1);
     }
+
     automationVault.exec(relayCaller, _execData, _feeData);
   }
 
@@ -489,6 +490,7 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     for (uint256 _i; _i < _execData.length; ++_i) {
       vm.expectCall(_execData[_i].job, _execData[_i].jobData, 1);
     }
+
     automationVault.exec(_sender, _execData, _feeData);
   }
 
@@ -510,7 +512,6 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     IAutomationVault.ExecData[] memory _execData,
     IAutomationVault.FeeData[] memory _feeData
   ) public happyPath(_execData, _feeData) {
-    vm.assume(_execData.length > 3);
     vm.assume(_feeData.length > 3);
     _feeData[1].feeToken = _ETH;
     vm.etch(_feeData[1].feeRecipient, type(NoFallbackForTest).runtimeCode);
@@ -525,7 +526,6 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     IAutomationVault.FeeData[] memory _feeData,
     uint128 _fee
   ) public happyPath(_execData, _feeData) {
-    vm.assume(_execData.length > 3);
     vm.assume(_feeData.length > 3);
     for (uint256 _i; _i < _feeData.length; ++_i) {
       _feeData[_i].feeToken = _ETH;
@@ -543,7 +543,6 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     IAutomationVault.ExecData[] memory _execData,
     IAutomationVault.FeeData[] memory _feeData
   ) public happyPath(_execData, _feeData) {
-    vm.assume(_execData.length > 3);
     vm.assume(_feeData.length > 3);
     for (uint256 _i; _i < _feeData.length; ++_i) {
       vm.assume(_feeData[_i].feeToken != _ETH);
@@ -562,7 +561,6 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     IAutomationVault.ExecData[] memory _execData,
     IAutomationVault.FeeData[] memory _feeData
   ) public happyPath(_execData, _feeData) {
-    vm.assume(_execData.length > 3);
     vm.assume(_feeData.length > 3);
 
     for (uint256 _i; _i < _feeData.length; ++_i) {

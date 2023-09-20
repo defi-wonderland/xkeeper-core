@@ -12,6 +12,6 @@ contract GelatoRelay is IGelatoRelay {
   ) external {
     IAutomationVault(_automationVault).exec(msg.sender, _execData, _feeData);
 
-    emit AutomationVaultExecuted(msg.sender, _execData, _feeData);
+    emit AutomationVaultExecuted(_automationVault, msg.sender, _execData, _feeData);
   }
 }

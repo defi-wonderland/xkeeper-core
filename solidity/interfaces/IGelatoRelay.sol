@@ -6,7 +6,10 @@ import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
 interface IGelatoRelay {
   /// EVENTS ///
   event AutomationVaultExecuted(
-    address indexed _relayCaller, IAutomationVault.ExecData[] _execData, IAutomationVault.FeeData[] _feeData
+    address indexed _automationVault,
+    address indexed _relayCaller,
+    IAutomationVault.ExecData[] _execData,
+    IAutomationVault.FeeData[] _feeData
   );
 
   /// EXTERNAL FUNCTIONS ///

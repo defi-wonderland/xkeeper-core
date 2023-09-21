@@ -7,4 +7,5 @@ isolmate/=node_modules/isolmate/src
 
 @contracts/=solidity/contracts
 @interfaces/=solidity/interfaces
+@script/=solidity/script
 @test/=solidity/test

@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-// solhint-disable-next-line
-import 'forge-std/Test.sol';
+import {Test} from 'forge-std/Test.sol';
 
 import {AutomationVault, IAutomationVault, EnumerableSet} from '@contracts/AutomationVault.sol';
 import {IERC20} from '@openzeppelin/token/ERC20/IERC20.sol';
@@ -75,7 +74,7 @@ abstract contract AutomationVaultUnitTest is Test {
   bytes public jobData;
 
   function setUp() public virtual {
-    organizationName = 'TestOrganization';
+    organizationName = 'TestOrg';
     jobSelector = bytes4(keccak256('jobSelector()'));
     jobData = abi.encodeWithSelector(jobSelector, organizationName);
 

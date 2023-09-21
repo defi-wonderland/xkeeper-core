@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-// solhint-disable-next-line
-import 'forge-std/Test.sol';
+import {Test} from 'forge-std/Test.sol';
 
 import {GelatoRelay, IAutomationVault} from '@contracts/GelatoRelay.sol';
 

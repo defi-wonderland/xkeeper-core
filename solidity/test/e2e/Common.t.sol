@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 import {Test} from 'forge-std/Test.sol';
 
+import {BasicJob} from '@contracts/for-test/BasicJob.sol';
 import {Deploy} from '@script/Deploy.s.sol';
 
 contract DeployForTest is Deploy {
@@ -16,14 +17,27 @@ contract DeployForTest is Deploy {
     _deployerPk = vm.deriveKey('test test test test test test test test test test test junk', 0);
 
     // AutomationVault setup
-    owner = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    owner = makeAddr('Owner');
     organizationName = 'TestOrg';
   }
 }
 
 abstract contract CommonE2ETest is DeployForTest, Test {
+  // Events
+  event Worked();
+
+  // ForTest contracts
+  BasicJob public basicJob;
+
+  // EOAs
+  address public bot;
+
   function setUp() public virtual override {
     DeployForTest.setUp();
+
+    bot = makeAddr('Bot');
+
+    basicJob = new BasicJob();
 
     run();
   }

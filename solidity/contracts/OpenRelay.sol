@@ -3,11 +3,11 @@ pragma solidity 0.8.19;
 
 import {IOpenRelay} from '@interfaces/IOpenRelay.sol';
 import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
-import {_ETH} from '@contracts/utils/Constants.sol';
+import {_ETH} from '@utils/Constants.sol';
 
 contract OpenRelay is IOpenRelay {
   /// @inheritdoc IOpenRelay
-  uint256 public constant GAS_BONUS = 40_000;
+  uint256 public constant GAS_BONUS = 53_000;
   /// @inheritdoc IOpenRelay
   uint256 public constant GAS_MULTIPLIER = 12_000;
   /// @inheritdoc IOpenRelay

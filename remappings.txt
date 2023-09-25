@@ -9,3 +9,4 @@ isolmate/=node_modules/isolmate/src
 @interfaces/=solidity/interfaces
 @script/=solidity/script
 @test/=solidity/test
+@utils/=solidity/utils

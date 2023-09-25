@@ -5,7 +5,7 @@ import {Test} from 'forge-std/Test.sol';
 
 import {OpenRelay, IOpenRelay} from '@contracts/OpenRelay.sol';
 import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
-import {_ETH} from '@contracts/utils/Constants.sol';
+import {_ETH} from '@utils/Constants.sol';
 
 /**
  * @title OpenRelay Unit tests
@@ -34,7 +34,7 @@ contract OpenRelayUnitTest is Test {
 
 contract UnitOpenRelayConstructor is OpenRelayUnitTest {
   function testSetGasBonus() public {
-    assertEq(openRelay.GAS_BONUS(), 40_000);
+    assertEq(openRelay.GAS_BONUS(), 53_000);
   }
 
   function testSetGasMultiplier() public {

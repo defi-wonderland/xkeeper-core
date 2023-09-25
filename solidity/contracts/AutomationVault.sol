@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
 import {IERC20, SafeERC20} from '@openzeppelin/token/ERC20/utils/SafeERC20.sol';
 import {EnumerableSet} from '@openzeppelin/utils/structs/EnumerableSet.sol';
-import {_ETH, _NULL} from '@contracts/utils/Constants.sol';
+import {_ETH, _NULL} from '@utils/Constants.sol';
 
 contract AutomationVault is IAutomationVault {
   using SafeERC20 for IERC20;

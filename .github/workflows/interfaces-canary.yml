@@ -1,0 +1,47 @@
+name: Interface Exporter Action - Canary
+
+on: workflow_dispatch
+
+jobs:
+  generate-and-publish-interfaces:
+    name: Generate Interfaces (canary)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        publish_type: ["web3-v1", "ethers-v6", "abi"]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
+
+      - name: Build project and generate out directory
+        run: yarn build
+
+      - name: Update version
+        run: yarn version --new-version "0.0.0-${GITHUB_SHA::8}" --no-git-tag-version
+
+      - name: Export Interfaces - ${{ matrix.publish_type }}
+        uses: defi-wonderland/interface-exporter-action@v1.0.0
+        with:
+          out_dir: "out"
+          publish_type: "${{ matrix.publish_type }}"
+          package_name: "keep3r-framework-${{ matrix.publish_type }}"
+          destination_dir: "exported-interfaces/keep3r-framework-${{ matrix.publish_type }}"
+
+      - name: Publish
+        run: cd exported-interfaces/keep3r-framework-${{ matrix.publish_type }} && npm publish --access public --tag canary
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

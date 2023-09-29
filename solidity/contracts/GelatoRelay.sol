@@ -3,6 +3,10 @@ pragma solidity 0.8.19;
 
 import {IGelatoRelay, IAutomationVault} from '@interfaces/IGelatoRelay.sol';
 
+/**
+ * @title  GelatoRelay
+ * @notice This contract will manage all executions coming from the gelato network
+ */
 contract GelatoRelay is IGelatoRelay {
   /// @inheritdoc IGelatoRelay
   function exec(

@@ -5,6 +5,10 @@ import {IOpenRelay} from '@interfaces/IOpenRelay.sol';
 import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
 import {_ETH} from '@utils/Constants.sol';
 
+/**
+ * @title  OpenRelay
+ * @notice This contract will manage all executions coming from any bot
+ */
 contract OpenRelay is IOpenRelay {
   /// @inheritdoc IOpenRelay
   uint256 public constant GAS_BONUS = 53_000;

@@ -18,7 +18,7 @@ contract E2EOpenRelay is CommonE2ETest {
 
     startHoax(owner);
     automationVault.approveRelayCallers(address(openRelay), _bots);
-    automationVault.approveJobFunctions(address(basicJob), _jobFunctions);
+    automationVault.approveJobSelectors(address(basicJob), _jobFunctions);
     address(automationVault).call{value: 100 ether}('');
     vm.stopPrank();
   }

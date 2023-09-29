@@ -6,6 +6,10 @@ import {IERC20, SafeERC20} from '@openzeppelin/token/ERC20/utils/SafeERC20.sol';
 import {EnumerableSet} from '@openzeppelin/utils/structs/EnumerableSet.sol';
 import {_ETH, _NULL} from '@utils/Constants.sol';
 
+/**
+ * @title  AutomationVault
+ * @notice This contract is used for manage the execution of jobs using several relays and pay them for their work
+ */
 contract AutomationVault is IAutomationVault {
   using SafeERC20 for IERC20;
   using EnumerableSet for EnumerableSet.AddressSet;
@@ -18,33 +22,53 @@ contract AutomationVault is IAutomationVault {
   /// @inheritdoc IAutomationVault
   string public organizationName;
 
+  /**
+   * @notice Callers that are approved to call a relay
+   */
   mapping(address _relay => EnumerableSet.AddressSet _enabledCallers) internal _relayEnabledCallers;
 
-  function relayEnabledCallers(address _relay) external view returns (address[] memory _enabledCallers) {
-    return _relayEnabledCallers[_relay].values();
-  }
+  /**
+   * @notice Selectors that are approved to be called
+   */
+  mapping(address _job => EnumerableSet.Bytes32Set _enabledSelectors) internal _jobEnabledSelectors;
 
-  mapping(address _job => EnumerableSet.Bytes32Set _enabledSelectors) internal _jobEnabledFunctions;
-
-  function jobEnabledFunctions(address _job) external view returns (bytes32[] memory _enabledSelectors) {
-    return _jobEnabledFunctions[_job].values();
-  }
-
+  /**
+   * @notice List of approved relays
+   */
   EnumerableSet.AddressSet internal _relays;
 
-  function relays() external view returns (address[] memory __relays) {
-    return _relays.values();
-  }
-
+  /**
+   * @notice List of approved jobs
+   */
   EnumerableSet.AddressSet internal _jobs;
 
-  function jobs() external view returns (address[] memory __jobs) {
-    return _jobs.values();
-  }
-
+  /**
+   * @param _owner The address of the owner
+   * @param _organizationName The name of the organization
+   */
   constructor(address _owner, string memory _organizationName) payable {
     owner = _owner;
     organizationName = _organizationName;
+  }
+
+  /// @inheritdoc IAutomationVault
+  function relayEnabledCallers(address _relay) external view returns (address[] memory _enabledCallers) {
+    _enabledCallers = _relayEnabledCallers[_relay].values();
+  }
+
+  /// @inheritdoc IAutomationVault
+  function jobEnabledSelectors(address _job) external view returns (bytes32[] memory _enabledSelectors) {
+    _enabledSelectors = _jobEnabledSelectors[_job].values();
+  }
+
+  /// @inheritdoc IAutomationVault
+  function relays() external view returns (address[] memory __relays) {
+    __relays = _relays.values();
+  }
+
+  /// @inheritdoc IAutomationVault
+  function jobs() external view returns (address[] memory __jobs) {
+    __jobs = _jobs.values();
   }
 
   /// @inheritdoc IAutomationVault
@@ -111,15 +135,15 @@ contract AutomationVault is IAutomationVault {
   }
 
   /// @inheritdoc IAutomationVault
-  function approveJobFunctions(address _job, bytes4[] calldata _functionSelectors) external onlyOwner {
-    EnumerableSet.Bytes32Set storage _enabledSelectors = _jobEnabledFunctions[_job];
+  function approveJobSelectors(address _job, bytes4[] calldata _functionSelectors) external onlyOwner {
+    EnumerableSet.Bytes32Set storage _enabledSelectors = _jobEnabledSelectors[_job];
     if (_jobs.add(_job)) {
       emit ApproveJob(_job);
     }
 
     for (uint256 _i; _i < _functionSelectors.length;) {
       if (_enabledSelectors.add(_functionSelectors[_i])) {
-        emit ApproveJobFunction(_job, _functionSelectors[_i]);
+        emit ApproveJobSelector(_job, _functionSelectors[_i]);
       }
 
       unchecked {
@@ -129,12 +153,12 @@ contract AutomationVault is IAutomationVault {
   }
 
   /// @inheritdoc IAutomationVault
-  function revokeJobFunctions(address _job, bytes4[] calldata _functionSelectors) external onlyOwner {
-    EnumerableSet.Bytes32Set storage _enabledSelectors = _jobEnabledFunctions[_job];
+  function revokeJobSelectors(address _job, bytes4[] calldata _functionSelectors) external onlyOwner {
+    EnumerableSet.Bytes32Set storage _enabledSelectors = _jobEnabledSelectors[_job];
 
     for (uint256 _i; _i < _functionSelectors.length;) {
       if (_enabledSelectors.remove(_functionSelectors[_i])) {
-        emit RevokeJobFunction(_job, _functionSelectors[_i]);
+        emit RevokeJobSelector(_job, _functionSelectors[_i]);
       }
 
       unchecked {
@@ -162,8 +186,8 @@ contract AutomationVault is IAutomationVault {
     for (_i; _i < _dataLength;) {
       _execDatum = _execData[_i];
 
-      if (!_jobEnabledFunctions[_execDatum.job].contains(bytes4(_execDatum.jobData))) {
-        revert AutomationVault_NotApprovedJobFunction();
+      if (!_jobEnabledSelectors[_execDatum.job].contains(bytes4(_execDatum.jobData))) {
+        revert AutomationVault_NotApprovedJobSelector();
       }
       (_success,) = _execDatum.job.call(_execDatum.jobData);
       if (!_success) revert AutomationVault_ExecFailed();
@@ -197,12 +221,18 @@ contract AutomationVault is IAutomationVault {
     }
   }
 
+  /**
+   * @notice Checks that the caller is the owner
+   */
   modifier onlyOwner() {
     address _owner = owner;
     if (msg.sender != _owner) revert AutomationVault_OnlyOwner(_owner);
     _;
   }
 
+  /**
+   * @notice Checks that the caller is the pending owner
+   */
   modifier onlyPendingOwner() {
     address _pendingOwner = pendingOwner;
     if (msg.sender != _pendingOwner) revert AutomationVault_OnlyPendingOwner(_pendingOwner);

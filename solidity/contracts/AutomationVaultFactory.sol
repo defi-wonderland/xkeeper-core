@@ -5,9 +5,16 @@ import {IAutomationVaultFactory} from '@interfaces/IAutomationVaultFactory.sol';
 import {AutomationVault, IAutomationVault} from '@contracts/AutomationVault.sol';
 import {EnumerableSet} from '@openzeppelin/utils/structs/EnumerableSet.sol';
 
+/**
+ * @title  AutomationVaultFactory
+ * @notice This contract deploy the new automation vaults
+ */
 contract AutomationVaultFactory is IAutomationVaultFactory {
   using EnumerableSet for EnumerableSet.AddressSet;
 
+  /**
+   * @notice List of deployed automation vaults
+   */
   EnumerableSet.AddressSet internal _automationVaults;
 
   /// @inheritdoc IAutomationVaultFactory

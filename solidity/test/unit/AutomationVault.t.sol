@@ -22,11 +22,11 @@ contract AutomationVaultForTest is AutomationVault {
   }
 
   function addJobEnabledFunctionsForTest(address _job, bytes4 _functionSelector) public {
-    _jobEnabledFunctions[_job].add(_functionSelector);
+    _jobEnabledSelectors[_job].add(_functionSelector);
   }
 
   function removeJobEnabledFunctionsForTest(address _job, bytes4 _functionSelector) public {
-    _jobEnabledFunctions[_job].remove(_functionSelector);
+    _jobEnabledSelectors[_job].remove(_functionSelector);
   }
 }
 
@@ -46,9 +46,9 @@ abstract contract AutomationVaultUnitTest is Test {
   event RevokeRelay(address indexed _relay);
   event RevokeRelayCaller(address indexed _relay, address indexed _caller);
   event ApproveJob(address indexed _job);
-  event ApproveJobFunction(address indexed _job, bytes4 indexed _functionSelector);
+  event ApproveJobSelector(address indexed _job, bytes4 indexed _functionSelector);
   event RevokeJob(address indexed _job);
-  event RevokeJobFunction(address indexed _job, bytes4 indexed _functionSelector);
+  event RevokeJobSelector(address indexed _job, bytes4 indexed _functionSelector);
   event JobExecuted(address indexed _relay, address indexed _relayCaller, address indexed _job, bytes _jobData);
   event IssuePayment(
     address indexed _relay, address indexed _relayCaller, address indexed _feeRecipient, address _feeToken, uint256 _fee
@@ -306,7 +306,7 @@ contract UnitAutomationVaultRevokeRelayCallers is AutomationVaultUnitTest {
   }
 }
 
-contract UnitAutomationVaultApproveJobFunctions is AutomationVaultUnitTest {
+contract UnitAutomationVaultApproveJobSelectors is AutomationVaultUnitTest {
   function setUp() public override {
     AutomationVaultUnitTest.setUp();
 
@@ -317,7 +317,7 @@ contract UnitAutomationVaultApproveJobFunctions is AutomationVaultUnitTest {
     vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector, owner));
 
     changePrank(pendingOwner);
-    automationVault.approveJobFunctions(_job, _functionSelectors);
+    automationVault.approveJobSelectors(_job, _functionSelectors);
   }
 
   function testEmitApproveJob(address _job, bytes4 _functionSelector) public {
@@ -330,7 +330,7 @@ contract UnitAutomationVaultApproveJobFunctions is AutomationVaultUnitTest {
     vm.expectEmit();
     emit ApproveJob(_job);
 
-    automationVault.approveJobFunctions(_job, _functionSelectors);
+    automationVault.approveJobSelectors(_job, _functionSelectors);
   }
 
   function testEmitApproveFunctionSelector(address _job, bytes4 _functionSelector) public {
@@ -343,14 +343,14 @@ contract UnitAutomationVaultApproveJobFunctions is AutomationVaultUnitTest {
 
     for (uint256 _i; _i < _functionSelectors.length; _i++) {
       vm.expectEmit();
-      emit ApproveJobFunction(_job, _functionSelectors[_i]);
+      emit ApproveJobSelector(_job, _functionSelectors[_i]);
     }
 
-    automationVault.approveJobFunctions(_job, _functionSelectors);
+    automationVault.approveJobSelectors(_job, _functionSelectors);
   }
 }
 
-contract UnitAutomationVaultRevokeJobFunctions is AutomationVaultUnitTest {
+contract UnitAutomationVaultRevokeJobSelectors is AutomationVaultUnitTest {
   function setUp() public override {
     AutomationVaultUnitTest.setUp();
     automationVault.addJobEnabledFunctionsForTest(job, jobSelector);
@@ -361,7 +361,7 @@ contract UnitAutomationVaultRevokeJobFunctions is AutomationVaultUnitTest {
     vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector, owner));
 
     changePrank(pendingOwner);
-    automationVault.revokeJobFunctions(_job, _functionSelectors);
+    automationVault.revokeJobSelectors(_job, _functionSelectors);
   }
 
   function testEmitRevokeJob() public {
@@ -372,7 +372,7 @@ contract UnitAutomationVaultRevokeJobFunctions is AutomationVaultUnitTest {
     vm.expectEmit();
     emit RevokeJob(job);
 
-    automationVault.revokeJobFunctions(job, _functionSelectors);
+    automationVault.revokeJobSelectors(job, _functionSelectors);
   }
 
   function testEmitRevokeFunctionSelector(address _job, bytes4 _functionSelector) public {
@@ -383,10 +383,10 @@ contract UnitAutomationVaultRevokeJobFunctions is AutomationVaultUnitTest {
 
     for (uint256 _i; _i < _functionSelectors.length; _i++) {
       vm.expectEmit();
-      emit RevokeJobFunction(_job, _functionSelector);
+      emit RevokeJobSelector(_job, _functionSelector);
     }
 
-    automationVault.revokeJobFunctions(_job, _functionSelectors);
+    automationVault.revokeJobSelectors(_job, _functionSelectors);
   }
 }
 
@@ -427,14 +427,14 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     automationVault.exec(relayCaller, _execData, _feeData);
   }
 
-  function testRevertIfNotApprovedJobFunction(
+  function testRevertIfNotApprovedJobSelector(
     IAutomationVault.ExecData[] memory _execData,
     IAutomationVault.FeeData[] memory _feeData
   ) public happyPath(_execData, _feeData) {
     vm.assume(_execData.length > 3);
     automationVault.removeJobEnabledFunctionsForTest(_execData[1].job, bytes4(_execData[1].jobData));
 
-    vm.expectRevert(IAutomationVault.AutomationVault_NotApprovedJobFunction.selector);
+    vm.expectRevert(IAutomationVault.AutomationVault_NotApprovedJobSelector.selector);
 
     automationVault.exec(relayCaller, _execData, _feeData);
   }

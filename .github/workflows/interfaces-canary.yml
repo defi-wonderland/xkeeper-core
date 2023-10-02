@@ -38,10 +38,10 @@ jobs:
         with:
           out_dir: "out"
           publish_type: "${{ matrix.publish_type }}"
-          package_name: "keep3r-framework-${{ matrix.publish_type }}"
-          destination_dir: "exported-interfaces/keep3r-framework-${{ matrix.publish_type }}"
+          package_name: "@keep3r-network/framework-${{ matrix.publish_type }}"
+          destination_dir: "exported-interfaces/@keep3r-network/framework-${{ matrix.publish_type }}"
 
       - name: Publish
-        run: cd exported-interfaces/keep3r-framework-${{ matrix.publish_type }} && npm publish --access public --tag canary
+        run: cd exported-interfaces/@keep3r-network/framework-${{ matrix.publish_type }} && npm publish --access public --tag canary
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

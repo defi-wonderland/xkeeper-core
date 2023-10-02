@@ -1,5 +1,5 @@
 {
-  "name": "keeper-framework-private",
+  "name": "@keep3r-network/framework",
   "version": "0.0.1",
   "private": true,
   "description": "Keep3r framework core",

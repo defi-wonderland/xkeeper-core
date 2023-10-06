@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.19;
 
-import {CommonE2ETest} from '@test/e2e/Common.t.sol';
+import {CommonIntegrationTest} from '@test/integration/Common.t.sol';
 
 import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
 
-contract E2EOpenRelay is CommonE2ETest {
+contract IntegrationOpenRelay is CommonIntegrationTest {
   function setUp() public override {
-    CommonE2ETest.setUp();
+    CommonIntegrationTest.setUp();
 
     // AutomationVault setup
     address[] memory _bots = new address[](1);

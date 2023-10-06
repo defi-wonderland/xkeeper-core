@@ -22,7 +22,7 @@ contract DeployForTest is Deploy {
   }
 }
 
-abstract contract CommonE2ETest is DeployForTest, Test {
+abstract contract CommonIntegrationTest is DeployForTest, Test {
   // Events
   event Worked();
 

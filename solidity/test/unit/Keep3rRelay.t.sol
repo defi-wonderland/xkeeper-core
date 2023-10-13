@@ -3,7 +3,9 @@ pragma solidity 0.8.19;
 
 import {Test} from 'forge-std/Test.sol';
 
-import {Keep3rRelay, IAutomationVault} from '@contracts/Keep3rRelay.sol';
+import {Keep3rRelay, IKeep3rRelay, IAutomationVault} from '@contracts/Keep3rRelay.sol';
+import {IKeep3rV2} from '@interfaces/external/IKeep3rV2.sol';
+import {_KEEP3R_V2} from '@utils/Constants.sol';
 
 /**
  * @title Keep3rRelay Unit tests
@@ -23,23 +25,57 @@ contract Keep3rRelayUnitTest is Test {
 }
 
 contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
-  modifier happyPath(address _relayCaller, address _automationVault) {
+  modifier happyPath(address _relayCaller, address _automationVault, IAutomationVault.ExecData[] memory _execData) {
     assumeNoPrecompiles(_automationVault);
     vm.assume(_automationVault != address(vm));
     vm.mockCall(_automationVault, abi.encodeWithSelector(IAutomationVault.exec.selector), abi.encode());
 
+    vm.assume(_execData.length > 0 && _execData.length < 30);
+    for (uint256 _i; _i < _execData.length; ++_i) {
+      vm.assume(_execData[_i].job != _KEEP3R_V2);
+    }
+
     vm.startPrank(_relayCaller);
     _;
+  }
+
+  function testRevertIfNoExecData(
+    address _relayCaller,
+    address _automationVault,
+    IAutomationVault.ExecData[] memory _execData
+  ) public happyPath(_relayCaller, _automationVault, _execData) {
+    _execData = new IAutomationVault.ExecData[](0);
+
+    vm.expectRevert(IKeep3rRelay.Keep3rRelay_NoExecData.selector);
+
+    keep3rRelay.exec(_automationVault, _execData);
+  }
+
+  function testRevertIfExecDataContainsKeep3rV2(
+    address _relayCaller,
+    address _automationVault,
+    IAutomationVault.ExecData[] memory _execData
+  ) public happyPath(_relayCaller, _automationVault, _execData) {
+    vm.assume(_execData.length > 3);
+    _execData[1].job = _KEEP3R_V2;
+
+    vm.expectRevert(IKeep3rRelay.Keep3rRelay_Keep3rNotAllowed.selector);
+
+    keep3rRelay.exec(_automationVault, _execData);
   }
 
   function testExpectCallWithCorrectsParams(
     address _relayCaller,
     address _automationVault,
     IAutomationVault.ExecData[] memory _execData
-  ) public happyPath(_relayCaller, _automationVault) {
+  ) public happyPath(_relayCaller, _automationVault, _execData) {
+    IAutomationVault.ExecData[] memory _execDataKeep3r = _buildExecDataKeep3r(_execData, _relayCaller);
+
     vm.expectCall(
       _automationVault,
-      abi.encodeWithSelector(IAutomationVault.exec.selector, _relayCaller, _execData, new IAutomationVault.FeeData[](0))
+      abi.encodeWithSelector(
+        IAutomationVault.exec.selector, _relayCaller, _execDataKeep3r, new IAutomationVault.FeeData[](0)
+      )
     );
 
     keep3rRelay.exec(_automationVault, _execData);
@@ -49,10 +85,34 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
     address _relayCaller,
     address _automationVault,
     IAutomationVault.ExecData[] memory _execData
-  ) public happyPath(_relayCaller, _automationVault) {
+  ) public happyPath(_relayCaller, _automationVault, _execData) {
+    IAutomationVault.ExecData[] memory _execDataKeep3r = _buildExecDataKeep3r(_execData, _relayCaller);
+
     vm.expectEmit();
-    emit AutomationVaultExecuted(_automationVault, _relayCaller, _execData);
+    emit AutomationVaultExecuted(_automationVault, _relayCaller, _execDataKeep3r);
 
     keep3rRelay.exec(_automationVault, _execData);
+  }
+
+  function _buildExecDataKeep3r(
+    IAutomationVault.ExecData[] memory _execData,
+    address _relayCaller
+  ) internal pure returns (IAutomationVault.ExecData[] memory _execDataKeep3r) {
+    uint256 _execDataKeep3rLength = _execData.length + 2;
+    _execDataKeep3r = new IAutomationVault.ExecData[](_execDataKeep3rLength);
+
+    _execDataKeep3r[0] = IAutomationVault.ExecData({
+      job: _KEEP3R_V2,
+      jobData: abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _relayCaller)
+    });
+
+    for (uint256 _i; _i < _execData.length; ++_i) {
+      _execDataKeep3r[_i + 1] = _execData[_i];
+    }
+
+    _execDataKeep3r[_execDataKeep3rLength - 1] = IAutomationVault.ExecData({
+      job: _KEEP3R_V2,
+      jobData: abi.encodeWithSelector(IKeep3rV2.worked.selector, _relayCaller)
+    });
   }
 }

@@ -12,15 +12,16 @@ contract IntegrationOpenRelay is CommonIntegrationTest {
     // AutomationVault setup
     address[] memory _bots = new address[](1);
     _bots[0] = bot;
-    bytes4[] memory _jobFunctions = new bytes4[](2);
-    _jobFunctions[0] = basicJob.work.selector;
-    _jobFunctions[1] = basicJob.workHard.selector;
+    bytes4[] memory _jobSelectors = new bytes4[](2);
+    _jobSelectors[0] = basicJob.work.selector;
+    _jobSelectors[1] = basicJob.workHard.selector;
 
     startHoax(owner);
     automationVault.approveRelayCallers(address(openRelay), _bots);
-    automationVault.approveJobSelectors(address(basicJob), _jobFunctions);
+    automationVault.approveJobSelectors(address(basicJob), _jobSelectors);
     address(automationVault).call{value: 100 ether}('');
-    vm.stopPrank();
+
+    changePrank(bot);
   }
 
   function test_execute_job() public {
@@ -30,18 +31,18 @@ contract IntegrationOpenRelay is CommonIntegrationTest {
     vm.expectEmit(address(basicJob));
     emit Worked();
 
-    vm.prank(bot);
     openRelay.exec(address(automationVault), _execData, bot);
   }
 
   function test_issue_payment(uint16 _howHard) public {
     vm.assume(_howHard <= 1000);
 
+    assertEq(bot.balance, 0);
+
     IAutomationVault.ExecData[] memory _execData = new IAutomationVault.ExecData[](1);
     _execData[0] =
       IAutomationVault.ExecData(address(basicJob), abi.encodeWithSelector(basicJob.workHard.selector, _howHard));
 
-    vm.prank(bot);
     uint256 _gasBeforeExec = gasleft();
     openRelay.exec(address(automationVault), _execData, bot);
     uint256 _gasAfterExec = gasleft();

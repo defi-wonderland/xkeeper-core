@@ -204,8 +204,8 @@ interface IAutomationVault {
   function relays() external view returns (address[] memory __relays);
 
   /**
-   * @notice Returns the jobs
-   * @return __jobs The array of jobs
+   * @notice Returns the approved jobs
+   * @return __jobs The array of approved jobs
    */
   function jobs() external view returns (address[] memory __jobs);
 
@@ -263,7 +263,7 @@ interface IAutomationVault {
   function revokeJobSelectors(address _job, bytes4[] calldata _functionSelectors) external;
 
   /**
-   * @notice Executes a job and issues a payment to the fee recipient
+   * @notice Executes a job and issues a payment to the fee data receivers
    * @dev    The function can be called with only execData, only feeData or both. The strategy of the payment
    *         will be different depending on which relay is calling the function
    * @param  _relayCaller The address of the relay caller

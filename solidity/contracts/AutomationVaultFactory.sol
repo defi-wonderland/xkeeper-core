@@ -7,7 +7,7 @@ import {EnumerableSet} from '@openzeppelin/utils/structs/EnumerableSet.sol';
 
 /**
  * @title  AutomationVaultFactory
- * @notice This contract deploy the new automation vaults
+ * @notice This contract deploys the new automation vaults
  */
 contract AutomationVaultFactory is IAutomationVaultFactory {
   using EnumerableSet for EnumerableSet.AddressSet;
@@ -19,7 +19,7 @@ contract AutomationVaultFactory is IAutomationVaultFactory {
 
   /// @inheritdoc IAutomationVaultFactory
   function automationVaults() external view returns (address[] memory __automationVaults) {
-    return _automationVaults.values();
+    __automationVaults = _automationVaults.values();
   }
 
   /// @inheritdoc IAutomationVaultFactory

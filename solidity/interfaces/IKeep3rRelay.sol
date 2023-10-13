@@ -19,12 +19,26 @@ interface IKeep3rRelay {
   );
 
   /*///////////////////////////////////////////////////////////////
+                              ERRORS  
+  //////////////////////////////////////////////////////////////*/
+
+  /**
+   * @notice Thrown when the exec data is empty
+   */
+  error Keep3rRelay_NoExecData();
+
+  /**
+   * @notice Thrown when the exec data contains Keep3r V2
+   */
+  error Keep3rRelay_Keep3rNotAllowed();
+
+  /*///////////////////////////////////////////////////////////////
                           EXTERNAL FUNCTIONS
   //////////////////////////////////////////////////////////////*/
 
   /**
-   * @notice Execute an automation vault which will execute the jobs and will managed the payment to the fee data receivers
-   * @dev    The payment will be manage by keep3r network
+   * @notice Execute an automation vault which will execute the jobs and will manage the payment to the fee data receivers
+   * @dev    The payment will be managed by keep3r network. The first and last exec data are assembled by the relay in order to be able to work with keep3r network
    * @param  _automationVault The address of the automation vault
    * @param  _execData The array of exec data
    */

@@ -8,7 +8,7 @@ import {_ETH, _NULL} from '@utils/Constants.sol';
 
 /**
  * @title  AutomationVault
- * @notice This contract is used for manage the execution of jobs using several relays and pay them for their work
+ * @notice This contract is used for managing the execution of jobs using several relays and paying them for their work
  */
 contract AutomationVault is IAutomationVault {
   using SafeERC20 for IERC20;

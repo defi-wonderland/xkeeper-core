@@ -21,11 +21,11 @@ contract AutomationVaultForTest is AutomationVault {
     _relayEnabledCallers[_relay].add(_relayCaller);
   }
 
-  function addJobEnabledFunctionsForTest(address _job, bytes4 _functionSelector) public {
+  function addJobEnabledSelectorsForTest(address _job, bytes4 _functionSelector) public {
     _jobEnabledSelectors[_job].add(_functionSelector);
   }
 
-  function removeJobEnabledFunctionsForTest(address _job, bytes4 _functionSelector) public {
+  function removeJobEnabledSelectorsForTest(address _job, bytes4 _functionSelector) public {
     _jobEnabledSelectors[_job].remove(_functionSelector);
   }
 }
@@ -353,7 +353,7 @@ contract UnitAutomationVaultApproveJobSelectors is AutomationVaultUnitTest {
 contract UnitAutomationVaultRevokeJobSelectors is AutomationVaultUnitTest {
   function setUp() public override {
     AutomationVaultUnitTest.setUp();
-    automationVault.addJobEnabledFunctionsForTest(job, jobSelector);
+    automationVault.addJobEnabledSelectorsForTest(job, jobSelector);
     vm.startPrank(owner);
   }
 
@@ -376,7 +376,7 @@ contract UnitAutomationVaultRevokeJobSelectors is AutomationVaultUnitTest {
   }
 
   function testEmitRevokeFunctionSelector(address _job, bytes4 _functionSelector) public {
-    automationVault.addJobEnabledFunctionsForTest(_job, _functionSelector);
+    automationVault.addJobEnabledSelectorsForTest(_job, _functionSelector);
     bytes4[] memory _functionSelectors = new bytes4[](1);
 
     _functionSelectors[0] = _functionSelector;
@@ -397,7 +397,7 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     automationVault.addRelayEnabledCallersForTest(relay, relayCaller);
 
     for (uint256 _i; _i < _execData.length; ++_i) {
-      automationVault.addJobEnabledFunctionsForTest(_execData[_i].job, bytes4(_execData[_i].jobData));
+      automationVault.addJobEnabledSelectorsForTest(_execData[_i].job, bytes4(_execData[_i].jobData));
       assumeNoPrecompiles(_execData[_i].job);
       vm.assume(_execData[_i].job != address(vm));
       vm.mockCall(_execData[_i].job, abi.encodeWithSelector(bytes4(_execData[_i].jobData)), abi.encode());
@@ -432,7 +432,7 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     IAutomationVault.FeeData[] memory _feeData
   ) public happyPath(_execData, _feeData) {
     vm.assume(_execData.length > 3);
-    automationVault.removeJobEnabledFunctionsForTest(_execData[1].job, bytes4(_execData[1].jobData));
+    automationVault.removeJobEnabledSelectorsForTest(_execData[1].job, bytes4(_execData[1].jobData));
 
     vm.expectRevert(IAutomationVault.AutomationVault_NotApprovedJobSelector.selector);
 

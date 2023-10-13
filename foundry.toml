@@ -28,6 +28,9 @@ out = 'out-via-ir'
 fuzz_runs = 2000
 src = 'solidity/test'
 
+[profile.docs]
+src ='solidity/interfaces' # root_path variable in build-docs.sh
+
 [rpc_endpoints]
 mainnet = "${MAINNET_RPC}"
 goerli = "${GOERLI_RPC}"

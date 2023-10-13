@@ -17,3 +17,7 @@ out-via-ir
 
 # Ignore the deployment files
 broadcast/*/*/*
+
+# Docs build files
+docs/book
+docs/src/solidity

@@ -11,13 +11,14 @@ interface IKeep3rBondedRelay is IKeep3rRelay {
 
   /**
    * @notice Emitted when the automation vault requirements are setted
-   * @param  _bond T
-   * @param  _minBond T
-   * @param  _earned T
-   * @param  _age T
+   * @param _automationVault The address of the automation vault
+   * @param _bond The bond token being evaluated
+   * @param _minBond The minimum amount of bonded tokens
+   * @param _earned The minimum funds earned in the keepers lifetime
+   * @param _age The minimum keeper age required
    */
   event AutomationVaultRequirementsSetted(
-    address indexed _automationVault, uint256 _bond, uint256 _minBond, uint256 _earned, uint256 _age
+    address indexed _automationVault, address _bond, uint256 _minBond, uint256 _earned, uint256 _age
   );
 
   /*///////////////////////////////////////////////////////////////
@@ -27,26 +28,27 @@ interface IKeep3rBondedRelay is IKeep3rRelay {
   /**
    * @notice Thrown when the caller is not the automation vault owner
    */
-  error IKeeperBondedRelay_NotVaultOwner();
+  error Keep3rBondedRelay_NotVaultOwner();
 
   /**
    * @notice Thrown when the automation automation vault requirements are not setted
    */
-  error IKeeperBondedRelay_NotAutomationVaultRequirement();
+  error Keep3rBondedRelay_NotAutomationVaultRequirement();
 
   /*///////////////////////////////////////////////////////////////
                               STRUCTS
   //////////////////////////////////////////////////////////////*/
 
   /**
-   * @notice The data to execute a job
-   * @param  _bond T
-   * @param  _minBond T
-   * @param  _earned T
-   * @param  _age T
+   * @notice The requirements needed when bonded job is required
+   * @param _keeper The address of the keeper to check
+   * @param _bond The bond token being evaluated
+   * @param _minBond The minimum amount of bonded tokens
+   * @param _earned The minimum funds earned in the keepers lifetime
+   * @param _age The minimum keeper age required
    */
   struct Requirements {
-    uint256 bond;
+    address bond;
     uint256 minBond;
     uint256 earned;
     uint256 age;
@@ -57,34 +59,34 @@ interface IKeep3rBondedRelay is IKeep3rRelay {
   //////////////////////////////////////////////////////////////*/
 
   /**
-   * @notice Get the automation vault requirements
-   * @param  _automationVault The address of the automation vault
-   * @return _bond T
-   * @return _minBond T
-   * @return _earned T
-   * @return _age T
+   * @notice Get the automation vault bonded requirements
+   * @param _automationVault The address of the automation vault
+   * @return _bond The bond token being evaluated
+   * @return _minBond The minimum amount of bonded tokens
+   * @return _earned The minimum funds earned in the keepers lifetime
+   * @return _age The minimum keeper age required
    */
   function automationVaultRequirements(address _automationVault)
     external
     view
-    returns (uint256 _bond, uint256 _minBond, uint256 _earned, uint256 _age);
+    returns (address _bond, uint256 _minBond, uint256 _earned, uint256 _age);
 
   /*///////////////////////////////////////////////////////////////
                           EXTERNAL FUNCTIONS
   //////////////////////////////////////////////////////////////*/
 
   /**
-   * @notice
+   * @notice Set the automation vault requirements when bonded job is required
    * @dev    Only the owner of the automation vault can set the requirements
-   * @param  _automationVault The address of the automation vault
-   * @param  _bond T
-   * @param  _minBond T
-   * @param  _earned T
-   * @param  _age T
+   * @param _automationVault The address of the automation vault
+   * @param _bond The bond token being evaluated
+   * @param _minBond The minimum amount of bonded tokens
+   * @param _earned The minimum funds earned in the keepers lifetime
+   * @param _age The minimum keeper age required
    */
   function setAutomationVaultRequirements(
     address _automationVault,
-    uint256 _bond,
+    address _bond,
     uint256 _minBond,
     uint256 _earned,
     uint256 _age

@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 import {CommonIntegrationTest} from '@test/integration/Common.t.sol';
 
 import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
+import {IKeep3rBondedRelay} from '@interfaces/IKeep3rBondedRelay.sol';
 import {IKeep3rV2} from '@interfaces/external/IKeep3rV2.sol';
 import {IKeep3rHelper} from '@interfaces/external/IKeep3rHelper.sol';
 import {IKeep3rV1} from '@interfaces/external/IKeep3rV1.sol';
@@ -45,9 +46,11 @@ contract IntegrationKeep3rBondedRelay is CommonIntegrationTest {
     bytes4[] memory _jobSelectors = new bytes4[](2);
     _jobSelectors[0] = basicJob.work.selector;
     _jobSelectors[1] = basicJob.workHard.selector;
+    IKeep3rBondedRelay.Requirements memory _requirements =
+      IKeep3rBondedRelay.Requirements(address(kp3r), 1 ether, 0, 1 days);
 
     vm.startPrank(owner);
-    keep3rBondedRelay.setAutomationVaultRequirements(address(automationVault), address(kp3r), 1 ether, 0, 1 days);
+    keep3rBondedRelay.setAutomationVaultRequirements(address(automationVault), _requirements);
     automationVault.approveRelayCallers(address(keep3rBondedRelay), _keepers);
     automationVault.approveJobSelectors(address(keep3r), _keep3rSelectors);
     automationVault.approveJobSelectors(address(basicJob), _jobSelectors);

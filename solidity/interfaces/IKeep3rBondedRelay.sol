@@ -31,7 +31,7 @@ interface IKeep3rBondedRelay is IKeep3rRelay {
   error Keep3rBondedRelay_NotVaultOwner();
 
   /**
-   * @notice Thrown when the automation automation vault requirements are not setted
+   * @notice Thrown when the automation vault requirements are not setted
    */
   error Keep3rBondedRelay_NotAutomationVaultRequirement();
 
@@ -79,16 +79,10 @@ interface IKeep3rBondedRelay is IKeep3rRelay {
    * @notice Set the automation vault requirements when bonded job is required
    * @dev    Only the owner of the automation vault can set the requirements
    * @param _automationVault The address of the automation vault
-   * @param _bond The bond token being evaluated
-   * @param _minBond The minimum amount of bonded tokens
-   * @param _earned The minimum funds earned in the keepers lifetime
-   * @param _age The minimum keeper age required
+   * @param _requirements The requirements needed when bonded job is required
    */
   function setAutomationVaultRequirements(
     address _automationVault,
-    address _bond,
-    uint256 _minBond,
-    uint256 _earned,
-    uint256 _age
+    IKeep3rBondedRelay.Requirements memory _requirements
   ) external;
 }

@@ -10,22 +10,21 @@ import {_KEEP3R_V2} from '@utils/Constants.sol';
  * @notice This contract will manage all executions coming from the keep3r network when the job is bonded
  */
 contract Keep3rBondedRelay is IKeep3rBondedRelay {
+  /// @inheritdoc IKeep3rBondedRelay
   mapping(address _automationVault => IKeep3rBondedRelay.Requirements _bondRequirements) public
     automationVaultRequirements;
 
   /// @inheritdoc IKeep3rBondedRelay
   function setAutomationVaultRequirements(
     address _automationVault,
-    address _bond,
-    uint256 _minBond,
-    uint256 _earned,
-    uint256 _age
+    IKeep3rBondedRelay.Requirements memory _requirements
   ) external {
     if (IAutomationVault(_automationVault).owner() != msg.sender) revert Keep3rBondedRelay_NotVaultOwner();
 
-    automationVaultRequirements[_automationVault] =
-      IKeep3rBondedRelay.Requirements({bond: _bond, minBond: _minBond, earned: _earned, age: _age});
-    emit AutomationVaultRequirementsSetted(_automationVault, _bond, _minBond, _earned, _age);
+    automationVaultRequirements[_automationVault] = _requirements;
+    emit AutomationVaultRequirementsSetted(
+      _automationVault, _requirements.bond, _requirements.minBond, _requirements.earned, _requirements.age
+    );
   }
 
   /// @inheritdoc IKeep3rRelay

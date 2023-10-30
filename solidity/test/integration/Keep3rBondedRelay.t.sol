@@ -35,7 +35,8 @@ contract IntegrationKeep3rBondedRelay is CommonIntegrationTest {
     kp3r = IKeep3rV1(_KEEP3R_V1);
 
     _addJobAndLiquidity(address(automationVault), 100 ether);
-    _bondAndActivateKeeper(bot, 0);
+    bot = 0xF977814e90dA44bFA03b6295A0616a897441aceC;
+    _bondAndActivateKeeper(bot, 1);
 
     // AutomationVault setup
     address[] memory _keepers = new address[](1);
@@ -46,8 +47,7 @@ contract IntegrationKeep3rBondedRelay is CommonIntegrationTest {
     bytes4[] memory _jobSelectors = new bytes4[](2);
     _jobSelectors[0] = basicJob.work.selector;
     _jobSelectors[1] = basicJob.workHard.selector;
-    IKeep3rBondedRelay.Requirements memory _requirements =
-      IKeep3rBondedRelay.Requirements(address(kp3r), 1 ether, 0, 1 days);
+    IKeep3rBondedRelay.Requirements memory _requirements = IKeep3rBondedRelay.Requirements(address(kp3r), 1 ether, 0, 0);
 
     vm.startPrank(owner);
     keep3rBondedRelay.setAutomationVaultRequirements(address(automationVault), _requirements);
@@ -58,14 +58,14 @@ contract IntegrationKeep3rBondedRelay is CommonIntegrationTest {
     changePrank(bot);
   }
 
-  function _addJobAndLiquidity(address _job, uint256 _amount) internal {
+  function _addJobAndLiquidity(address _job, uint256 _amount) public {
     keep3r.addJob(_job);
 
     vm.prank(keep3rGovernor);
     keep3r.forceLiquidityCreditsToJob(_job, _amount);
   }
 
-  function _bondAndActivateKeeper(address _keeper, uint256 _bondAmount) internal {
+  function _bondAndActivateKeeper(address _keeper, uint256 _bondAmount) public {
     vm.startPrank(_keeper);
     kp3r.approve(address(keep3r), _bondAmount);
     keep3r.bond(address(kp3r), _bondAmount);
@@ -76,7 +76,7 @@ contract IntegrationKeep3rBondedRelay is CommonIntegrationTest {
     vm.stopPrank();
   }
 
-  function test_execute_job_keep3r() public {
+  function test_execute_job_keep3r_bonded() public {
     IAutomationVault.ExecData[] memory _execData = new IAutomationVault.ExecData[](1);
     _execData[0] = IAutomationVault.ExecData(address(basicJob), abi.encodeWithSelector(basicJob.work.selector));
 
@@ -94,11 +94,10 @@ contract IntegrationKeep3rBondedRelay is CommonIntegrationTest {
     vm.fee(_fee);
 
     uint256 _payment = keep3r.bonds(bot, address(kp3r));
-    assertEq(_payment, 0);
+    assertEq(_payment, 1 ether);
 
     IAutomationVault.ExecData[] memory _execData = new IAutomationVault.ExecData[](1);
-    _execData[0] =
-      IAutomationVault.ExecData(address(basicJob), abi.encodeWithSelector(basicJob.workHard.selector, _howHard));
+    _execData[0] = IAutomationVault.ExecData(address(basicJob), abi.encodeWithSelector(basicJob.workHard.selector, 50));
 
     keep3rBondedRelay.exec(address(automationVault), _execData); // Initializes storage variables
     _payment = keep3r.bonds(bot, address(kp3r));
@@ -116,12 +115,12 @@ contract IntegrationKeep3rBondedRelay is CommonIntegrationTest {
     assertLt(_payment, _breakEven * 115 / 100);
   }
 
-  function test_issue_payment_keep3r_high_base_fee(uint16 _howHard) public {
+  function test_issue_payment_keep3r_high_base_fee_dist(uint16 _howHard) public {
     vm.assume(_howHard > 35 && _howHard <= 1000);
     vm.fee(50 gwei); // >= keep3rHelper.minBaseFee() - keep3rHelper.minPriorityFee()
 
     uint256 _payment = keep3r.bonds(bot, address(kp3r));
-    assertEq(_payment, 0);
+    assertEq(_payment, 1 ether);
 
     IAutomationVault.ExecData[] memory _execData = new IAutomationVault.ExecData[](1);
     _execData[0] =

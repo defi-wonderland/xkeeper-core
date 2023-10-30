@@ -35,6 +35,8 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
       vm.assume(_execData[_i].job != _KEEP3R_V2);
     }
 
+    vm.mockCall(_KEEP3R_V2, abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _relayCaller), abi.encode(true));
+
     vm.startPrank(_relayCaller);
     _;
   }
@@ -51,6 +53,21 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
     keep3rRelay.exec(_automationVault, _execData);
   }
 
+  function testRevertIfCallerIsNotKeep3r(
+    address _relayCaller,
+    address _automationVault,
+    IAutomationVault.ExecData[] memory _execData
+  ) public happyPath(_relayCaller, _automationVault, _execData) {
+    address _newCaller = makeAddr('newCaller');
+    changePrank(_newCaller);
+    IAutomationVault.ExecData[] memory _execDataKeep3r = _buildExecDataKeep3r(_execData, _relayCaller);
+
+    vm.mockCall(_KEEP3R_V2, abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _newCaller), abi.encode(false));
+    vm.expectRevert(IKeep3rRelay.Keep3rRelay_NotKeep3r.selector);
+
+    keep3rRelay.exec(_automationVault, _execData);
+  }
+
   function testRevertIfExecDataContainsKeep3rV2(
     address _relayCaller,
     address _automationVault,
@@ -60,6 +77,18 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
     _execData[1].job = _KEEP3R_V2;
 
     vm.expectRevert(IKeep3rRelay.Keep3rRelay_Keep3rNotAllowed.selector);
+
+    keep3rRelay.exec(_automationVault, _execData);
+  }
+
+  function testExpectCallIsKeep3r(
+    address _relayCaller,
+    address _automationVault,
+    IAutomationVault.ExecData[] memory _execData
+  ) public happyPath(_relayCaller, _automationVault, _execData) {
+    IAutomationVault.ExecData[] memory _execDataKeep3r = _buildExecDataKeep3r(_execData, _relayCaller);
+
+    vm.expectCall(_KEEP3R_V2, abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _relayCaller));
 
     keep3rRelay.exec(_automationVault, _execData);
   }
@@ -98,19 +127,14 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
     IAutomationVault.ExecData[] memory _execData,
     address _relayCaller
   ) internal pure returns (IAutomationVault.ExecData[] memory _execDataKeep3r) {
-    uint256 _execDataKeep3rLength = _execData.length + 2;
+    uint256 _execDataKeep3rLength = _execData.length + 1;
     _execDataKeep3r = new IAutomationVault.ExecData[](_execDataKeep3rLength);
 
-    _execDataKeep3r[0] = IAutomationVault.ExecData({
-      job: _KEEP3R_V2,
-      jobData: abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _relayCaller)
-    });
-
     for (uint256 _i; _i < _execData.length; ++_i) {
-      _execDataKeep3r[_i + 1] = _execData[_i];
+      _execDataKeep3r[_i] = _execData[_i];
     }
 
-    _execDataKeep3r[_execDataKeep3rLength - 1] = IAutomationVault.ExecData({
+    _execDataKeep3r[_execData.length] = IAutomationVault.ExecData({
       job: _KEEP3R_V2,
       jobData: abi.encodeWithSelector(IKeep3rV2.worked.selector, _relayCaller)
     });

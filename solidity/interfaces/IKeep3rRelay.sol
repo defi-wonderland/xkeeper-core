@@ -28,6 +28,11 @@ interface IKeep3rRelay {
   error Keep3rRelay_NoExecData();
 
   /**
+   * @notice Thrown when the caller is not a keeper
+   */
+  error Keep3rRelay_NotKeep3r();
+
+  /**
    * @notice Thrown when the exec data contains Keep3r V2
    */
   error Keep3rRelay_Keep3rNotAllowed();

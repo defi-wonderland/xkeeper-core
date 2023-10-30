@@ -35,6 +35,11 @@ interface IKeep3rBondedRelay is IKeep3rRelay {
    */
   error Keep3rBondedRelay_NotAutomationVaultRequirement();
 
+  /**
+   * @notice Thrown when the keeper doesn't meet the requirements set by the automation vault
+   */
+  error Keep3rBondedRelay_NotBondedKeeper();
+
   /*///////////////////////////////////////////////////////////////
                               STRUCTS
   //////////////////////////////////////////////////////////////*/

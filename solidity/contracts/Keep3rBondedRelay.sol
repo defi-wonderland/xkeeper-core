@@ -29,42 +29,44 @@ contract Keep3rBondedRelay is IKeep3rBondedRelay {
 
   /// @inheritdoc IKeep3rRelay
   function exec(address _automationVault, IAutomationVault.ExecData[] calldata _execData) external {
+    // ensure that calls are being passed
     uint256 _execDataLength = _execData.length;
     if (_execDataLength == 0) revert Keep3rRelay_NoExecData();
 
+    // ensure that the automation vault owner has setup bond requirements
     IKeep3rBondedRelay.Requirements memory _requirements = automationVaultRequirements[_automationVault];
+    if (_requirements.bond == address(0) && _requirements.earned == 0 && _requirements.age == 0) {
+      revert Keep3rBondedRelay_NotAutomationVaultRequirement();
+    }
 
-    if (_requirements.bond == address(0)) revert Keep3rBondedRelay_NotAutomationVaultRequirement();
+    // ensure that the keeper meets the requirements
+    bool _isBondedKeeper = IKeep3rV2(_KEEP3R_V2).isBondedKeeper(
+      msg.sender, _requirements.bond, _requirements.minBond, _requirements.earned, _requirements.age
+    );
+    if (!_isBondedKeeper) revert Keep3rBondedRelay_NotBondedKeeper();
 
-    IAutomationVault.ExecData[] memory _execDataKeep3r = new IAutomationVault.ExecData[](_execDataLength + 2);
+    // create the array of calls which are going to be executed by the automation vault
+    IAutomationVault.ExecData[] memory _execDataKeep3r = new IAutomationVault.ExecData[](_execDataLength + 1);
 
-    _execDataKeep3r[0] = IAutomationVault.ExecData({
-      job: _KEEP3R_V2,
-      jobData: abi.encodeWithSelector(
-        IKeep3rV2.isBondedKeeper.selector,
-        msg.sender,
-        _requirements.bond,
-        _requirements.minBond,
-        _requirements.earned,
-        _requirements.age
-        )
-    });
-
+    // inject to that array of calls the exec data provided in the arguments
     for (uint256 _i; _i < _execDataLength;) {
       if (_execData[_i].job == _KEEP3R_V2) revert Keep3rRelay_Keep3rNotAllowed();
-      _execDataKeep3r[_i + 1] = _execData[_i];
+      _execDataKeep3r[_i] = _execData[_i];
       unchecked {
         ++_i;
       }
     }
 
-    _execDataKeep3r[_execDataLength + 1] = IAutomationVault.ExecData({
+    // inject the final call which will issue the payment to the keeper
+    _execDataKeep3r[_execDataLength] = IAutomationVault.ExecData({
       job: _KEEP3R_V2,
       jobData: abi.encodeWithSelector(IKeep3rV2.worked.selector, msg.sender)
     });
 
+    // send the array of calls to the automation vault for it to execute them
     IAutomationVault(_automationVault).exec(msg.sender, _execDataKeep3r, new IAutomationVault.FeeData[](0));
 
+    // emit the necessary event
     emit AutomationVaultExecuted(_automationVault, msg.sender, _execDataKeep3r);
   }
 }

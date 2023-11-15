@@ -25,15 +25,20 @@ contract OpenRelay is IOpenRelay {
   ) external {
     if (_execData.length == 0) revert OpenRelay_NoExecData();
 
+    // Execute the automation vault counting the gas spent
     uint256 _initialGas = gasleft();
     IAutomationVault(_automationVault).exec(msg.sender, _execData, new IAutomationVault.FeeData[](0));
     uint256 _gasSpent = _initialGas - gasleft();
+
+    // Calculate the payment for the relayer
     uint256 _payment = (_gasSpent + GAS_BONUS) * block.basefee * GAS_MULTIPLIER / BASE;
 
+    // Send the payment to the relayer
     IAutomationVault.FeeData[] memory _feeData = new IAutomationVault.FeeData[](1);
     _feeData[0] = IAutomationVault.FeeData(_feeRecipient, _ETH, _payment);
     IAutomationVault(_automationVault).exec(msg.sender, new IAutomationVault.ExecData[](0), _feeData);
 
+    // Emit the event
     emit AutomationVaultExecuted(_automationVault, msg.sender, _execData, _feeData);
   }
 }

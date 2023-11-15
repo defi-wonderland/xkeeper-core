@@ -19,6 +19,15 @@ interface IAutomationVaultFactory {
   );
 
   /*///////////////////////////////////////////////////////////////
+                              ERRORS  
+  //////////////////////////////////////////////////////////////*/
+
+  /**
+   * @notice Thrown when the amount is zero
+   */
+  error AutomationVaultFactory_AmountZero();
+
+  /*///////////////////////////////////////////////////////////////
                           VIEW FUNCTIONS
   //////////////////////////////////////////////////////////////*/
 
@@ -27,6 +36,17 @@ interface IAutomationVaultFactory {
    * @return __automationVaults The array of automation vaults
    */
   function automationVaults() external view returns (address[] memory __automationVaults);
+
+  /**
+   * @notice Get the automation vaults deployed by the factory in a paginated format
+   * @param  _startFrom Index from where to start the pagination
+   * @param  _amount Maximum amount of automation vaults to retrieve
+   * @return _paginatedAutomationVaults The array of automation vaults
+   */
+  function paginatedAutomationVaults(
+    uint256 _startFrom,
+    uint256 _amount
+  ) external view returns (address[] memory _paginatedAutomationVaults);
 
   /*///////////////////////////////////////////////////////////////
                           EXTERNAL FUNCTIONS

@@ -28,7 +28,7 @@ via_ir = true
 out = 'out-via-ir'
 fuzz_runs = 2000
 src = 'solidity/test'
-gas_limit = 50_000_000
+gas_limit = 30_000_000
 
 [profile.docs]
 src ='solidity/interfaces' # root_path variable in build-docs.sh

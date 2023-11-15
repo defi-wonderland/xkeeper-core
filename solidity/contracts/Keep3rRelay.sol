@@ -12,38 +12,44 @@ import {_KEEP3R_V2} from '@utils/Constants.sol';
 contract Keep3rRelay is IKeep3rRelay {
   /// @inheritdoc IKeep3rRelay
   function exec(address _automationVault, IAutomationVault.ExecData[] calldata _execData) external {
-    // ensure that calls are being passed
+    // Ensure that calls are being passed
     uint256 _execDataLength = _execData.length;
     if (_execDataLength == 0) revert Keep3rRelay_NoExecData();
 
-    // ensure that the caller is a valid keeper
+    // Ensure that the caller is a valid keeper
     bool _isKeeper = IKeep3rV2(_KEEP3R_V2).isKeeper(msg.sender);
     if (!_isKeeper) revert Keep3rRelay_NotKeep3r();
 
-    // create the array of calls which are going to be executed by the automation vault
-    IAutomationVault.ExecData[] memory _execDataKeep3r = new IAutomationVault.ExecData[](_execDataLength + 1);
+    // Create the array of calls which are going to be executed by the automation vault
+    IAutomationVault.ExecData[] memory _execDataKeep3r = new IAutomationVault.ExecData[](_execDataLength + 2);
 
-    // inject to that array of calls the exec data provided in the arguments
+    // Inject the first call which will validate that the caller is a keeper
+    _execDataKeep3r[0] = IAutomationVault.ExecData({
+      job: _KEEP3R_V2,
+      jobData: abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, msg.sender)
+    });
+
+    // Inject to that array of calls the exec data provided in the arguments
     for (uint256 _i; _i < _execDataLength;) {
       if (_execData[_i].job == _KEEP3R_V2) revert Keep3rRelay_Keep3rNotAllowed();
-      _execDataKeep3r[_i] = _execData[_i];
+      _execDataKeep3r[_i + 1] = _execData[_i];
       unchecked {
         ++_i;
       }
     }
 
-    // inject the final call which will issue the payment to the keeper
-    _execDataKeep3r[_execDataLength] = IAutomationVault.ExecData({
+    // Inject the final call which will issue the payment to the keeper
+    _execDataKeep3r[_execDataLength + 1] = IAutomationVault.ExecData({
       job: _KEEP3R_V2,
       jobData: abi.encodeWithSelector(IKeep3rV2.worked.selector, msg.sender)
     });
 
-    // ensure that the caller is a valid keeper
+    // Ensure that the caller is a valid keeper
 
-    // send the array of calls to the automation vault for it to execute them
+    // Send the array of calls to the automation vault for it to execute them
     IAutomationVault(_automationVault).exec(msg.sender, _execDataKeep3r, new IAutomationVault.FeeData[](0));
 
-    // emit the event
+    // Emit the event
     emit AutomationVaultExecuted(_automationVault, msg.sender, _execDataKeep3r);
   }
 }

@@ -73,7 +73,7 @@ contract UnitAutomationVaultFactoryGetPaginatedAutomationVaults is AutomationVau
     _;
   }
 
-  function testGetAutomationVaults(
+  function testGetPaginatedAutomationVaults(
     address[] memory _automationVaults,
     uint256 _startFrom,
     uint256 _amount

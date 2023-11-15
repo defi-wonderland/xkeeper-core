@@ -127,14 +127,19 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
     IAutomationVault.ExecData[] memory _execData,
     address _relayCaller
   ) internal pure returns (IAutomationVault.ExecData[] memory _execDataKeep3r) {
-    uint256 _execDataKeep3rLength = _execData.length + 1;
+    uint256 _execDataKeep3rLength = _execData.length + 2;
     _execDataKeep3r = new IAutomationVault.ExecData[](_execDataKeep3rLength);
 
+    _execDataKeep3r[0] = IAutomationVault.ExecData({
+      job: _KEEP3R_V2,
+      jobData: abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _relayCaller)
+    });
+
     for (uint256 _i; _i < _execData.length; ++_i) {
-      _execDataKeep3r[_i] = _execData[_i];
+      _execDataKeep3r[_i + 1] = _execData[_i];
     }
 
-    _execDataKeep3r[_execData.length] = IAutomationVault.ExecData({
+    _execDataKeep3r[_execData.length + 1] = IAutomationVault.ExecData({
       job: _KEEP3R_V2,
       jobData: abi.encodeWithSelector(IKeep3rV2.worked.selector, _relayCaller)
     });

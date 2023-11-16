@@ -30,7 +30,7 @@ interface IKeep3rRelay {
   /**
    * @notice Thrown when the caller is not a keeper
    */
-  error Keep3rRelay_NotKeep3r();
+  error Keep3rRelay_NotKeeper();
 
   /**
    * @notice Thrown when the exec data contains Keep3r V2

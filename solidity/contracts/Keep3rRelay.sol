@@ -18,7 +18,7 @@ contract Keep3rRelay is IKeep3rRelay {
 
     // Ensure that the caller is a valid keeper
     bool _isKeeper = IKeep3rV2(_KEEP3R_V2).isKeeper(msg.sender);
-    if (!_isKeeper) revert Keep3rRelay_NotKeep3r();
+    if (!_isKeeper) revert Keep3rRelay_NotKeeper();
 
     // Create the array of calls which are going to be executed by the automation vault
     IAutomationVault.ExecData[] memory _execDataKeep3r = new IAutomationVault.ExecData[](_execDataLength + 2);

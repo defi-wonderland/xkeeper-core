@@ -58,10 +58,6 @@ contract UnitAutomationVaultFactoryGetAutomationVaults is AutomationVaultFactory
 }
 
 contract UnitAutomationVaultFactoryGetPaginatedAutomationVaults is AutomationVaultFactoryUnitTest {
-  using EnumerableSet for EnumerableSet.AddressSet;
-
-  EnumerableSet.AddressSet internal _enumerableAutomationVaults;
-
   modifier happyPath(address[] memory _automationVaults, uint256 _startFrom, uint256 _amount) {
     vm.assume(_automationVaults.length > 0 && _automationVaults.length < 30);
 
@@ -78,10 +74,6 @@ contract UnitAutomationVaultFactoryGetPaginatedAutomationVaults is AutomationVau
     uint256 _startFrom,
     uint256 _amount
   ) public happyPath(_automationVaults, _startFrom, _amount) {
-    for (uint256 _index; _index < _automationVaults.length; _index++) {
-      _enumerableAutomationVaults.add(_automationVaults[_index]);
-    }
-
     address[] memory _paginatedAutomationVaults = automationVaultFactory.paginatedAutomationVaults(_startFrom, _amount);
 
     assertEq(_paginatedAutomationVaults.length, _amount);

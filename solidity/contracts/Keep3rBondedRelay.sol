@@ -48,17 +48,10 @@ contract Keep3rBondedRelay is IKeep3rBondedRelay {
     // Create the array of calls which are going to be executed by the automation vault
     IAutomationVault.ExecData[] memory _execDataKeep3r = new IAutomationVault.ExecData[](_execDataLength + 2);
 
-    // Inject the first call which will validate that the caller is a bonded keeper
+    // Inject the first call which will validate that the caller is a keeper
     _execDataKeep3r[0] = IAutomationVault.ExecData({
       job: _KEEP3R_V2,
-      jobData: abi.encodeWithSelector(
-        IKeep3rV2.isBondedKeeper.selector,
-        msg.sender,
-        _requirements.bond,
-        _requirements.minBond,
-        _requirements.earned,
-        _requirements.age
-        )
+      jobData: abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, msg.sender)
     });
 
     // Inject to that array of calls the exec data provided in the arguments

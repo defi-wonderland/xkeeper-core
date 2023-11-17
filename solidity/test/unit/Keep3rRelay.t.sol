@@ -60,12 +60,11 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
   ) public happyPath(_relayCaller, _automationVault, _execData) {
     address _newCaller = makeAddr('newCaller');
     changePrank(_newCaller);
-    IAutomationVault.ExecData[] memory _execDataKeep3r = _buildExecDataKeep3r(_execData, _relayCaller);
 
     vm.mockCall(_KEEP3R_V2, abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _newCaller), abi.encode(false));
     vm.expectRevert(IKeep3rRelay.Keep3rRelay_NotKeeper.selector);
 
-    keep3rRelay.exec(_automationVault, _execDataKeep3r);
+    keep3rRelay.exec(_automationVault, _execData);
   }
 
   function testRevertIfExecDataContainsKeep3rV2(

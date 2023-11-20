@@ -38,45 +38,47 @@ abstract contract AutomationVaultFactoryUnitTest is Test {
   }
 }
 
-contract UnitAutomationVaultFactoryGetAutomationVaults is AutomationVaultFactoryUnitTest {
+contract UnitAutomationVaultFactoryGetTotalAutomationVaults is AutomationVaultFactoryUnitTest {
   using EnumerableSet for EnumerableSet.AddressSet;
 
-  EnumerableSet.AddressSet internal _enumerableAutomationVaults;
+  // This is needed because foundry fuzz some values which are repeated
+  EnumerableSet.AddressSet internal _cleanAutomationVaults;
 
   modifier happyPath(address[] memory _automationVaults) {
     vm.assume(_automationVaults.length > 0 && _automationVaults.length < 30);
+
     automationVaultFactory.addAutomationVaultForTest(_automationVaults);
     _;
   }
 
-  function testGetAutomationVaults(address[] memory _automationVaults) public happyPath(_automationVaults) {
+  function testGetTotalAutomationVaults(address[] memory _automationVaults) public happyPath(_automationVaults) {
     for (uint256 _index; _index < _automationVaults.length; _index++) {
-      _enumerableAutomationVaults.add(_automationVaults[_index]);
+      _cleanAutomationVaults.add(_automationVaults[_index]);
     }
-    assertEq(automationVaultFactory.automationVaults(), _enumerableAutomationVaults.values());
+    assertEq(automationVaultFactory.totalAutomationVaults(), _cleanAutomationVaults.length());
   }
 }
 
-contract UnitAutomationVaultFactoryGetPaginatedAutomationVaults is AutomationVaultFactoryUnitTest {
-  modifier happyPath(address[] memory _automationVaults, uint256 _startFrom, uint256 _amount) {
+contract UnitAutomationVaultFactoryGetAutomationVaults is AutomationVaultFactoryUnitTest {
+  modifier happyPath(address[] memory _automationVaults, uint256 _startFrom, uint256 _automationVaultAmount) {
     vm.assume(_automationVaults.length > 0 && _automationVaults.length < 30);
 
     // Avoid underflow
     vm.assume(_startFrom < _automationVaults.length);
-    vm.assume(_amount < _automationVaults.length - _startFrom);
+    vm.assume(_automationVaultAmount < _automationVaults.length - _startFrom);
 
     automationVaultFactory.addAutomationVaultForTest(_automationVaults);
     _;
   }
 
-  function testGetPaginatedAutomationVaults(
+  function testGetAutomationVaults(
     address[] memory _automationVaults,
     uint256 _startFrom,
-    uint256 _amount
-  ) public happyPath(_automationVaults, _startFrom, _amount) {
-    address[] memory _paginatedAutomationVaults = automationVaultFactory.paginatedAutomationVaults(_startFrom, _amount);
+    uint256 _automationVaultAmount
+  ) public happyPath(_automationVaults, _startFrom, _automationVaultAmount) {
+    address[] memory __automationVaults = automationVaultFactory.automationVaults(_startFrom, _automationVaultAmount);
 
-    assertEq(_paginatedAutomationVaults.length, _amount);
+    assertEq(__automationVaults.length, _automationVaultAmount);
   }
 }
 
@@ -94,7 +96,7 @@ contract UnitAutomationVaultFactoryDeployAutomationVault is AutomationVaultFacto
   function testSetAutomationVaults(address _owner, string calldata _organizationName) public {
     automationVaultFactory.deployAutomationVault(_owner, _organizationName);
 
-    assertEq(automationVaultFactory.automationVaults()[0], address(automationVault));
+    assertEq(automationVaultFactory.automationVaults(0, 1)[0], address(automationVault));
   }
 
   function testEmitDeployAutomationVault(address _owner, string calldata _organizationName) public {

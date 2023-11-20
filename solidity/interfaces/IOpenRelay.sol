@@ -61,12 +61,12 @@ interface IOpenRelay {
    * @notice Execute an automation vault which will execute the jobs and will manage the payment to the fee data receivers
    * @dev    The payment will be calculated on the basis of several variables like the gas spent, the base fee,
    *         the gas bonus and the gas multiplier
-   * @param  _automationVault The address of the automation vault
+   * @param  _automationVault The automation vault that will be executed
    * @param  _execData The array of exec data
    * @param  _feeRecipient The address of the fee recipient
    */
   function exec(
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] calldata _execData,
     address _feeRecipient
   ) external;

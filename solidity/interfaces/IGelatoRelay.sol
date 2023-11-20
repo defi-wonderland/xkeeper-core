@@ -28,12 +28,12 @@ interface IGelatoRelay {
 
   /**
    * @notice Execute an automation vault which will execute the jobs and will manage the payment to the fee data receivers
-   * @param  _automationVault The address of the automation vault
+   * @param  _automationVault The automation vault that will be executed
    * @param  _execData The array of exec data
    * @param  _feeData The array of fee data
    */
   function exec(
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] calldata _execData,
     IAutomationVault.FeeData[] calldata _feeData
   ) external;

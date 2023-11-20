@@ -10,14 +10,14 @@ import {IGelatoRelay, IAutomationVault} from '@interfaces/IGelatoRelay.sol';
 contract GelatoRelay is IGelatoRelay {
   /// @inheritdoc IGelatoRelay
   function exec(
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] calldata _execData,
     IAutomationVault.FeeData[] calldata _feeData
   ) external {
     // Execute the automation vault
-    IAutomationVault(_automationVault).exec(msg.sender, _execData, _feeData);
+    _automationVault.exec(msg.sender, _execData, _feeData);
 
     // Emit the event
-    emit AutomationVaultExecuted(_automationVault, msg.sender, _execData, _feeData);
+    emit AutomationVaultExecuted(address(_automationVault), msg.sender, _execData, _feeData);
   }
 }

@@ -32,21 +32,21 @@ interface IAutomationVaultFactory {
   //////////////////////////////////////////////////////////////*/
 
   /**
-   * @notice Get the automation vaults deployed by the factory
-   * @return __automationVaults The array of automation vaults
+   * @notice Get the total amount of automation vaults deployed by the factory
+   * @return _totalAutomationVaults The total amount of automation vaults deployed
    */
-  function automationVaults() external view returns (address[] memory __automationVaults);
+  function totalAutomationVaults() external view returns (uint256 _totalAutomationVaults);
 
   /**
-   * @notice Get the automation vaults deployed by the factory in a paginated format
-   * @param  _startFrom Index from where to start the pagination
-   * @param  _amount Maximum amount of automation vaults to retrieve
-   * @return _paginatedAutomationVaults The array of automation vaults
+   * @notice Get a certain amount of automation vaults deployed by the factory
+   * @param  _startFrom Index from where to start retrieving automation vaults
+   * @param  _automationVaultAmount Amount of automation vaults to retrieve
+   * @return __automationVaults The array of automation vaults
    */
-  function paginatedAutomationVaults(
+  function automationVaults(
     uint256 _startFrom,
-    uint256 _amount
-  ) external view returns (address[] memory _paginatedAutomationVaults);
+    uint256 _automationVaultAmount
+  ) external view returns (address[] memory __automationVaults);
 
   /*///////////////////////////////////////////////////////////////
                           EXTERNAL FUNCTIONS

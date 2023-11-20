@@ -19,7 +19,7 @@ contract OpenRelay is IOpenRelay {
 
   /// @inheritdoc IOpenRelay
   function exec(
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] calldata _execData,
     address _feeRecipient
   ) external {
@@ -27,7 +27,7 @@ contract OpenRelay is IOpenRelay {
 
     // Execute the automation vault counting the gas spent
     uint256 _initialGas = gasleft();
-    IAutomationVault(_automationVault).exec(msg.sender, _execData, new IAutomationVault.FeeData[](0));
+    _automationVault.exec(msg.sender, _execData, new IAutomationVault.FeeData[](0));
     uint256 _gasSpent = _initialGas - gasleft();
 
     // Calculate the payment for the relayer
@@ -36,9 +36,9 @@ contract OpenRelay is IOpenRelay {
     // Send the payment to the relayer
     IAutomationVault.FeeData[] memory _feeData = new IAutomationVault.FeeData[](1);
     _feeData[0] = IAutomationVault.FeeData(_feeRecipient, _ETH, _payment);
-    IAutomationVault(_automationVault).exec(msg.sender, new IAutomationVault.ExecData[](0), _feeData);
+    _automationVault.exec(msg.sender, new IAutomationVault.ExecData[](0), _feeData);
 
     // Emit the event
-    emit AutomationVaultExecuted(_automationVault, msg.sender, _execData, _feeData);
+    emit AutomationVaultExecuted(address(_automationVault), msg.sender, _execData, _feeData);
   }
 }

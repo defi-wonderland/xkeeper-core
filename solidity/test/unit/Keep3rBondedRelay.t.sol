@@ -9,7 +9,7 @@ import {_KEEP3R_V2} from '@utils/Constants.sol';
 
 contract Keep3rBondedRelayForTest is Keep3rBondedRelay {
   function setAutomationVaultRequirementsForTest(
-    address _automationVault,
+    IAutomationVault _automationVault,
     address _bond,
     uint256 _minBond,
     uint256 _earned,
@@ -42,19 +42,23 @@ contract Keep3rBondedRelayUnitTest is Test {
 }
 
 contract UnitKeep3rRelaySetAutomationVaultRequirements is Keep3rBondedRelayUnitTest {
-  modifier happyPath(address _owner, address _automationVault, IKeep3rBondedRelay.Requirements memory _requirements) {
-    vm.assume(_automationVault != address(vm));
+  modifier happyPath(
+    address _owner,
+    IAutomationVault _automationVault,
+    IKeep3rBondedRelay.Requirements memory _requirements
+  ) {
+    vm.assume(address(_automationVault) != address(vm));
     vm.assume(
       _requirements.bond > address(0) && _requirements.minBond > 0 && _requirements.earned > 0 && _requirements.age > 0
     );
-    vm.mockCall(_automationVault, abi.encodeWithSelector(IAutomationVault.owner.selector), abi.encode(_owner));
+    vm.mockCall(address(_automationVault), abi.encodeWithSelector(IAutomationVault.owner.selector), abi.encode(_owner));
     vm.startPrank(_owner);
     _;
   }
 
   function testRevertIfCallerIsNotAutomationVaultOwner(
     address _relayCaller,
-    address _automationVault,
+    IAutomationVault _automationVault,
     IKeep3rBondedRelay.Requirements memory _requirements
   ) public happyPath(_relayCaller, _automationVault, _requirements) {
     vm.expectRevert(IKeep3rBondedRelay.Keep3rBondedRelay_NotVaultOwner.selector);
@@ -65,7 +69,7 @@ contract UnitKeep3rRelaySetAutomationVaultRequirements is Keep3rBondedRelayUnitT
 
   function testRequirementsWithCorrectsParams(
     address _relayCaller,
-    address _automationVault,
+    IAutomationVault _automationVault,
     IKeep3rBondedRelay.Requirements memory _requirements
   ) public happyPath(_relayCaller, _automationVault, _requirements) {
     keep3rBondedRelay.setAutomationVaultRequirements(_automationVault, _requirements);
@@ -80,12 +84,12 @@ contract UnitKeep3rRelaySetAutomationVaultRequirements is Keep3rBondedRelayUnitT
 
   function testEmitSetAutomationVaultRequirements(
     address _relayCaller,
-    address _automationVault,
+    IAutomationVault _automationVault,
     IKeep3rBondedRelay.Requirements memory _requirements
   ) public happyPath(_relayCaller, _automationVault, _requirements) {
     vm.expectEmit();
     emit AutomationVaultRequirementsSetted(
-      _automationVault, _requirements.bond, _requirements.minBond, _requirements.earned, _requirements.age
+      address(_automationVault), _requirements.bond, _requirements.minBond, _requirements.earned, _requirements.age
     );
 
     keep3rBondedRelay.setAutomationVaultRequirements(_automationVault, _requirements);
@@ -95,13 +99,13 @@ contract UnitKeep3rRelaySetAutomationVaultRequirements is Keep3rBondedRelayUnitT
 contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
   modifier happyPath(
     address _relayCaller,
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] memory _execData,
     IKeep3rBondedRelay.Requirements memory _requirements
   ) {
-    assumeNoPrecompiles(_automationVault);
-    vm.assume(_automationVault != address(vm));
-    vm.mockCall(_automationVault, abi.encodeWithSelector(IAutomationVault.exec.selector), abi.encode());
+    assumeNoPrecompiles(address(_automationVault));
+    vm.assume(address(_automationVault) != address(vm));
+    vm.mockCall(address(_automationVault), abi.encodeWithSelector(IAutomationVault.exec.selector), abi.encode());
     vm.assume(
       _requirements.bond > address(0) && _requirements.minBond > 0 && _requirements.earned > 0 && _requirements.age > 0
     );
@@ -110,7 +114,7 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
     );
 
     vm.mockCall(
-      _KEEP3R_V2,
+      address(_KEEP3R_V2),
       abi.encodeWithSelector(
         IKeep3rV2.isBondedKeeper.selector,
         _relayCaller,
@@ -124,7 +128,7 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
 
     vm.assume(_execData.length > 0 && _execData.length < 30);
     for (uint256 _i; _i < _execData.length; ++_i) {
-      vm.assume(_execData[_i].job != _KEEP3R_V2);
+      vm.assume(_execData[_i].job != address(_KEEP3R_V2));
     }
 
     vm.startPrank(_relayCaller);
@@ -133,7 +137,7 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
 
   function testRevertIfNoExecData(
     address _relayCaller,
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] memory _execData,
     IKeep3rBondedRelay.Requirements memory _requirements
   ) public happyPath(_relayCaller, _automationVault, _execData, _requirements) {
@@ -146,7 +150,7 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
 
   function testRevertIfRequirementsAreNotSetted(
     address _relayCaller,
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] memory _execData,
     IKeep3rBondedRelay.Requirements memory _requirements
   ) public happyPath(_relayCaller, _automationVault, _execData, _requirements) {
@@ -159,15 +163,16 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
 
   function testRevertIfCallerIsNotBondedKeep3r(
     address _relayCaller,
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] memory _execData,
     IKeep3rBondedRelay.Requirements memory _requirements
   ) public happyPath(_relayCaller, _automationVault, _execData, _requirements) {
     address _newCaller = makeAddr('newCaller');
     changePrank(_newCaller);
-    IAutomationVault.ExecData[] memory _execDataKeep3rBonded = _buildExecDataKeep3rBonded(_newCaller, _execData);
 
-    vm.mockCall(_KEEP3R_V2, abi.encodeWithSelector(IKeep3rV2.isBondedKeeper.selector, _newCaller), abi.encode(false));
+    vm.mockCall(
+      address(_KEEP3R_V2), abi.encodeWithSelector(IKeep3rV2.isBondedKeeper.selector, _newCaller), abi.encode(false)
+    );
     vm.expectRevert(IKeep3rBondedRelay.Keep3rBondedRelay_NotBondedKeeper.selector);
 
     keep3rBondedRelay.exec(_automationVault, _execData);
@@ -175,13 +180,12 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
 
   function testRevertIfExecDataContainsKeep3rV2(
     address _relayCaller,
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] memory _execData,
     IKeep3rBondedRelay.Requirements memory _requirements
   ) public happyPath(_relayCaller, _automationVault, _execData, _requirements) {
     vm.assume(_execData.length > 3);
-    _execData[1].job = _KEEP3R_V2;
-    IAutomationVault.ExecData[] memory _execDataKeep3rBonded = _buildExecDataKeep3rBonded(_relayCaller, _execData);
+    _execData[1].job = address(_KEEP3R_V2);
 
     vm.expectRevert(IKeep3rRelay.Keep3rRelay_Keep3rNotAllowed.selector);
 
@@ -190,13 +194,13 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
 
   function testExpectCallWithCorrectsParams(
     address _relayCaller,
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] memory _execData,
     IKeep3rBondedRelay.Requirements memory _requirements
   ) public happyPath(_relayCaller, _automationVault, _execData, _requirements) {
     IAutomationVault.ExecData[] memory _execDataKeep3rBonded = _buildExecDataKeep3rBonded(_relayCaller, _execData);
     vm.expectCall(
-      _automationVault,
+      address(_automationVault),
       abi.encodeWithSelector(
         IAutomationVault.exec.selector, _relayCaller, _execDataKeep3rBonded, new IAutomationVault.FeeData[](0)
       )
@@ -207,14 +211,14 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
 
   function testEmitJobExecuted(
     address _relayCaller,
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] memory _execData,
     IKeep3rBondedRelay.Requirements memory _requirements
   ) public happyPath(_relayCaller, _automationVault, _execData, _requirements) {
     IAutomationVault.ExecData[] memory _execDataKeep3rBonded = _buildExecDataKeep3rBonded(_relayCaller, _execData);
 
     vm.expectEmit();
-    emit AutomationVaultExecuted(_automationVault, _relayCaller, _execDataKeep3rBonded);
+    emit AutomationVaultExecuted(address(_automationVault), _relayCaller, _execDataKeep3rBonded);
 
     keep3rBondedRelay.exec(_automationVault, _execData);
   }
@@ -227,7 +231,7 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
     _execDataKeep3rBonded = new IAutomationVault.ExecData[](_execDataKeep3rLength);
 
     _execDataKeep3rBonded[0] = IAutomationVault.ExecData({
-      job: _KEEP3R_V2,
+      job: address(_KEEP3R_V2),
       jobData: abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _relayCaller)
     });
 
@@ -236,7 +240,7 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
     }
 
     _execDataKeep3rBonded[_execData.length + 1] = IAutomationVault.ExecData({
-      job: _KEEP3R_V2,
+      job: address(_KEEP3R_V2),
       jobData: abi.encodeWithSelector(IKeep3rV2.worked.selector, _relayCaller)
     });
   }

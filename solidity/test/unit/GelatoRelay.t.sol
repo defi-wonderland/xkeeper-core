@@ -26,10 +26,10 @@ contract GelatoRelayUnitTest is Test {
 }
 
 contract UnitGelatoRelayExec is GelatoRelayUnitTest {
-  modifier happyPath(address _relayCaller, address _automationVault) {
-    assumeNoPrecompiles(_automationVault);
-    vm.assume(_automationVault != address(vm));
-    vm.mockCall(_automationVault, abi.encodeWithSelector(IAutomationVault.exec.selector), abi.encode());
+  modifier happyPath(address _relayCaller, IAutomationVault _automationVault) {
+    assumeNoPrecompiles(address(_automationVault));
+    vm.assume(address(_automationVault) != address(vm));
+    vm.mockCall(address(_automationVault), abi.encodeWithSelector(IAutomationVault.exec.selector), abi.encode());
 
     vm.startPrank(_relayCaller);
     _;
@@ -37,12 +37,13 @@ contract UnitGelatoRelayExec is GelatoRelayUnitTest {
 
   function testExpectCallWithCorrectsParams(
     address _relayCaller,
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] memory _execData,
     IAutomationVault.FeeData[] memory _feeData
   ) public happyPath(_relayCaller, _automationVault) {
     vm.expectCall(
-      _automationVault, abi.encodeWithSelector(IAutomationVault.exec.selector, _relayCaller, _execData, _feeData)
+      address(_automationVault),
+      abi.encodeWithSelector(IAutomationVault.exec.selector, _relayCaller, _execData, _feeData)
     );
 
     gelatoRelay.exec(_automationVault, _execData, _feeData);
@@ -50,12 +51,12 @@ contract UnitGelatoRelayExec is GelatoRelayUnitTest {
 
   function testEmitJobExecuted(
     address _relayCaller,
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] memory _execData,
     IAutomationVault.FeeData[] memory _feeData
   ) public happyPath(_relayCaller, _automationVault) {
     vm.expectEmit();
-    emit AutomationVaultExecuted(_automationVault, _relayCaller, _execData, _feeData);
+    emit AutomationVaultExecuted(address(_automationVault), _relayCaller, _execData, _feeData);
 
     gelatoRelay.exec(_automationVault, _execData, _feeData);
   }

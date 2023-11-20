@@ -267,5 +267,7 @@ contract AutomationVault is IAutomationVault {
   /**
    * @notice Fallback function to receive ETH
    */
-  receive() external payable {}
+  receive() external payable {
+    emit ETHReceived(msg.sender, msg.value);
+  }
 }

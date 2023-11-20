@@ -65,13 +65,13 @@ interface IKeep3rBondedRelay is IKeep3rRelay {
 
   /**
    * @notice Get the automation vault bonded requirements
-   * @param _automationVault The address of the automation vault
+   * @param _automationVault The automation vault
    * @return _bond The bond token being evaluated
    * @return _minBond The minimum amount of bonded tokens
    * @return _earned The minimum funds earned in the keepers lifetime
    * @return _age The minimum keeper age required
    */
-  function automationVaultRequirements(address _automationVault)
+  function automationVaultRequirements(IAutomationVault _automationVault)
     external
     view
     returns (address _bond, uint256 _minBond, uint256 _earned, uint256 _age);
@@ -83,11 +83,11 @@ interface IKeep3rBondedRelay is IKeep3rRelay {
   /**
    * @notice Set the automation vault requirements when bonded job is required
    * @dev    Only the owner of the automation vault can set the requirements
-   * @param _automationVault The address of the automation vault
+   * @param _automationVault The automation vault that will be executed
    * @param _requirements The requirements needed when bonded job is required
    */
   function setAutomationVaultRequirements(
-    address _automationVault,
+    IAutomationVault _automationVault,
     IKeep3rBondedRelay.Requirements memory _requirements
   ) external;
 }

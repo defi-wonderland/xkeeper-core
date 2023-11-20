@@ -99,6 +99,13 @@ interface IAutomationVault {
     address indexed _relay, address indexed _relayCaller, address indexed _feeRecipient, address _feeToken, uint256 _fee
   );
 
+  /**
+   * @notice Emitted when ETH is received in the automation vault
+   * @param  _sender The sender address
+   * @param  _amount The amount of ETH
+   */
+  event ETHReceived(address indexed _sender, uint256 _amount);
+
   /*///////////////////////////////////////////////////////////////
                               ERRORS
   //////////////////////////////////////////////////////////////*/

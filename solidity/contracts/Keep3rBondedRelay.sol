@@ -11,24 +11,24 @@ import {_KEEP3R_V2} from '@utils/Constants.sol';
  */
 contract Keep3rBondedRelay is IKeep3rBondedRelay {
   /// @inheritdoc IKeep3rBondedRelay
-  mapping(address _automationVault => IKeep3rBondedRelay.Requirements _bondRequirements) public
+  mapping(IAutomationVault _automationVault => IKeep3rBondedRelay.Requirements _bondRequirements) public
     automationVaultRequirements;
 
   /// @inheritdoc IKeep3rBondedRelay
   function setAutomationVaultRequirements(
-    address _automationVault,
+    IAutomationVault _automationVault,
     IKeep3rBondedRelay.Requirements memory _requirements
   ) external {
-    if (IAutomationVault(_automationVault).owner() != msg.sender) revert Keep3rBondedRelay_NotVaultOwner();
+    if (_automationVault.owner() != msg.sender) revert Keep3rBondedRelay_NotVaultOwner();
 
     automationVaultRequirements[_automationVault] = _requirements;
     emit AutomationVaultRequirementsSetted(
-      _automationVault, _requirements.bond, _requirements.minBond, _requirements.earned, _requirements.age
+      address(_automationVault), _requirements.bond, _requirements.minBond, _requirements.earned, _requirements.age
     );
   }
 
   /// @inheritdoc IKeep3rRelay
-  function exec(address _automationVault, IAutomationVault.ExecData[] calldata _execData) external {
+  function exec(IAutomationVault _automationVault, IAutomationVault.ExecData[] calldata _execData) external {
     // Ensure that calls are being passed
     uint256 _execDataLength = _execData.length;
     if (_execDataLength == 0) revert Keep3rRelay_NoExecData();
@@ -39,8 +39,8 @@ contract Keep3rBondedRelay is IKeep3rBondedRelay {
       revert Keep3rBondedRelay_NotAutomationVaultRequirement();
     }
 
-    // Ensure that the keeper meets the requirements
-    bool _isBondedKeeper = IKeep3rV2(_KEEP3R_V2).isBondedKeeper(
+    // The first call to `isBondedKeeper` ensures the caller is a valid bonded keeper.
+    bool _isBondedKeeper = _KEEP3R_V2.isBondedKeeper(
       msg.sender, _requirements.bond, _requirements.minBond, _requirements.earned, _requirements.age
     );
     if (!_isBondedKeeper) revert Keep3rBondedRelay_NotBondedKeeper();
@@ -48,15 +48,16 @@ contract Keep3rBondedRelay is IKeep3rBondedRelay {
     // Create the array of calls which are going to be executed by the automation vault
     IAutomationVault.ExecData[] memory _execDataKeep3r = new IAutomationVault.ExecData[](_execDataLength + 2);
 
-    // Inject the first call which will validate that the caller is a keeper
+    // The second call sets the initialGas variable inside Keep3r in the same deepness level than the `worked` call
+    // If the second call is not done, the initialGas will have a 63/64 more gas than the `worked`, thus overpaying a lot
     _execDataKeep3r[0] = IAutomationVault.ExecData({
-      job: _KEEP3R_V2,
+      job: address(_KEEP3R_V2),
       jobData: abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, msg.sender)
     });
 
     // Inject to that array of calls the exec data provided in the arguments
     for (uint256 _i; _i < _execDataLength;) {
-      if (_execData[_i].job == _KEEP3R_V2) revert Keep3rRelay_Keep3rNotAllowed();
+      if (_execData[_i].job == address(_KEEP3R_V2)) revert Keep3rRelay_Keep3rNotAllowed();
       _execDataKeep3r[_i + 1] = _execData[_i];
       unchecked {
         ++_i;
@@ -65,14 +66,14 @@ contract Keep3rBondedRelay is IKeep3rBondedRelay {
 
     // Inject the final call which will issue the payment to the keeper
     _execDataKeep3r[_execDataLength + 1] = IAutomationVault.ExecData({
-      job: _KEEP3R_V2,
+      job: address(_KEEP3R_V2),
       jobData: abi.encodeWithSelector(IKeep3rV2.worked.selector, msg.sender)
     });
 
     // Send the array of calls to the automation vault for it to execute them
-    IAutomationVault(_automationVault).exec(msg.sender, _execDataKeep3r, new IAutomationVault.FeeData[](0));
+    _automationVault.exec(msg.sender, _execDataKeep3r, new IAutomationVault.FeeData[](0));
 
     // Emit necessary event
-    emit AutomationVaultExecuted(_automationVault, msg.sender, _execDataKeep3r);
+    emit AutomationVaultExecuted(address(_automationVault), msg.sender, _execDataKeep3r);
   }
 }

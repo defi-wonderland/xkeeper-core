@@ -18,37 +18,37 @@ contract AutomationVaultFactory is IAutomationVaultFactory {
   EnumerableSet.AddressSet internal _automationVaults;
 
   /// @inheritdoc IAutomationVaultFactory
-  function automationVaults() external view returns (address[] memory __automationVaults) {
-    __automationVaults = _automationVaults.values();
+  function totalAutomationVaults() external view returns (uint256 _totalAutomationVaults) {
+    _totalAutomationVaults = _automationVaults.length();
   }
 
   /// @inheritdoc IAutomationVaultFactory
-  function paginatedAutomationVaults(
+  function automationVaults(
     uint256 _startFrom,
-    uint256 _amount
-  ) external view returns (address[] memory _paginatedAutomationVaults) {
+    uint256 _automationVaultAmount
+  ) external view returns (address[] memory __automationVaults) {
     uint256 _totalVaults = _automationVaults.length();
 
     // If amount is greater than the total vaults less the start index, set the amount to the difference
-    if (_amount > _totalVaults - _startFrom) {
-      _amount = _totalVaults - _startFrom;
+    if (_automationVaultAmount > _totalVaults - _startFrom) {
+      _automationVaultAmount = _totalVaults - _startFrom;
     }
 
     // Initialize the paginated vaults array
-    _paginatedAutomationVaults = new address[](_amount);
+    __automationVaults = new address[](_automationVaultAmount);
 
     uint256 _index;
 
     // Iterate over the vaults to get the paginated vaults
-    while (_index < _amount) {
-      _paginatedAutomationVaults[_index] = _automationVaults.at(_startFrom + _index);
+    while (_index < _automationVaultAmount) {
+      __automationVaults[_index] = _automationVaults.at(_startFrom + _index);
 
       unchecked {
         ++_index;
       }
     }
 
-    return _paginatedAutomationVaults;
+    return __automationVaults;
   }
 
   /// @inheritdoc IAutomationVaultFactory

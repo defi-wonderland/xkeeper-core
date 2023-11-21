@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import {CommonIntegrationTest} from '@test/integration/Common.t.sol';
 
-import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
+import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
 
 contract IntegrationOpenRelay is CommonIntegrationTest {
   function setUp() public override {

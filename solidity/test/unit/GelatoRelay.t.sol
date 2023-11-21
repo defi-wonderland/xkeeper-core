@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import {Test} from 'forge-std/Test.sol';
 
-import {GelatoRelay, IAutomationVault} from '@contracts/GelatoRelay.sol';
+import {GelatoRelay, IAutomationVault} from '@contracts/relays/GelatoRelay.sol';
 
 /**
  * @title GelatoRelay Unit tests

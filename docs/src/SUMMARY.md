@@ -3,13 +3,32 @@
 # Documentation
 
 - [Getting Started](content/intro/README.md)
-  - [Keep3r Framework](content/intro/framework.md)
+
+  - [XKeeper](content/intro/xkeeper.md)
+
+- [How to use]
+
+  - [Step by step](content/howto/step_by_step.md)
+
+- [Core Contracts](content/core/README.md)
+
+  - [AutomationVault](content/core/automation_vault.md)
+  - [AutomationVaultFactory](content/core/automation_vault_factory.md)
+
+- [Relays Contracts](content/relays/README.md)
+
+  - [Keep3rRelay](content/relays/keep3r_relay.md)
+  - [Keep3rBondedRelay](content/relays/keep3r_bonded_relay.md)
+  - [GelatoRelay](content/relays/gelato_relay.md)
+  - [OpenRelay](content/relays/open_relay.md)
 
 # Technical Documentation
 
 - [❱ interfaces](solidity/interfaces/README.md)
-  - [IAutomationVault](solidity/interfaces/IAutomationVault.sol/interface.IAutomationVault.md)
-  - [IAutomationVaultFactory](solidity/interfaces/IAutomationVaultFactory.sol/interface.IAutomationVaultFactory.md)
-  - [IGelatoRelay](solidity/interfaces/IGelatoRelay.sol/interface.IGelatoRelay.md)
-  - [IKeep3rRelay](solidity/interfaces/IKeep3rRelay.sol/interface.IKeep3rRelay.md)
-  - [IOpenRelay](solidity/interfaces/IOpenRelay.sol/interface.IOpenRelay.md)
+  - [❱ core](solidity/interfaces/core/README.md)
+    - [IAutomationVault](solidity/interfaces/core/IAutomationVault.sol/interface.IAutomationVault.md)
+    - [IAutomationVaultFactory](solidity/interfaces/core/IAutomationVaultFactory.sol/interface.IAutomationVaultFactory.md)
+  - [❱ relays](solidity/interfaces/relays/README.md)
+    - [IGelatoRelay](solidity/interfaces/relays/IGelatoRelay.sol/interface.IGelatoRelay.md)
+    - [IKeep3rRelay](solidity/interfaces/relays/IKeep3rRelay.sol/interface.IKeep3rRelay.md)
+    - [IOpenRelay](solidity/interfaces/relays/IOpenRelay.sol/interface.IOpenRelay.md)

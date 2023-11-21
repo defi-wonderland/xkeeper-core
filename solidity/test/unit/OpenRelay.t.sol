@@ -3,8 +3,8 @@ pragma solidity 0.8.19;
 
 import {Test} from 'forge-std/Test.sol';
 
-import {OpenRelay, IOpenRelay} from '@contracts/OpenRelay.sol';
-import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
+import {OpenRelay, IOpenRelay} from '@contracts/relays/OpenRelay.sol';
+import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
 import {_ETH} from '@utils/Constants.sol';
 
 /**

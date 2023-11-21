@@ -10,6 +10,8 @@ The `OpenRelay` is designed to manage and facilitate the execution of tasks comi
 
 - **Seamless Task Execution**: The contract allows the execution of tasks within an automation vault. It ensures that all tasks are carried out smoothly, and fees are promptly paid to the designated fee recipient.
 
+- **Event Transparency**: Upon successful execution, the contract emits the `AutomationVaultExecuted` event, providing transparent insights into executed tasks and relay activities.
+
 ## Gas Metrics
 
 - `GAS_BONUS`: 53,000

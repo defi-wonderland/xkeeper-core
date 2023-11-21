@@ -3,8 +3,8 @@ pragma solidity 0.8.19;
 
 import {Test} from 'forge-std/Test.sol';
 
-import {AutomationVaultFactory} from '@contracts/AutomationVaultFactory.sol';
-import {AutomationVault} from '@contracts/AutomationVault.sol';
+import {AutomationVaultFactory} from '@contracts/core/AutomationVaultFactory.sol';
+import {AutomationVault} from '@contracts/core/AutomationVault.sol';
 
 /**
  * @title AutomationVaultFactory Unit tests

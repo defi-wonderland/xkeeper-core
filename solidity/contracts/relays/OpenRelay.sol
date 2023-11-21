@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {IOpenRelay} from '@interfaces/IOpenRelay.sol';
-import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
+import {IOpenRelay} from '@interfaces/relays/IOpenRelay.sol';
+import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
 import {_ETH} from '@utils/Constants.sol';
 
 /**

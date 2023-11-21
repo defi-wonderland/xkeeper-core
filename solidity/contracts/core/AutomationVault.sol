@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
+import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
 import {IERC20, SafeERC20} from '@openzeppelin/token/ERC20/utils/SafeERC20.sol';
 import {EnumerableSet} from '@openzeppelin/utils/structs/EnumerableSet.sol';
 import {_ETH, _NULL} from '@utils/Constants.sol';

@@ -1,6 +1,6 @@
 # Automation Vault
 
-The `AutomationVault` is designed to facilitate the management of job execution with various relays and the payment of these relays for their services. The contract operates as a core component in the realm of on-chain automation. It provides a robust and user-friendly solution for defining and executing tasks while ensuring that payments are handled in a more straightforward manner.
+The `AutomationVault` contract is designed to facilitate the management of job execution with various relays and the payment of these relays for their services. The contract operates as a core component in the realm of on-chain automation. It provides a robust and user-friendly solution for defining and executing tasks while ensuring that payments are handled in a more straightforward manner.
 
 ## Key Features
 

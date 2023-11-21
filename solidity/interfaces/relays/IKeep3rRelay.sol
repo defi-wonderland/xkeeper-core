@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
+import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
 
 interface IKeep3rRelay {
   /*///////////////////////////////////////////////////////////////

@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import {CommonIntegrationTest} from '@test/integration/Common.t.sol';
 
-import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
+import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
 import {IKeep3rV2} from '@interfaces/external/IKeep3rV2.sol';
 import {IKeep3rHelper} from '@interfaces/external/IKeep3rHelper.sol';
 import {IKeep3rV1} from '@interfaces/external/IKeep3rV1.sol';

@@ -15,6 +15,7 @@ contract XKeeperMetadata is IXKeeperMetadata {
 
   /// @inheritdoc IXKeeperMetadata
   function setAutomationVaultMetadata(IAutomationVault _automationVault, string calldata _description) external {
+    // Check if the caller is the owner of the automation vault
     if (_automationVault.owner() != msg.sender) {
       revert XKeeperMetadata_OnlyAutomationVaultOwner();
     }

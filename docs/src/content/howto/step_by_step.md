@@ -20,22 +20,15 @@
 2. **Approval of Relays:**
    - Ensure approval of relevant relays to be used for task execution. This might include relays such as `Keep3rRelay`, `Keep3rBondedRelay`, `GelatoRelay`, or `OpenRelay`, depending on the protocol's needs.
 
-### Step 4: Configuration of Relays
+### Step 4: Configuration of jobs and selectors
 
-1. **Configuration of Keep3r Relay:**
+1. **Approval of jobs:**
 
-   - Configure the `Keep3rRelay` if chosen for use. This may involve setting fees, gas parameters, and any other specific configurations.
+   - To enable task executions, you need to approve specific jobs that the Automation Vault will interact with and will be allowed.
 
-2. **Configuration of Keep3r Bonded Relay:**
+   - Additionally, you need to approve specific function selectors for each approved job. This ensures that only designated functions within the approved jobs can be executed.
 
-   - Configure the `Keep3rBondedRelay` if chosen for use. Adjust bonding requirements as per the protocol's needs.
-
-3. **Configuration of Gelato Relay:**
-
-   - Configure the `GelatoRelay` if chosen for use. Adjust any necessary parameters for the proper execution of automated tasks.
-
-4. **Configuration of Open Relay:**
-   - Configure the `OpenRelay` if chosen for use. Adjust any necessary parameters for the proper management of tasks from bots.
+2. **Approval of selectors:**
 
 ### Step 5: Tracking and Monitoring
 

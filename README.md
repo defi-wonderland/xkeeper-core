@@ -1,12 +1,12 @@
 # Prophet Core
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/defi-wonderland/prophet-core/blob/main/LICENSE)
+[License: AGPL-3.0](https://github.com/defi-wonderland/xkeeper-core/blob/main/LICENSE)
 
 ⚠️ The code has not been audited yet, tread with caution.
 
 ## Overview
 
-Keep3r Frameworks is a public good for on-chain automation. It should be very easy to create a job which can be run both by Keep3r, Gelato, Autonolas, or any other keeper out there. We have also deployed compatible relays to ensure seamless integration, but Keep3r Frameworks is designed to work with any keeper of your choice, providing you with the flexibility to select the one that best suits your needs.
+XKeeper is a public good for on-chain automation. It should be very easy to create a job which can be run both by Keep3r, Gelato, Autonolas, or any other keeper out there. We have also deployed compatible relays to ensure seamless integration, but Keep3r Frameworks is designed to work with any keeper of your choice, providing you with the flexibility to select the one that best suits your needs.
 
 ## Setup
 
@@ -42,8 +42,10 @@ The primary license for Keep3r Framework contracts is MIT, see [`LICENSE`](./LIC
 
 ## Contributors
 
-Keep3r Framework was built with ❤️ by [Wonderland](https://defi.sucks).
+XKeeper was built with ❤️ by [Wonderland](https://defi.sucks).
 
-Wonderland is a team of top Web3 researchers, developers, and operators who believe that the future needs to be open-source, permissionless, and decentralized.
+Wonderland is the largest core development group in web3. Our commitment is to a financial future that's open, decentralized, and accessible to all.
+
+[DeFi sucks](https://defi.sucks), but Wonderland is here to make it better.
 
 [DeFi sucks](https://defi.sucks), but Wonderland is here to make it better.

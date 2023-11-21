@@ -6,9 +6,7 @@
 
   - [XKeeper](content/intro/xkeeper.md)
 
-- [How to use]
-
-  - [Step by step](content/howto/step_by_step.md)
+- [How to use](content/howto/step_by_step.md)
 
 - [Core Contracts](content/core/README.md)
 

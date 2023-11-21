@@ -23,15 +23,16 @@ contract IntegrationAutomationVault is CommonIntegrationTest {
 
     vm.prank(owner);
     address(automationVault).call{value: 100 ether}('');
-    _transferDaiToAutomationVault();
   }
 
-  function _transferDaiToAutomationVault() internal {
+  function test_changeOwnerAndWithdrawFunds(uint64 _amount, uint64 _amountToWithdraw) public {
+    // The amount to withdraw should be less than the amount transferred
+    vm.assume(_amount > _amountToWithdraw);
+
+    // Transfer DAI to automation vault
     vm.prank(_DAI_WHALE);
-    IERC20(_DAI).safeTransfer(address(automationVault), 1000);
-  }
+    _DAI.safeTransfer(address(automationVault), _amount);
 
-  function test_changeOwnerAndWithdrawFunds() public {
     // Propose new owner
     vm.prank(owner);
     automationVault.changeOwner(newOwner);
@@ -39,21 +40,22 @@ contract IntegrationAutomationVault is CommonIntegrationTest {
     vm.startPrank(newOwner);
     // Try to withdraw funds, should fail because new owner has not confirmed
     vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector, owner));
-    automationVault.withdrawFunds(_DAI, 1000, newOwner);
+    automationVault.withdrawFunds(address(_DAI), _amount, newOwner);
 
     // Balance of DAI should be 0
-    assertEq(IERC20(_DAI).balanceOf(newOwner), 0);
+    uint256 _balance = _DAI.balanceOf(address(automationVault));
 
     // Confirm new owner and withdraw funds
     automationVault.acceptOwner();
-    automationVault.withdrawFunds(_DAI, 1000, newOwner);
+    automationVault.withdrawFunds(address(_DAI), _amountToWithdraw, newOwner);
 
     // Check that funds were withdrawn
-    assertEq(IERC20(_DAI).balanceOf(newOwner), 1000);
+    assertEq(_DAI.balanceOf(newOwner), _amountToWithdraw);
+    assertEq(_DAI.balanceOf(address(automationVault)), _balance - _amountToWithdraw);
 
-    // Check that the old owner cant withdraw funds
+    // Check that the old owner can't withdraw funds
     changePrank(owner);
     vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector, newOwner));
-    automationVault.withdrawFunds(_ETH, 10, owner);
+    automationVault.withdrawFunds(_ETH, 100 ether, owner);
   }
 }

@@ -23,46 +23,40 @@ contract AutomationVaultFactory is IAutomationVaultFactory {
   }
 
   /// @inheritdoc IAutomationVaultFactory
-  function automationVaults(
-    uint256 _startFrom,
-    uint256 _automationVaultAmount
-  ) external view returns (address[] memory __automationVaults) {
+  function automationVaults(uint256 _startFrom, uint256 _amount) external view returns (address[] memory _list) {
     uint256 _totalVaults = _automationVaults.length();
 
     // If amount is greater than the total vaults less the start index, set the amount to the difference
-    if (_automationVaultAmount > _totalVaults - _startFrom) {
-      _automationVaultAmount = _totalVaults - _startFrom;
+    if (_amount > _totalVaults - _startFrom) {
+      _amount = _totalVaults - _startFrom;
     }
 
     // Initialize the paginated vaults array
-    __automationVaults = new address[](_automationVaultAmount);
+    _list = new address[](_amount);
 
     uint256 _index;
 
     // Iterate over the vaults to get the paginated vaults
-    while (_index < _automationVaultAmount) {
-      __automationVaults[_index] = _automationVaults.at(_startFrom + _index);
+    while (_index < _amount) {
+      _list[_index] = _automationVaults.at(_startFrom + _index);
 
       unchecked {
         ++_index;
       }
     }
 
-    return __automationVaults;
+    return _list;
   }
 
   /// @inheritdoc IAutomationVaultFactory
-  function deployAutomationVault(
-    address _owner,
-    string calldata _organizationName
-  ) external returns (IAutomationVault _automationVault) {
-    // Create the new automation vault for the owner with the organization name
-    _automationVault = new AutomationVault(_owner, _organizationName);
+  function deployAutomationVault(address _owner) external returns (IAutomationVault _automationVault) {
+    // Create the new automation vault with the owner
+    _automationVault = new AutomationVault(_owner);
 
     // Add the automation vault to the list of automation vaults
     _automationVaults.add(address(_automationVault));
 
     // Emit the event
-    emit DeployAutomationVault(_owner, _organizationName, address(_automationVault));
+    emit DeployAutomationVault(_owner, address(_automationVault));
   }
 }

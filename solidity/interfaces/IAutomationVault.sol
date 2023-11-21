@@ -185,12 +185,6 @@ interface IAutomationVault {
   function pendingOwner() external view returns (address _pendingOwner);
 
   /**
-   * @notice Returns the organization name
-   * @return _organizationName The name of the organization
-   */
-  function organizationName() external view returns (string calldata _organizationName);
-
-  /**
    * @notice Returns the approved relay callers for a specific relay
    * @param  _relay The address of the relay
    * @return _enabledCallers The array of approved relay callers

@@ -27,14 +27,13 @@ abstract contract Deploy is Script {
 
   // AutomationVault params
   address public owner;
-  string public organizationName;
 
   function run() public {
     deployer = vm.rememberKey(_deployerPk);
     vm.startBroadcast(deployer);
 
     automationVaultFactory = new AutomationVaultFactory();
-    automationVault = automationVaultFactory.deployAutomationVault(owner, organizationName);
+    automationVault = automationVaultFactory.deployAutomationVault(owner);
 
     openRelay = new OpenRelay();
     gelatoRelay = new GelatoRelay();
@@ -52,7 +51,6 @@ contract DeployMainnet is Deploy {
 
     // AutomationVault setup
     owner = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    organizationName = 'MainnetOrg';
   }
 }
 
@@ -63,6 +61,5 @@ contract DeployGoerli is Deploy {
 
     // AutomationVault setup
     owner = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    organizationName = 'GoerliOrg';
   }
 }

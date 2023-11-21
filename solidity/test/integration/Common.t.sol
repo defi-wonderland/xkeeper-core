@@ -18,7 +18,6 @@ contract DeployForTest is Deploy {
 
     // AutomationVault setup
     owner = makeAddr('Owner');
-    organizationName = 'TestOrg';
   }
 }
 

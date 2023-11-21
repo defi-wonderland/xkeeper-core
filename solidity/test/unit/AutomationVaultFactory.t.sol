@@ -21,9 +21,7 @@ contract AutomationVaultFactoryForTest is AutomationVaultFactory {
  */
 abstract contract AutomationVaultFactoryUnitTest is Test {
   // Events
-  event DeployAutomationVault(
-    address indexed _owner, string indexed _organizationName, address indexed _automationVault
-  );
+  event DeployAutomationVault(address indexed _owner, address indexed _automationVault);
 
   // AutomationVaultFactory contract
   AutomationVaultFactoryForTest public automationVaultFactory;
@@ -83,30 +81,29 @@ contract UnitAutomationVaultFactoryGetAutomationVaults is AutomationVaultFactory
 }
 
 contract UnitAutomationVaultFactoryDeployAutomationVault is AutomationVaultFactoryUnitTest {
-  function testDeployAutomationVault(address _owner, string calldata _organizationName) public {
-    automationVaultFactory.deployAutomationVault(_owner, _organizationName);
+  function testDeployAutomationVault(address _owner) public {
+    automationVaultFactory.deployAutomationVault(_owner);
 
     assertEq(address(automationVault).code, type(AutomationVault).runtimeCode);
 
     // params
     assertEq(automationVault.owner(), _owner);
-    assertEq(automationVault.organizationName(), _organizationName);
   }
 
-  function testSetAutomationVaults(address _owner, string calldata _organizationName) public {
-    automationVaultFactory.deployAutomationVault(_owner, _organizationName);
+  function testSetAutomationVaults(address _owner) public {
+    automationVaultFactory.deployAutomationVault(_owner);
 
     assertEq(automationVaultFactory.automationVaults(0, 1)[0], address(automationVault));
   }
 
-  function testEmitDeployAutomationVault(address _owner, string calldata _organizationName) public {
+  function testEmitDeployAutomationVault(address _owner) public {
     vm.expectEmit();
-    emit DeployAutomationVault(_owner, _organizationName, address(automationVault));
+    emit DeployAutomationVault(_owner, address(automationVault));
 
-    automationVaultFactory.deployAutomationVault(_owner, _organizationName);
+    automationVaultFactory.deployAutomationVault(_owner);
   }
 
-  function testReturnAutomationVault(address _owner, string calldata _organizationName) public {
-    assertEq(address(automationVaultFactory.deployAutomationVault(_owner, _organizationName)), address(automationVault));
+  function testReturnAutomationVault(address _owner) public {
+    assertEq(address(automationVaultFactory.deployAutomationVault(_owner)), address(automationVault));
   }
 }

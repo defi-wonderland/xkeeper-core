@@ -19,8 +19,6 @@ contract AutomationVault is IAutomationVault {
   address public owner;
   /// @inheritdoc IAutomationVault
   address public pendingOwner;
-  /// @inheritdoc IAutomationVault
-  string public organizationName;
 
   /**
    * @notice Callers that are approved to call a relay
@@ -44,11 +42,9 @@ contract AutomationVault is IAutomationVault {
 
   /**
    * @param _owner The address of the owner
-   * @param _organizationName The name of the organization
    */
-  constructor(address _owner, string memory _organizationName) payable {
+  constructor(address _owner) payable {
     owner = _owner;
-    organizationName = _organizationName;
   }
 
   /// @inheritdoc IAutomationVault

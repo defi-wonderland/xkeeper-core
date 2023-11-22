@@ -93,8 +93,8 @@ contract IntegrationKeep3rRelay is CommonIntegrationTest {
     keep3rRelay.exec(automationVault, _execData);
   }
 
-  function test_executeAndGetPaymentFromKeep3r(uint64 _fee, uint64 _howHard) public {
-    vm.assume(_howHard > 20 && _howHard < 500);
+  function test_executeAndGetPaymentFromKeep3r(uint64 _fee, uint8 _howHard) public {
+    vm.assume(_howHard > 20);
     vm.assume(_fee > 1 && _fee < 400);
     vm.fee(_fee);
 
@@ -153,8 +153,8 @@ contract IntegrationKeep3rRelay is CommonIntegrationTest {
     keep3rBondedRelay.exec(automationVault, _execData);
   }
 
-  function test_executeBondAndGetPaymentFromKeep3r(uint64 _fee, uint64 _howHard) public {
-    vm.assume(_howHard > 20 && _howHard < 500);
+  function test_executeBondAndGetPaymentFromKeep3r(uint64 _fee, uint8 _howHard) public {
+    vm.assume(_howHard > 20);
     vm.assume(_fee > 1 && _fee < 400);
     vm.fee(_fee);
 

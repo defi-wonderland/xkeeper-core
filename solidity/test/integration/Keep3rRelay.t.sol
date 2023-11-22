@@ -144,6 +144,7 @@ contract IntegrationKeep3rRelay is CommonIntegrationTest {
     IAutomationVault.ExecData[] memory _execData = new IAutomationVault.ExecData[](1);
     _execData[0] = IAutomationVault.ExecData(address(basicJob), abi.encodeWithSelector(basicJob.work.selector));
 
+    emit KeeperValidation(0);
     vm.expectEmit(address(basicJob));
     emit Worked();
     vm.expectEmit(true, true, true, false, address(keep3r));

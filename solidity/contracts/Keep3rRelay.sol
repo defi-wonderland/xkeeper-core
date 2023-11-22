@@ -45,8 +45,6 @@ contract Keep3rRelay is IKeep3rRelay {
       jobData: abi.encodeWithSelector(IKeep3rV2.worked.selector, msg.sender)
     });
 
-    // Ensure that the caller is a valid keeper
-
     // Send the array of calls to the automation vault for it to execute them
     _automationVault.exec(msg.sender, _execDataKeep3r, new IAutomationVault.FeeData[](0));
 

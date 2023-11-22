@@ -1,34 +1,35 @@
 #!/bin/bash
 
 root_path="solidity/interfaces"
+excluded_path="external"
+
 # generate docs in a temporary directory
 temp_folder="technical-docs"
 FOUNDRY_PROFILE=docs forge doc --out "$temp_folder"
 
-# edit the SUMMARY after the Interfaces section
-# https://stackoverflow.com/questions/67086574/no-such-file-or-directory-when-using-sed-in-combination-with-find
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  sed -i '' -e '/Technical Documentation/q' docs/src/SUMMARY.md
-else
-  sed -i -e '/Technical Documentation/q' docs/src/SUMMARY.md
-fi
+# exclude the external folder from the generated docs
+find "$temp_folder/src/$root_path" -type d -name "$excluded_path" -exec rm -rf {} \;
 
-# copy the generated SUMMARY, from the tmp directory, without the first 5 lines
-# and paste them after the Interfaces section on the original SUMMARY
-tail -n +4 $temp_folder/src/SUMMARY.md >> docs/src/SUMMARY.md
+# Copy the generated SUMMARY, from the tmp directory
+tail -n +4 $temp_folder/src/SUMMARY.md >> docs/src/SUMMARY_TEMP.md
 
-# delete old generated interfaces docs
-rm -rf docs/src/$root_path
-# there are differences in cp and mv behavior between UNIX and macOS when it comes to non-existing directories
-# creating the directory to circumvent them
-mkdir -p docs/src/$root_path
-# move new generated interfaces docs from tmp to original directory
-cp -R $temp_folder/src/$root_path docs/src/solidity/
+# Remove the external docs from the SUMMARY
+(head -n 1 docs/src/SUMMARY_TEMP.md && tail -n +12 docs/src/SUMMARY_TEMP.md) >> docs/src/SUMMARY.md
+rm docs/src/SUMMARY_TEMP.md
 
-# delete tmp directory
-rm -rf $temp_folder
+# Delete old generated interfaces docs
+rm -rf "docs/src/$root_path"
 
-# function to replace text in all files (to fix the internal paths)
+# Creating the directory to circumvent differences in behavior between UNIX and macOS
+mkdir -p "docs/src/$root_path"
+
+# Move new generated interfaces docs from tmp to the original directory
+cp -R "$temp_folder/src/$root_path" "docs/src/solidity/"
+
+# Delete the tmp directory
+rm -rf "$temp_folder"
+
+# Function to replace text in all files (to fix the internal paths)
 replace_text() {
     for file in "$1"/*; do
         if [ -f "$file" ]; then
@@ -43,8 +44,11 @@ replace_text() {
     done
 }
 
-# path to the base folder
+# Path to the base folder
 base_folder="docs/src/$root_path"
 
-# calling the function to fix the paths
+# Call the function to fix the paths
 replace_text "$base_folder"
+
+# Remove the external docs from the README
+perl -i -ne 'print if $. != 4' docs/src/solidity/interfaces/README.md

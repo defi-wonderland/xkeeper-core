@@ -99,6 +99,13 @@ interface IAutomationVault {
     address indexed _relay, address indexed _relayCaller, address indexed _feeRecipient, address _feeToken, uint256 _fee
   );
 
+  /**
+   * @notice Emitted when ETH is received in the automation vault
+   * @param  _sender The sender address
+   * @param  _amount The amount of ETH
+   */
+  event ETHReceived(address indexed _sender, uint256 _amount);
+
   /*///////////////////////////////////////////////////////////////
                               ERRORS
   //////////////////////////////////////////////////////////////*/
@@ -176,12 +183,6 @@ interface IAutomationVault {
    * @return _pendingOwner The address of the pending owner
    */
   function pendingOwner() external view returns (address _pendingOwner);
-
-  /**
-   * @notice Returns the organization name
-   * @return _organizationName The name of the organization
-   */
-  function organizationName() external view returns (string calldata _organizationName);
 
   /**
    * @notice Returns the approved relay callers for a specific relay

@@ -58,12 +58,10 @@ contract UnitAutomationVaultFactoryGetTotalAutomationVaults is AutomationVaultFa
 }
 
 contract UnitAutomationVaultFactoryGetAutomationVaults is AutomationVaultFactoryUnitTest {
-  modifier happyPath(address[] memory _automationVaults, uint256 _startFrom, uint256 _automationVaultAmount) {
-    vm.assume(_automationVaults.length > 0);
-
+  modifier happyPath(address[] memory _automationVaults, uint256 _startFrom, uint256 _amount) {
     // Avoid underflow
     vm.assume(_startFrom < _automationVaults.length);
-    vm.assume(_automationVaultAmount < _automationVaults.length - _startFrom);
+    vm.assume(_amount < _automationVaults.length - _startFrom);
 
     automationVaultFactory.addAutomationVaultForTest(_automationVaults);
     _;

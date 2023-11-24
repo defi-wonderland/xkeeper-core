@@ -8,6 +8,7 @@ import {AutomationVault, IAutomationVault} from '@contracts/AutomationVault.sol'
 import {OpenRelay, IOpenRelay} from '@contracts/OpenRelay.sol';
 import {GelatoRelay, IGelatoRelay} from '@contracts/GelatoRelay.sol';
 import {Keep3rRelay, IKeep3rRelay} from '@contracts/Keep3rRelay.sol';
+import {Keep3rBondedRelay, IKeep3rBondedRelay} from '@contracts/Keep3rBondedRelay.sol';
 
 abstract contract Deploy is Script {
   // Deployer EOA
@@ -22,21 +23,22 @@ abstract contract Deploy is Script {
   IOpenRelay public openRelay;
   IGelatoRelay public gelatoRelay;
   IKeep3rRelay public keep3rRelay;
+  IKeep3rBondedRelay public keep3rBondedRelay;
 
   // AutomationVault params
   address public owner;
-  string public organizationName;
 
   function run() public {
     deployer = vm.rememberKey(_deployerPk);
     vm.startBroadcast(deployer);
 
     automationVaultFactory = new AutomationVaultFactory();
-    automationVault = automationVaultFactory.deployAutomationVault(owner, organizationName);
+    automationVault = automationVaultFactory.deployAutomationVault(owner);
 
     openRelay = new OpenRelay();
     gelatoRelay = new GelatoRelay();
     keep3rRelay = new Keep3rRelay();
+    keep3rBondedRelay = new Keep3rBondedRelay();
 
     vm.stopBroadcast();
   }
@@ -49,7 +51,6 @@ contract DeployMainnet is Deploy {
 
     // AutomationVault setup
     owner = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    organizationName = 'MainnetOrg';
   }
 }
 
@@ -60,6 +61,5 @@ contract DeployGoerli is Deploy {
 
     // AutomationVault setup
     owner = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    organizationName = 'GoerliOrg';
   }
 }

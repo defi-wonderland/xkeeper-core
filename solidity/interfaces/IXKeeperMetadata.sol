@@ -11,9 +11,10 @@ interface IXKeeperMetadata {
   /**
    * @notice Emitted when the description of an automation vault is set
    * @param  _automationVault The automation vault
+   * @param  _name The name of the automation vault
    * @param  _description The description of the automation vault
    */
-  event AutomationVaultMetadataSetted(IAutomationVault indexed _automationVault, string _description);
+  event AutomationVaultMetadataSetted(IAutomationVault indexed _automationVault, string _name, string _description);
 
   /*///////////////////////////////////////////////////////////////
                           ERRORS
@@ -25,18 +26,33 @@ interface IXKeeperMetadata {
   error XKeeperMetadata_OnlyAutomationVaultOwner();
 
   /*///////////////////////////////////////////////////////////////
+                          STRUCTS
+  //////////////////////////////////////////////////////////////*/
+
+  /**
+   * @notice The metadata of the automation vault
+   * @param  _name The name of the automation vault
+   * @param  _description The description of the automation vault
+   */
+  struct AutomationVaultMetadata {
+    string name;
+    string description;
+  }
+
+  /*///////////////////////////////////////////////////////////////
                           VIEW FUNCTIONS
   //////////////////////////////////////////////////////////////*/
 
   /**
    * @notice Returns the description of the automation vault
    * @param  _automationVault The automation vault
-   * @return _description The description of the automation vault
+   * @return _name The description and the name of the automation vault
+   * @return _description The description and the name of the automation vault
    */
   function automationVaultMetadata(IAutomationVault _automationVault)
     external
     view
-    returns (string calldata _description);
+    returns (string calldata _name, string calldata _description);
 
   /*///////////////////////////////////////////////////////////////
                           EXTERNAL FUNCTIONS
@@ -45,7 +61,10 @@ interface IXKeeperMetadata {
   /**
    * @notice Sets the description of the automation vault
    * @param  _automationVault The automation vault
-   * @param  _description The description of the automation vault
+   * @param _automationVaultMetadata The metadata of the automation vault
    */
-  function setAutomationVaultMetadata(IAutomationVault _automationVault, string calldata _description) external;
+  function setAutomationVaultMetadata(
+    IAutomationVault _automationVault,
+    AutomationVaultMetadata calldata _automationVaultMetadata
+  ) external;
 }

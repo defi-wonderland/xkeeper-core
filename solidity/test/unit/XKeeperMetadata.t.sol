@@ -10,7 +10,7 @@ import {IXKeeperMetadata, XKeeperMetadata, IAutomationVault} from '@contracts/XK
  */
 contract XKeeperMetadataUnitTest is Test {
   // Events
-  event AutomationVaultMetadataSetted(IAutomationVault indexed _automationVault, string _description);
+  event AutomationVaultMetadataSetted(IAutomationVault indexed _automationVault, string _name, string _description);
 
   // XKeeperMetadata contract
   XKeeperMetadata public xKeeperMetadata;
@@ -25,38 +25,44 @@ contract XKeeperMetadataUnitTest is Test {
 }
 
 contract UnitXKeeperMetadataSetAutomationVaultMetadata is XKeeperMetadataUnitTest {
-  modifier happyPath(IAutomationVault _automationVault, string calldata _description) {
+  modifier happyPath(IAutomationVault _automationVault) {
     vm.mockCall(address(_automationVault), abi.encodeWithSelector(IAutomationVault.owner.selector), abi.encode(owner));
     vm.startPrank(owner);
     _;
   }
 
-  function testRevertInlyAutomationVaultOwner(
+  function testRevertOnlyAutomationVaultOwner(
     IAutomationVault _automationVault,
-    string calldata _description
-  ) public happyPath(_automationVault, _description) {
+    IXKeeperMetadata.AutomationVaultMetadata calldata _automationVaultMetadata,
+    address _newOwner
+  ) public happyPath(_automationVault) {
+    vm.assume(_newOwner != owner);
     vm.expectRevert(IXKeeperMetadata.XKeeperMetadata_OnlyAutomationVaultOwner.selector);
 
-    changePrank(makeAddr('NotOwner'));
-    xKeeperMetadata.setAutomationVaultMetadata(_automationVault, _description);
+    changePrank(_newOwner);
+    xKeeperMetadata.setAutomationVaultMetadata(_automationVault, _automationVaultMetadata);
   }
 
   function testSetAutomationVaultMetadata(
     IAutomationVault _automationVault,
-    string calldata _description
-  ) public happyPath(_automationVault, _description) {
-    xKeeperMetadata.setAutomationVaultMetadata(_automationVault, _description);
+    IXKeeperMetadata.AutomationVaultMetadata calldata _automationVaultMetadata
+  ) public happyPath(_automationVault) {
+    xKeeperMetadata.setAutomationVaultMetadata(_automationVault, _automationVaultMetadata);
+    (string memory _name, string memory _description) = xKeeperMetadata.automationVaultMetadata(_automationVault);
 
-    assertEq(xKeeperMetadata.automationVaultMetadata(_automationVault), _description);
+    assertEq(_name, _automationVaultMetadata.name);
+    assertEq(_description, _automationVaultMetadata.description);
   }
 
   function testEmitAutomationVaultMetadataSetted(
     IAutomationVault _automationVault,
-    string calldata _description
-  ) public happyPath(_automationVault, _description) {
+    IXKeeperMetadata.AutomationVaultMetadata calldata _automationVaultMetadata
+  ) public happyPath(_automationVault) {
     vm.expectEmit();
-    emit AutomationVaultMetadataSetted(_automationVault, _description);
+    emit AutomationVaultMetadataSetted(
+      _automationVault, _automationVaultMetadata.name, _automationVaultMetadata.description
+    );
 
-    xKeeperMetadata.setAutomationVaultMetadata(_automationVault, _description);
+    xKeeperMetadata.setAutomationVaultMetadata(_automationVault, _automationVaultMetadata);
   }
 }

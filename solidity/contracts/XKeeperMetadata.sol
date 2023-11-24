@@ -11,16 +11,22 @@ import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
 
 contract XKeeperMetadata is IXKeeperMetadata {
   /// @inheritdoc IXKeeperMetadata
-  mapping(IAutomationVault _automationVault => string _description) public automationVaultMetadata;
+  mapping(IAutomationVault _automationVault => IXKeeperMetadata.AutomationVaultMetadata _automationVaultMetadata) public
+    automationVaultMetadata;
 
   /// @inheritdoc IXKeeperMetadata
-  function setAutomationVaultMetadata(IAutomationVault _automationVault, string calldata _description) external {
+  function setAutomationVaultMetadata(
+    IAutomationVault _automationVault,
+    IXKeeperMetadata.AutomationVaultMetadata calldata _automationVaultMetadata
+  ) external {
     // Check if the caller is the owner of the automation vault
     if (_automationVault.owner() != msg.sender) {
       revert XKeeperMetadata_OnlyAutomationVaultOwner();
     }
 
-    automationVaultMetadata[_automationVault] = _description;
-    emit AutomationVaultMetadataSetted(_automationVault, _description);
+    automationVaultMetadata[_automationVault] = _automationVaultMetadata;
+    emit AutomationVaultMetadataSetted(
+      _automationVault, _automationVaultMetadata.name, _automationVaultMetadata.description
+    );
   }
 }

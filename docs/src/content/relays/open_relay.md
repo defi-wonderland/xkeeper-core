@@ -18,4 +18,4 @@ The `OpenRelay` is designed to manage and facilitate the execution of tasks comi
 - `GAS_MULTIPLIER`: 12,000
 - `BASE`: 10,000
 
-These gas metrics play a vital role in optimizing gas costs during task execution.
+These gas metrics play a vital role in paying the caller for the work performed.

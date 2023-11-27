@@ -1,4 +1,4 @@
-# Prophet Core
+# XKeeper Core
 
 [License: AGPL-3.0](https://github.com/defi-wonderland/xkeeper-core/blob/main/LICENSE)
 
@@ -6,22 +6,22 @@
 
 ## Overview
 
-XKeeper is a public good for on-chain automation. It should be very easy to create a job which can be run both by Keep3r, Gelato, Autonolas, or any other keeper out there. We have also deployed compatible relays to ensure seamless integration, but Keep3r Frameworks is designed to work with any keeper of your choice, providing you with the flexibility to select the one that best suits your needs.
+XKeeper is a public good for on-chain automation. It should be very easy to create a job which can be run both by Keep3r, Gelato, Autonolas, or any other keeper out there. We have also deployed compatible relays to ensure seamless integration, but XKeeper is designed to work with any keeper of your choice, providing you with the flexibility to select the one that best suits your needs.
 
 ## Setup
 
 This project uses [Foundry](https://book.getfoundry.sh/). To build it locally, run:
 
 ```sh
-git clone git@github.com:defi-wonderland/prophet-core.git
-cd keep3r-framework-core
+git clone git@github.com:defi-wonderland/xkeeper-core.git
+cd xkeeper-core
 yarn install
 yarn build
 ```
 
 ### Available Commands
 
-Make sure to set `MAINNET_RPC` environment variable before running end-to-end tests.
+Make sure to set `MAINNET_RPC` environment variable before running integration tests.
 
 | Yarn Command            | Description                                                                                      |
 | ----------------------- | ------------------------------------------------------------------------------------------------ |
@@ -38,7 +38,7 @@ Make sure to set `MAINNET_RPC` environment variable before running end-to-end te
 
 ## Licensing
 
-The primary license for Keep3r Framework contracts is MIT, see [`LICENSE`](./LICENSE).
+The primary license for XKeeper contracts is AGPL-3.0, see [`LICENSE`](./LICENSE).
 
 ## Contributors
 

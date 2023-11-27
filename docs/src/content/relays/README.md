@@ -14,6 +14,6 @@ Relay contracts in the XKeeper project play a key role in facilitating automated
 
 For more detailed information about each contract, please refer to the respective documentation pages.
 
-For more technical details about the interfaces of the core contracts, please refer to the `Interfaces` section in the technical documentation.
+For more technical details about the interfaces of the relays contracts, please refer to the `Interfaces` section in the technical documentation.
 
 ⚠️ Please note that the code has not been audited yet, so use it with caution.

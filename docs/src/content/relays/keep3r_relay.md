@@ -6,7 +6,7 @@ The `Keep3rRelay` is meticulously crafted to orchestrate and streamline task exe
 
 - **Task Coordination**: The contract seamlessly coordinates task executions with an `AutomationVault`, ensuring a harmonious and streamlined automation process.
 
-- **Keeper Authorization**: Validation mechanisms guarantee that only authorized Keepers within the Keep3r network can initiate and execute tasks, enhancing security and control.
+- **Keeper Authorization**: Validation mechanisms guarantee that only authorized keepers within the Keep3r network can initiate and execute tasks, enhancing security and control.
 
 - **Optimized Execution Array**: The contract intelligently creates an array of executions, encompassing crucial steps such as keeper validation, injected execution data, and issuance of payments upon successful task completion.
 

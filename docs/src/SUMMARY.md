@@ -21,12 +21,12 @@
   - [OpenRelay](content/relays/open_relay.md)
 
 # Technical Documentation
-
-- [❱ interfaces](solidity/interfaces/README.md)
-  - [❱ core](solidity/interfaces/core/README.md)
-    - [IAutomationVault](solidity/interfaces/core/IAutomationVault.sol/interface.IAutomationVault.md)
-    - [IAutomationVaultFactory](solidity/interfaces/core/IAutomationVaultFactory.sol/interface.IAutomationVaultFactory.md)
-  - [❱ relays](solidity/interfaces/relays/README.md)
-    - [IGelatoRelay](solidity/interfaces/relays/IGelatoRelay.sol/interface.IGelatoRelay.md)
-    - [IKeep3rRelay](solidity/interfaces/relays/IKeep3rRelay.sol/interface.IKeep3rRelay.md)
-    - [IOpenRelay](solidity/interfaces/relays/IOpenRelay.sol/interface.IOpenRelay.md)
+  - [❱ interfaces](solidity/interfaces/README.md)
+    - [❱ core](solidity/interfaces/core/README.md)
+      - [IAutomationVault](solidity/interfaces/core/IAutomationVault.sol/interface.IAutomationVault.md)
+      - [IAutomationVaultFactory](solidity/interfaces/core/IAutomationVaultFactory.sol/interface.IAutomationVaultFactory.md)
+    - [❱ relays](solidity/interfaces/relays/README.md)
+      - [IGelatoRelay](solidity/interfaces/relays/IGelatoRelay.sol/interface.IGelatoRelay.md)
+      - [IKeep3rBondedRelay](solidity/interfaces/relays/IKeep3rBondedRelay.sol/interface.IKeep3rBondedRelay.md)
+      - [IKeep3rRelay](solidity/interfaces/relays/IKeep3rRelay.sol/interface.IKeep3rRelay.md)
+      - [IOpenRelay](solidity/interfaces/relays/IOpenRelay.sol/interface.IOpenRelay.md)

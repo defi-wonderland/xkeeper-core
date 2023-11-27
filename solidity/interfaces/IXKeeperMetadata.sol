@@ -9,7 +9,7 @@ interface IXKeeperMetadata {
   //////////////////////////////////////////////////////////////*/
 
   /**
-   * @notice Emitted when the description of an automation vault is set
+   * @notice Emitted when the metadata of an automation vault is set
    * @param  _automationVault The automation vault
    * @param  _name The name of the automation vault
    * @param  _description The description of the automation vault
@@ -44,22 +44,38 @@ interface IXKeeperMetadata {
   //////////////////////////////////////////////////////////////*/
 
   /**
-   * @notice Returns the description of the automation vault
+   * @notice Returns the list of automation vaults that have metadata
+   * @return __automationVaults The list of automation vaults
+   */
+  function automationVaults() external view returns (address[] memory __automationVaults);
+
+  /**
+   * @notice Returns the metadata of the automation vault
    * @param  _automationVault The automation vault
-   * @return _name The description and the name of the automation vault
-   * @return _description The description and the name of the automation vault
+   * @return _name The name of the automation vault
+   * @return _description The description of the automation vault
    */
   function automationVaultMetadata(IAutomationVault _automationVault)
     external
     view
     returns (string calldata _name, string calldata _description);
 
+  /**
+   * @notice Returns the metadata of the automation vault
+   * @param  _automationVault The automation vaults
+   * @return _metadata The metadata of the automation vault
+   */
+  function automationVaultsMetadata(IAutomationVault[] calldata _automationVault)
+    external
+    view
+    returns (IXKeeperMetadata.AutomationVaultMetadata[] memory _metadata);
+
   /*///////////////////////////////////////////////////////////////
                           EXTERNAL FUNCTIONS
   //////////////////////////////////////////////////////////////*/
 
   /**
-   * @notice Sets the description of the automation vault
+   * @notice Sets the metadata of the automation vault
    * @param  _automationVault The automation vault
    * @param _automationVaultMetadata The metadata of the automation vault
    */

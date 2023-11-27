@@ -3,7 +3,24 @@ pragma solidity 0.8.19;
 
 import {Test} from 'forge-std/Test.sol';
 
-import {IXKeeperMetadata, XKeeperMetadata, IAutomationVault} from '@contracts/XKeeperMetadata.sol';
+import {IXKeeperMetadata, XKeeperMetadata, IAutomationVault, EnumerableSet} from '@contracts/XKeeperMetadata.sol';
+
+contract XKeeperMetadataForTest is XKeeperMetadata {
+  using EnumerableSet for EnumerableSet.AddressSet;
+
+  // This is needed because foundry fuzz some values which are repeated
+  EnumerableSet.AddressSet internal _cleanAutomationVaults;
+
+  function addMetadataForTest(
+    IAutomationVault[] calldata _automationVaults,
+    IXKeeperMetadata.AutomationVaultMetadata[] calldata _automationVaultMetadata
+  ) public {
+    for (uint256 _index; _index < _automationVaultMetadata.length; _index++) {
+      automationVaultMetadata[IAutomationVault(_automationVaults[_index])] = _automationVaultMetadata[_index];
+      _cleanAutomationVaults.add(address(_automationVaults[_index]));
+    }
+  }
+}
 
 /**
  * @title XKeeperMetadata Unit tests
@@ -13,14 +30,44 @@ contract XKeeperMetadataUnitTest is Test {
   event AutomationVaultMetadataSetted(IAutomationVault indexed _automationVault, string _name, string _description);
 
   // XKeeperMetadata contract
-  XKeeperMetadata public xKeeperMetadata;
+  XKeeperMetadataForTest public xKeeperMetadata;
 
   // EOAs
   address public owner;
 
   function setUp() public virtual {
-    xKeeperMetadata = new XKeeperMetadata();
+    xKeeperMetadata = new XKeeperMetadataForTest();
     owner = makeAddr('Owner');
+  }
+}
+
+contract UnitXKeeperMetadataGetMetadata is XKeeperMetadataUnitTest {
+  using EnumerableSet for EnumerableSet.AddressSet;
+
+  // This is needed because foundry fuzz some values which are repeated
+  EnumerableSet.AddressSet internal _cleanAutomationVaults;
+
+  modifier happyPath(
+    IAutomationVault[] calldata _automationVaults,
+    IXKeeperMetadata.AutomationVaultMetadata[] calldata _metadata
+  ) {
+    vm.assume(_automationVaults.length > 0 && _automationVaults.length < 30);
+    vm.assume(_automationVaults.length > _metadata.length);
+
+    xKeeperMetadata.addMetadataForTest(_automationVaults, _metadata);
+
+    _;
+  }
+
+  function testGetMetadataFromAutomationVault(
+    IAutomationVault[] calldata _automationVaults,
+    IXKeeperMetadata.AutomationVaultMetadata[] calldata _metadata
+  ) public happyPath(_automationVaults, _metadata) {
+    // Get the metadata from the contract
+    IXKeeperMetadata.AutomationVaultMetadata[] memory _getMetadata =
+      xKeeperMetadata.automationVaultsMetadata(_automationVaults);
+
+    assertEq(_getMetadata.length, _automationVaults.length);
   }
 }
 

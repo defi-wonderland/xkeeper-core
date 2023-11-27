@@ -42,11 +42,6 @@ contract XKeeperMetadataUnitTest is Test {
 }
 
 contract UnitXKeeperMetadataGetMetadata is XKeeperMetadataUnitTest {
-  using EnumerableSet for EnumerableSet.AddressSet;
-
-  // This is needed because foundry fuzz some values which are repeated
-  EnumerableSet.AddressSet internal _cleanAutomationVaults;
-
   modifier happyPath(
     IAutomationVault[] calldata _automationVaults,
     IXKeeperMetadata.AutomationVaultMetadata[] calldata _metadata

@@ -11,7 +11,7 @@ contract AutomationVaultForTest is AutomationVault {
   using EnumerableSet for EnumerableSet.AddressSet;
   using EnumerableSet for EnumerableSet.Bytes32Set;
 
-  constructor(address _owner, string memory _organizationName) AutomationVault(_owner, _organizationName) {}
+  constructor(address _owner) AutomationVault(_owner) {}
 
   function setPendingOwnerForTest(address _pendingOwner) public {
     pendingOwner = _pendingOwner;
@@ -69,14 +69,12 @@ abstract contract AutomationVaultUnitTest is Test {
   address public receiver;
 
   // Data
-  string public organizationName;
   bytes4 public jobSelector;
   bytes public jobData;
 
   function setUp() public virtual {
-    organizationName = 'TestOrg';
     jobSelector = bytes4(keccak256('jobSelector()'));
-    jobData = abi.encodeWithSelector(jobSelector, organizationName);
+    jobData = abi.encodeWithSelector(jobSelector, owner);
 
     owner = makeAddr('Owner');
     pendingOwner = makeAddr('PendingOwner');
@@ -87,7 +85,7 @@ abstract contract AutomationVaultUnitTest is Test {
     relay = makeAddr('Relay');
     relayCaller = makeAddr('RelayCaller');
 
-    automationVault = new AutomationVaultForTest(owner, organizationName);
+    automationVault = new AutomationVaultForTest(owner);
   }
 
   function _mockTokenTransfer(address _token) internal {
@@ -98,7 +96,6 @@ abstract contract AutomationVaultUnitTest is Test {
 contract UnitAutomationVaultConstructor is AutomationVaultUnitTest {
   function testParamsAreSet() public {
     assertEq(automationVault.owner(), owner);
-    assertEq(automationVault.organizationName(), organizationName);
   }
 }
 

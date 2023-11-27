@@ -32,9 +32,9 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
     CommonIntegrationTest.setUp();
 
     // Gelato setup
-    automate = IAutomate(_AUTOMATE);
+    automate = _AUTOMATE;
     gelato = IGelato(automate.gelato());
-    opsProxyFactory = IOpsProxyFactory(_OPS_PROXY_FACTORY);
+    opsProxyFactory = _OPS_PROXY_FACTORY;
 
     taskId = _createTask(owner);
 
@@ -72,7 +72,7 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
     (_dedicatedMsgSender,) = opsProxyFactory.getProxyOf(_account);
   }
 
-  function test_execute_job_gelato() public {
+  function test_executeJobGelato() public {
     IAutomationVault.ExecData[] memory _execData = new IAutomationVault.ExecData[](1);
     _execData[0] = IAutomationVault.ExecData(address(basicJob), abi.encodeWithSelector(basicJob.work.selector));
 
@@ -80,7 +80,7 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
     _feeData[0] = IAutomationVault.FeeData(bot, _ETH, 1 ether);
 
     bytes memory _execDataAutomate =
-      abi.encodeWithSelector(gelatoRelay.exec.selector, address(automationVault), _execData, _feeData);
+      abi.encodeWithSelector(gelatoRelay.exec.selector, automationVault, _execData, _feeData);
 
     LibDataTypes.ModuleData memory _moduleData = _createModuleData();
 
@@ -92,7 +92,7 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
     automate.exec(owner, address(gelatoRelay), _execDataAutomate, _moduleData, 1 ether, _ETH, false, true);
   }
 
-  function test_issue_payment_gelato(uint16 _howHard) public {
+  function test_executeAndGetPaymentFromGelato(uint16 _howHard) public {
     vm.assume(_howHard <= 1000);
 
     assertEq(bot.balance, 0);
@@ -105,7 +105,7 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
     _feeData[0] = IAutomationVault.FeeData(bot, _ETH, 1 ether);
 
     bytes memory _execDataAutomate =
-      abi.encodeWithSelector(gelatoRelay.exec.selector, address(automationVault), _execData, _feeData);
+      abi.encodeWithSelector(gelatoRelay.exec.selector, automationVault, _execData, _feeData);
 
     LibDataTypes.ModuleData memory _moduleData = _createModuleData();
 

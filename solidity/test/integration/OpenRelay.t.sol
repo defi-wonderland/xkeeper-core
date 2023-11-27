@@ -24,17 +24,17 @@ contract IntegrationOpenRelay is CommonIntegrationTest {
     changePrank(bot);
   }
 
-  function test_execute_job() public {
+  function test_executeJobOpenRelay() public {
     IAutomationVault.ExecData[] memory _execData = new IAutomationVault.ExecData[](1);
     _execData[0] = IAutomationVault.ExecData(address(basicJob), abi.encodeWithSelector(basicJob.work.selector));
 
     vm.expectEmit(address(basicJob));
     emit Worked();
 
-    openRelay.exec(address(automationVault), _execData, bot);
+    openRelay.exec(automationVault, _execData, bot);
   }
 
-  function test_issue_payment(uint16 _howHard) public {
+  function test_executeBondAndGetPayment(uint16 _howHard) public {
     vm.assume(_howHard <= 1000);
 
     assertEq(bot.balance, 0);
@@ -44,7 +44,7 @@ contract IntegrationOpenRelay is CommonIntegrationTest {
       IAutomationVault.ExecData(address(basicJob), abi.encodeWithSelector(basicJob.workHard.selector, _howHard));
 
     uint256 _gasBeforeExec = gasleft();
-    openRelay.exec(address(automationVault), _execData, bot);
+    openRelay.exec(automationVault, _execData, bot);
     uint256 _gasAfterExec = gasleft();
 
     uint256 _txCost = (_gasBeforeExec - _gasAfterExec) * block.basefee;

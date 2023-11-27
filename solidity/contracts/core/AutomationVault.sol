@@ -19,8 +19,6 @@ contract AutomationVault is IAutomationVault {
   address public owner;
   /// @inheritdoc IAutomationVault
   address public pendingOwner;
-  /// @inheritdoc IAutomationVault
-  string public organizationName;
 
   /**
    * @notice Callers that are approved to call a relay
@@ -44,11 +42,9 @@ contract AutomationVault is IAutomationVault {
 
   /**
    * @param _owner The address of the owner
-   * @param _organizationName The name of the organization
    */
-  constructor(address _owner, string memory _organizationName) payable {
+  constructor(address _owner) payable {
     owner = _owner;
-    organizationName = _organizationName;
   }
 
   /// @inheritdoc IAutomationVault
@@ -86,6 +82,7 @@ contract AutomationVault is IAutomationVault {
 
   /// @inheritdoc IAutomationVault
   function withdrawFunds(address _token, uint256 _amount, address _receiver) external payable onlyOwner {
+    // If the token is ETH, transfer the funds to the receiver, otherwise transfer the tokens
     if (_token == _ETH) {
       (bool _success,) = _receiver.call{value: _amount}('');
       if (!_success) revert AutomationVault_ETHTransferFailed();
@@ -93,16 +90,21 @@ contract AutomationVault is IAutomationVault {
       IERC20(_token).safeTransfer(_receiver, _amount);
     }
 
+    // Emit the event
     emit WithdrawFunds(_token, _amount, _receiver);
   }
 
   /// @inheritdoc IAutomationVault
   function approveRelayCallers(address _relay, address[] calldata _callers) external onlyOwner {
+    // Get the list of enabled callers for the relay
     EnumerableSet.AddressSet storage _enabledCallers = _relayEnabledCallers[_relay];
+
+    // If the relay is not approved, add it to the list of relays
     if (_relays.add(_relay)) {
       emit ApproveRelay(_relay);
     }
 
+    // Iterate over the callers to approve them
     for (uint256 _i; _i < _callers.length;) {
       if (_enabledCallers.add(_callers[_i])) {
         emit ApproveRelayCaller(_relay, _callers[_i]);
@@ -116,8 +118,10 @@ contract AutomationVault is IAutomationVault {
 
   /// @inheritdoc IAutomationVault
   function revokeRelayCallers(address _relay, address[] calldata _callers) external onlyOwner {
+    // Get the list of enabled callers for the relay
     EnumerableSet.AddressSet storage _enabledCallers = _relayEnabledCallers[_relay];
 
+    // Iterate over the callers to revoke them
     for (uint256 _i; _i < _callers.length;) {
       if (_enabledCallers.remove(_callers[_i])) {
         emit RevokeRelayCaller(_relay, _callers[_i]);
@@ -128,6 +132,7 @@ contract AutomationVault is IAutomationVault {
       }
     }
 
+    // If the relay has no more callers, remove it from the list of relays
     if (_enabledCallers.length() == 0) {
       _relays.remove(_relay);
       emit RevokeRelay(_relay);
@@ -136,11 +141,15 @@ contract AutomationVault is IAutomationVault {
 
   /// @inheritdoc IAutomationVault
   function approveJobSelectors(address _job, bytes4[] calldata _functionSelectors) external onlyOwner {
+    // Get the list of enabled selectors for the job
     EnumerableSet.Bytes32Set storage _enabledSelectors = _jobEnabledSelectors[_job];
+
+    // If the job is not approved, add it to the list of jobs
     if (_jobs.add(_job)) {
       emit ApproveJob(_job);
     }
 
+    // Iterate over the selectors to approve them
     for (uint256 _i; _i < _functionSelectors.length;) {
       if (_enabledSelectors.add(_functionSelectors[_i])) {
         emit ApproveJobSelector(_job, _functionSelectors[_i]);
@@ -154,8 +163,10 @@ contract AutomationVault is IAutomationVault {
 
   /// @inheritdoc IAutomationVault
   function revokeJobSelectors(address _job, bytes4[] calldata _functionSelectors) external onlyOwner {
+    // Get the list of enabled selectors for the job
     EnumerableSet.Bytes32Set storage _enabledSelectors = _jobEnabledSelectors[_job];
 
+    // Iterate over the selectors to revoke them
     for (uint256 _i; _i < _functionSelectors.length;) {
       if (_enabledSelectors.remove(_functionSelectors[_i])) {
         emit RevokeJobSelector(_job, _functionSelectors[_i]);
@@ -166,6 +177,7 @@ contract AutomationVault is IAutomationVault {
       }
     }
 
+    // If the job has no more selectors, remove it from the list of jobs
     if (_enabledSelectors.length() == 0) {
       _jobs.remove(_job);
       emit RevokeJob(_job);
@@ -174,24 +186,29 @@ contract AutomationVault is IAutomationVault {
 
   /// @inheritdoc IAutomationVault
   function exec(address _relayCaller, ExecData[] calldata _execData, FeeData[] calldata _feeData) external payable {
+    // Check that the specific caller is approved to call the relay
     if (!_relayEnabledCallers[msg.sender].contains(_relayCaller) && !_relayEnabledCallers[msg.sender].contains(_NULL)) {
       revert AutomationVault_NotApprovedRelayCaller();
     }
 
+    // Create the exec data needed variables
     ExecData memory _execDatum;
     uint256 _dataLength = _execData.length;
     uint256 _i;
     bool _success;
 
+    // Iterate over the exec data to execute the jobs
     for (_i; _i < _dataLength;) {
       _execDatum = _execData[_i];
 
+      // Check that the selector is approved to be called
       if (!_jobEnabledSelectors[_execDatum.job].contains(bytes4(_execDatum.jobData))) {
         revert AutomationVault_NotApprovedJobSelector();
       }
       (_success,) = _execDatum.job.call(_execDatum.jobData);
       if (!_success) revert AutomationVault_ExecFailed();
 
+      // Emit the event
       emit JobExecuted(msg.sender, _relayCaller, _execDatum.job, _execDatum.jobData);
 
       unchecked {
@@ -199,13 +216,16 @@ contract AutomationVault is IAutomationVault {
       }
     }
 
+    // Create the fee data needed variables
     FeeData memory _feeDatum;
     _dataLength = _feeData.length;
     _i = 0;
 
+    // Iterate over the fee data to issue the payments
     for (_i; _i < _dataLength;) {
       _feeDatum = _feeData[_i];
 
+      // If the token is ETH, transfer the funds to the receiver, otherwise transfer the tokens
       if (_feeDatum.feeToken == _ETH) {
         (_success,) = _feeDatum.feeRecipient.call{value: _feeDatum.fee}('');
         if (!_success) revert AutomationVault_ETHTransferFailed();
@@ -213,6 +233,7 @@ contract AutomationVault is IAutomationVault {
         IERC20(_feeDatum.feeToken).safeTransfer(_feeDatum.feeRecipient, _feeDatum.fee);
       }
 
+      // Emit the event
       emit IssuePayment(msg.sender, _relayCaller, _feeDatum.feeRecipient, _feeDatum.feeToken, _feeDatum.fee);
 
       unchecked {
@@ -239,5 +260,10 @@ contract AutomationVault is IAutomationVault {
     _;
   }
 
-  receive() external payable {}
+  /**
+   * @notice Fallback function to receive ETH
+   */
+  receive() external payable {
+    emit ETHReceived(msg.sender, msg.value);
+  }
 }

@@ -47,19 +47,19 @@ contract UnitOpenRelayConstructor is OpenRelayUnitTest {
 }
 
 contract UnitOpenRelayExec is OpenRelayUnitTest {
-  modifier happyPath(address _automationVault, IAutomationVault.ExecData[] memory _execData) {
+  modifier happyPath(IAutomationVault _automationVault, IAutomationVault.ExecData[] memory _execData) {
     vm.assume(_execData.length > 0);
 
-    assumeNoPrecompiles(_automationVault);
-    vm.assume(_automationVault != address(vm));
-    vm.mockCall(_automationVault, abi.encodeWithSelector(IAutomationVault.exec.selector), abi.encode());
+    assumeNoPrecompiles(address(_automationVault));
+    vm.assume(address(_automationVault) != address(vm));
+    vm.mockCall(address(_automationVault), abi.encodeWithSelector(IAutomationVault.exec.selector), abi.encode());
 
     vm.startPrank(relayCaller);
     _;
   }
 
   function testRevertIfNoExecData(
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] memory _execData,
     address _feeRecipient
   ) public happyPath(_automationVault, _execData) {
@@ -71,12 +71,12 @@ contract UnitOpenRelayExec is OpenRelayUnitTest {
   }
 
   function testCallAutomationVaultExecJobFunction(
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] memory _execData,
     address _feeRecipient
   ) public happyPath(_automationVault, _execData) {
     vm.expectCall(
-      _automationVault,
+      address(_automationVault),
       abi.encodeCall(IAutomationVault.exec, (relayCaller, _execData, new IAutomationVault.FeeData[](0))),
       1
     );
@@ -85,7 +85,7 @@ contract UnitOpenRelayExec is OpenRelayUnitTest {
   }
 
   function testCallAutomationVaultExecIssuePayment(
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] memory _execData,
     address _feeRecipient
   ) public happyPath(_automationVault, _execData) {
@@ -93,7 +93,7 @@ contract UnitOpenRelayExec is OpenRelayUnitTest {
     _feeData[0] = IAutomationVault.FeeData(_feeRecipient, _ETH, 0);
 
     vm.expectCall(
-      _automationVault,
+      address(_automationVault),
       abi.encodeCall(IAutomationVault.exec, (relayCaller, new IAutomationVault.ExecData[](0), _feeData)),
       1
     );
@@ -102,7 +102,7 @@ contract UnitOpenRelayExec is OpenRelayUnitTest {
   }
 
   function testEmitAutomationVaultExecuted(
-    address _automationVault,
+    IAutomationVault _automationVault,
     IAutomationVault.ExecData[] memory _execData,
     address _feeRecipient
   ) public happyPath(_automationVault, _execData) {
@@ -110,7 +110,7 @@ contract UnitOpenRelayExec is OpenRelayUnitTest {
     _feeData[0] = IAutomationVault.FeeData(_feeRecipient, _ETH, 0);
 
     vm.expectEmit();
-    emit AutomationVaultExecuted(_automationVault, relayCaller, _execData, _feeData);
+    emit AutomationVaultExecuted(address(_automationVault), relayCaller, _execData, _feeData);
 
     openRelay.exec(_automationVault, _execData, _feeRecipient);
   }

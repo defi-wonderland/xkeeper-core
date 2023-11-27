@@ -28,6 +28,11 @@ interface IKeep3rRelay {
   error Keep3rRelay_NoExecData();
 
   /**
+   * @notice Thrown when the caller is not a keeper
+   */
+  error Keep3rRelay_NotKeeper();
+
+  /**
    * @notice Thrown when the exec data contains Keep3r V2
    */
   error Keep3rRelay_Keep3rNotAllowed();
@@ -39,8 +44,8 @@ interface IKeep3rRelay {
   /**
    * @notice Execute an automation vault which will execute the jobs and will manage the payment to the fee data receivers
    * @dev    The payment will be managed by keep3r network. The first and last exec data are assembled by the relay in order to be able to work with keep3r network
-   * @param  _automationVault The address of the automation vault
+   * @param  _automationVault The automation vault that will be executed
    * @param  _execData The array of exec data
    */
-  function exec(address _automationVault, IAutomationVault.ExecData[] calldata _execData) external;
+  function exec(IAutomationVault _automationVault, IAutomationVault.ExecData[] calldata _execData) external;
 }

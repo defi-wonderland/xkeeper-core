@@ -1,24 +1,49 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {IKeep3rRelay, IAutomationVault} from '@interfaces/relays/IKeep3rRelay.sol';
+import {IKeep3rBondedRelay, IAutomationVault, IKeep3rRelay} from '@interfaces/relays/IKeep3rBondedRelay.sol';
 import {IKeep3rV2} from '@interfaces/external/IKeep3rV2.sol';
 import {_KEEP3R_V2} from '@utils/Constants.sol';
 
 /**
- * @title  Keep3rRelay
- * @notice This contract will manage all executions coming from the keep3r network
+ * @title  Keep3rBondedRelay
+ * @notice This contract will manage all executions coming from the keep3r network when the job is bonded
  */
-contract Keep3rRelay is IKeep3rRelay {
+contract Keep3rBondedRelay is IKeep3rBondedRelay {
+  /// @inheritdoc IKeep3rBondedRelay
+  mapping(IAutomationVault _automationVault => IKeep3rBondedRelay.Requirements _bondRequirements) public
+    automationVaultRequirements;
+
+  /// @inheritdoc IKeep3rBondedRelay
+  function setAutomationVaultRequirements(
+    IAutomationVault _automationVault,
+    IKeep3rBondedRelay.Requirements memory _requirements
+  ) external {
+    if (_automationVault.owner() != msg.sender) revert Keep3rBondedRelay_NotVaultOwner();
+
+    automationVaultRequirements[_automationVault] = _requirements;
+    emit AutomationVaultRequirementsSetted(
+      address(_automationVault), _requirements.bond, _requirements.minBond, _requirements.earned, _requirements.age
+    );
+  }
+
   /// @inheritdoc IKeep3rRelay
   function exec(IAutomationVault _automationVault, IAutomationVault.ExecData[] calldata _execData) external {
     // Ensure that calls are being passed
     uint256 _execDataLength = _execData.length;
     if (_execDataLength == 0) revert Keep3rRelay_NoExecData();
 
-    // The first call to `isKeeper` ensures the caller is a valid keeper
-    bool _isKeeper = _KEEP3R_V2.isKeeper(msg.sender);
-    if (!_isKeeper) revert Keep3rRelay_NotKeeper();
+    // Ensure that the automation vault owner has setup bond requirements
+    IKeep3rBondedRelay.Requirements memory _requirements = automationVaultRequirements[_automationVault];
+    if (_requirements.bond == address(0) && _requirements.earned == 0 && _requirements.age == 0) {
+      revert Keep3rBondedRelay_NotAutomationVaultRequirement();
+    }
+
+    // The first call to `isBondedKeeper` ensures the caller is a valid bonded keeper.
+    bool _isBondedKeeper = _KEEP3R_V2.isBondedKeeper(
+      msg.sender, _requirements.bond, _requirements.minBond, _requirements.earned, _requirements.age
+    );
+    if (!_isBondedKeeper) revert Keep3rBondedRelay_NotBondedKeeper();
 
     // Create the array of calls which are going to be executed by the automation vault
     IAutomationVault.ExecData[] memory _execDataKeep3r = new IAutomationVault.ExecData[](_execDataLength + 2);
@@ -48,7 +73,7 @@ contract Keep3rRelay is IKeep3rRelay {
     // Send the array of calls to the automation vault for it to execute them
     _automationVault.exec(msg.sender, _execDataKeep3r, new IAutomationVault.FeeData[](0));
 
-    // Emit the event
+    // Emit necessary event
     emit AutomationVaultExecuted(address(_automationVault), msg.sender, _execDataKeep3r);
   }
 }

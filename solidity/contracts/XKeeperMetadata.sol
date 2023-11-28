@@ -17,16 +17,6 @@ contract XKeeperMetadata is IXKeeperMetadata {
   mapping(IAutomationVault _automationVault => IXKeeperMetadata.AutomationVaultMetadata _automationVaultMetadata) public
     automationVaultMetadata;
 
-  /**
-   * @notice List of automationVaults that have metadata
-   */
-  EnumerableSet.AddressSet internal _automationVaults;
-
-  /// @inheritdoc IXKeeperMetadata
-  function automationVaults() external view returns (address[] memory __automationVaults) {
-    __automationVaults = _automationVaults.values();
-  }
-
   /// @inheritdoc IXKeeperMetadata
   function automationVaultsMetadata(IAutomationVault[] calldata _automationVault)
     external
@@ -58,8 +48,8 @@ contract XKeeperMetadata is IXKeeperMetadata {
 
     // Add the automation vault to the list of automation vaults and set the metadata
     automationVaultMetadata[_automationVault] = _automationVaultMetadata;
-    _automationVaults.add(address(_automationVault));
 
+    // Emit an event when the metadata is set
     emit AutomationVaultMetadataSetted(
       _automationVault, _automationVaultMetadata.name, _automationVaultMetadata.description
     );

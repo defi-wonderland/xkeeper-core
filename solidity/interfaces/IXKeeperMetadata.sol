@@ -44,12 +44,6 @@ interface IXKeeperMetadata {
   //////////////////////////////////////////////////////////////*/
 
   /**
-   * @notice Returns the list of automation vaults that have metadata
-   * @return __automationVaults The list of automation vaults
-   */
-  function automationVaults() external view returns (address[] memory __automationVaults);
-
-  /**
    * @notice Returns the metadata of the automation vault
    * @param  _automationVault The automation vault
    * @return _name The name of the automation vault

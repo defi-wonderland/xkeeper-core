@@ -6,18 +6,12 @@ import {Test} from 'forge-std/Test.sol';
 import {IXKeeperMetadata, XKeeperMetadata, IAutomationVault, EnumerableSet} from '@contracts/XKeeperMetadata.sol';
 
 contract XKeeperMetadataForTest is XKeeperMetadata {
-  using EnumerableSet for EnumerableSet.AddressSet;
-
-  // This is needed because foundry fuzz some values which are repeated
-  EnumerableSet.AddressSet internal _cleanAutomationVaults;
-
   function addMetadataForTest(
     IAutomationVault[] calldata _automationVaults,
     IXKeeperMetadata.AutomationVaultMetadata[] calldata _automationVaultMetadata
   ) public {
     for (uint256 _index; _index < _automationVaultMetadata.length; _index++) {
       automationVaultMetadata[IAutomationVault(_automationVaults[_index])] = _automationVaultMetadata[_index];
-      _cleanAutomationVaults.add(address(_automationVaults[_index]));
     }
   }
 }

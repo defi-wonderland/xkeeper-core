@@ -61,8 +61,11 @@ contract UnitXKeeperMetadataGetMetadata is XKeeperMetadataUnitTest {
 }
 
 contract UnitXKeeperMetadataSetAutomationVaultMetadata is XKeeperMetadataUnitTest {
+  IXKeeperMetadata.AutomationVaultMetadata _automationVaultMetadata;
+
   modifier happyPath(IAutomationVault _automationVault) {
     vm.mockCall(address(_automationVault), abi.encodeWithSelector(IAutomationVault.owner.selector), abi.encode(owner));
+    _automationVaultMetadata = IXKeeperMetadata.AutomationVaultMetadata('name', 'description');
     vm.startPrank(owner);
     _;
   }
@@ -71,8 +74,6 @@ contract UnitXKeeperMetadataSetAutomationVaultMetadata is XKeeperMetadataUnitTes
     IAutomationVault _automationVault,
     address _newOwner
   ) public happyPath(_automationVault) {
-    IXKeeperMetadata.AutomationVaultMetadata memory _automationVaultMetadata =
-      IXKeeperMetadata.AutomationVaultMetadata('name', 'description');
     vm.assume(_newOwner != owner);
 
     vm.expectRevert(IXKeeperMetadata.XKeeperMetadata_OnlyAutomationVaultOwner.selector);
@@ -81,10 +82,7 @@ contract UnitXKeeperMetadataSetAutomationVaultMetadata is XKeeperMetadataUnitTes
     xKeeperMetadata.setAutomationVaultMetadata(_automationVault, _automationVaultMetadata);
   }
 
-  function testSetAutomationVaultMetadata(
-    IAutomationVault _automationVault,
-    IXKeeperMetadata.AutomationVaultMetadata calldata _automationVaultMetadata
-  ) public happyPath(_automationVault) {
+  function testSetAutomationVaultMetadata(IAutomationVault _automationVault) public happyPath(_automationVault) {
     xKeeperMetadata.setAutomationVaultMetadata(_automationVault, _automationVaultMetadata);
     (string memory _name, string memory _description) = xKeeperMetadata.automationVaultMetadata(_automationVault);
 
@@ -92,10 +90,7 @@ contract UnitXKeeperMetadataSetAutomationVaultMetadata is XKeeperMetadataUnitTes
     assertEq(_description, _automationVaultMetadata.description);
   }
 
-  function testEmitAutomationVaultMetadataSetted(
-    IAutomationVault _automationVault,
-    IXKeeperMetadata.AutomationVaultMetadata calldata _automationVaultMetadata
-  ) public happyPath(_automationVault) {
+  function testEmitAutomationVaultMetadataSetted(IAutomationVault _automationVault) public happyPath(_automationVault) {
     vm.expectEmit();
     emit AutomationVaultMetadataSetted(
       _automationVault, _automationVaultMetadata.name, _automationVaultMetadata.description

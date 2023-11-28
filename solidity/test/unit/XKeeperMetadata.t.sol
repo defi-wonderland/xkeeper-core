@@ -69,13 +69,11 @@ contract UnitXKeeperMetadataSetAutomationVaultMetadata is XKeeperMetadataUnitTes
 
   function testRevertOnlyAutomationVaultOwner(
     IAutomationVault _automationVault,
-    IXKeeperMetadata.AutomationVaultMetadata calldata _automationVaultMetadata,
-    address _newOwner
+    IXKeeperMetadata.AutomationVaultMetadata calldata _automationVaultMetadata
   ) public happyPath(_automationVault) {
-    vm.assume(_newOwner != owner);
     vm.expectRevert(IXKeeperMetadata.XKeeperMetadata_OnlyAutomationVaultOwner.selector);
 
-    changePrank(_newOwner);
+    changePrank(address(0));
     xKeeperMetadata.setAutomationVaultMetadata(_automationVault, _automationVaultMetadata);
   }
 

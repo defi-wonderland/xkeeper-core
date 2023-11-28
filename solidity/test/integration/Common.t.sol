@@ -7,7 +7,7 @@ import {BasicJob} from '@contracts/for-test/BasicJob.sol';
 import {Deploy} from '@script/Deploy.s.sol';
 
 contract DeployForTest is Deploy {
-  uint256 private constant _FORK_BLOCK = 18_000_000;
+  uint256 private constant _FORK_BLOCK = 18_500_000;
 
   function setUp() public virtual {
     // Mainnet fork

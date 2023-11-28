@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import {Test} from 'forge-std/Test.sol';
 
-import {IXKeeperMetadata, XKeeperMetadata, IAutomationVault, EnumerableSet} from '@contracts/XKeeperMetadata.sol';
+import {IXKeeperMetadata, XKeeperMetadata, IAutomationVault} from '@contracts/XKeeperMetadata.sol';
 
 contract XKeeperMetadataForTest is XKeeperMetadata {
   function addMetadataForTest(

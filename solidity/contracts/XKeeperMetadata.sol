@@ -46,7 +46,7 @@ contract XKeeperMetadata is IXKeeperMetadata {
       revert XKeeperMetadata_OnlyAutomationVaultOwner();
     }
 
-    // Add the automation vault to the list of automation vaults and set the metadata
+    // Index the metadata with the automation vault
     automationVaultMetadata[_automationVault] = _automationVaultMetadata;
 
     // Emit an event when the metadata is set

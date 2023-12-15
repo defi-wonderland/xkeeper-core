@@ -9,6 +9,7 @@ import {OpenRelay, IOpenRelay} from '@contracts/OpenRelay.sol';
 import {GelatoRelay, IGelatoRelay} from '@contracts/GelatoRelay.sol';
 import {Keep3rRelay, IKeep3rRelay} from '@contracts/Keep3rRelay.sol';
 import {Keep3rBondedRelay, IKeep3rBondedRelay} from '@contracts/Keep3rBondedRelay.sol';
+import {XKeeperMetadata, IXKeeperMetadata} from '@contracts/XKeeperMetadata.sol';
 
 abstract contract Deploy is Script {
   // Deployer EOA
@@ -25,6 +26,9 @@ abstract contract Deploy is Script {
   IKeep3rRelay public keep3rRelay;
   IKeep3rBondedRelay public keep3rBondedRelay;
 
+  // Metadata
+  IXKeeperMetadata public xKeeperMetadata;
+
   // AutomationVault params
   address public owner;
 
@@ -39,6 +43,8 @@ abstract contract Deploy is Script {
     gelatoRelay = new GelatoRelay();
     keep3rRelay = new Keep3rRelay();
     keep3rBondedRelay = new Keep3rBondedRelay();
+
+    xKeeperMetadata = new XKeeperMetadata();
 
     vm.stopBroadcast();
   }

@@ -39,7 +39,7 @@ contract IntegrationAutomationVault is CommonIntegrationTest {
 
     vm.startPrank(newOwner);
     // Try to withdraw funds, should fail because new owner has not confirmed
-    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector, owner));
+    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector));
     automationVault.withdrawFunds(address(_DAI), _amount, newOwner);
 
     // Balance of DAI should be 0
@@ -55,7 +55,7 @@ contract IntegrationAutomationVault is CommonIntegrationTest {
 
     // Check that the old owner can't withdraw funds
     changePrank(owner);
-    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector, newOwner));
+    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector));
     automationVault.withdrawFunds(_ETH, 100 ether, owner);
   }
 }

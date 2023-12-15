@@ -17,7 +17,7 @@ contract Keep3rBondedRelay is IKeep3rBondedRelay {
   /// @inheritdoc IKeep3rBondedRelay
   function setAutomationVaultRequirements(
     IAutomationVault _automationVault,
-    IKeep3rBondedRelay.Requirements memory _requirements
+    IKeep3rBondedRelay.Requirements calldata _requirements
   ) external {
     if (_automationVault.owner() != msg.sender) revert Keep3rBondedRelay_NotVaultOwner();
 
@@ -34,7 +34,7 @@ contract Keep3rBondedRelay is IKeep3rBondedRelay {
     if (_execDataLength == 0) revert Keep3rRelay_NoExecData();
 
     // Ensure that the automation vault owner has setup bond requirements
-    IKeep3rBondedRelay.Requirements memory _requirements = automationVaultRequirements[_automationVault];
+    IKeep3rBondedRelay.Requirements storage _requirements = automationVaultRequirements[_automationVault];
     if (_requirements.bond == address(0) && _requirements.earned == 0 && _requirements.age == 0) {
       revert Keep3rBondedRelay_NotAutomationVaultRequirement();
     }

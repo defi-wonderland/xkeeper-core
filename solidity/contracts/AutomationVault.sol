@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
 import {IERC20, SafeERC20} from '@openzeppelin/token/ERC20/utils/SafeERC20.sol';
 import {EnumerableSet} from '@openzeppelin/utils/structs/EnumerableSet.sol';
-import {_ETH, _NULL} from '@utils/Constants.sol';
+import {_ETH, _ALL} from '@utils/Constants.sol';
 
 /**
  * @title  AutomationVault
@@ -43,7 +43,7 @@ contract AutomationVault is IAutomationVault {
   /**
    * @param _owner The address of the owner
    */
-  constructor(address _owner) payable {
+  constructor(address _owner) {
     owner = _owner;
   }
 
@@ -58,13 +58,13 @@ contract AutomationVault is IAutomationVault {
   }
 
   /// @inheritdoc IAutomationVault
-  function relays() external view returns (address[] memory __relays) {
-    __relays = _relays.values();
+  function relays() external view returns (address[] memory _listRelays) {
+    _listRelays = _relays.values();
   }
 
   /// @inheritdoc IAutomationVault
-  function jobs() external view returns (address[] memory __jobs) {
-    __jobs = _jobs.values();
+  function jobs() external view returns (address[] memory _listJobs) {
+    _listJobs = _jobs.values();
   }
 
   /// @inheritdoc IAutomationVault
@@ -81,7 +81,7 @@ contract AutomationVault is IAutomationVault {
   }
 
   /// @inheritdoc IAutomationVault
-  function withdrawFunds(address _token, uint256 _amount, address _receiver) external payable onlyOwner {
+  function withdrawFunds(address _token, uint256 _amount, address _receiver) external onlyOwner {
     // If the token is ETH, transfer the funds to the receiver, otherwise transfer the tokens
     if (_token == _ETH) {
       (bool _success,) = _receiver.call{value: _amount}('');
@@ -185,31 +185,31 @@ contract AutomationVault is IAutomationVault {
   }
 
   /// @inheritdoc IAutomationVault
-  function exec(address _relayCaller, ExecData[] calldata _execData, FeeData[] calldata _feeData) external payable {
+  function exec(address _relayCaller, ExecData[] calldata _execData, FeeData[] calldata _feeData) external {
     // Check that the specific caller is approved to call the relay
-    if (!_relayEnabledCallers[msg.sender].contains(_relayCaller) && !_relayEnabledCallers[msg.sender].contains(_NULL)) {
+    if (!_relayEnabledCallers[msg.sender].contains(_relayCaller) && !_relayEnabledCallers[msg.sender].contains(_ALL)) {
       revert AutomationVault_NotApprovedRelayCaller();
     }
 
     // Create the exec data needed variables
-    ExecData memory _execDatum;
+    ExecData memory _dataToExecute;
     uint256 _dataLength = _execData.length;
     uint256 _i;
     bool _success;
 
     // Iterate over the exec data to execute the jobs
     for (_i; _i < _dataLength;) {
-      _execDatum = _execData[_i];
+      _dataToExecute = _execData[_i];
 
       // Check that the selector is approved to be called
-      if (!_jobEnabledSelectors[_execDatum.job].contains(bytes4(_execDatum.jobData))) {
+      if (!_jobEnabledSelectors[_dataToExecute.job].contains(bytes4(_dataToExecute.jobData))) {
         revert AutomationVault_NotApprovedJobSelector();
       }
-      (_success,) = _execDatum.job.call(_execDatum.jobData);
+      (_success,) = _dataToExecute.job.call(_dataToExecute.jobData);
       if (!_success) revert AutomationVault_ExecFailed();
 
       // Emit the event
-      emit JobExecuted(msg.sender, _relayCaller, _execDatum.job, _execDatum.jobData);
+      emit JobExecuted(msg.sender, _relayCaller, _dataToExecute.job, _dataToExecute.jobData);
 
       unchecked {
         ++_i;
@@ -217,24 +217,24 @@ contract AutomationVault is IAutomationVault {
     }
 
     // Create the fee data needed variables
-    FeeData memory _feeDatum;
+    FeeData memory _dataToFee;
     _dataLength = _feeData.length;
     _i = 0;
 
     // Iterate over the fee data to issue the payments
     for (_i; _i < _dataLength;) {
-      _feeDatum = _feeData[_i];
+      _dataToFee = _feeData[_i];
 
       // If the token is ETH, transfer the funds to the receiver, otherwise transfer the tokens
-      if (_feeDatum.feeToken == _ETH) {
-        (_success,) = _feeDatum.feeRecipient.call{value: _feeDatum.fee}('');
+      if (_dataToFee.feeToken == _ETH) {
+        (_success,) = _dataToFee.feeRecipient.call{value: _dataToFee.fee}('');
         if (!_success) revert AutomationVault_ETHTransferFailed();
       } else {
-        IERC20(_feeDatum.feeToken).safeTransfer(_feeDatum.feeRecipient, _feeDatum.fee);
+        IERC20(_dataToFee.feeToken).safeTransfer(_dataToFee.feeRecipient, _dataToFee.fee);
       }
 
       // Emit the event
-      emit IssuePayment(msg.sender, _relayCaller, _feeDatum.feeRecipient, _feeDatum.feeToken, _feeDatum.fee);
+      emit IssuePayment(msg.sender, _relayCaller, _dataToFee.feeRecipient, _dataToFee.feeToken, _dataToFee.fee);
 
       unchecked {
         ++_i;
@@ -247,7 +247,7 @@ contract AutomationVault is IAutomationVault {
    */
   modifier onlyOwner() {
     address _owner = owner;
-    if (msg.sender != _owner) revert AutomationVault_OnlyOwner(_owner);
+    if (msg.sender != _owner) revert AutomationVault_OnlyOwner();
     _;
   }
 
@@ -256,7 +256,7 @@ contract AutomationVault is IAutomationVault {
    */
   modifier onlyPendingOwner() {
     address _pendingOwner = pendingOwner;
-    if (msg.sender != _pendingOwner) revert AutomationVault_OnlyPendingOwner(_pendingOwner);
+    if (msg.sender != _pendingOwner) revert AutomationVault_OnlyPendingOwner();
     _;
   }
 

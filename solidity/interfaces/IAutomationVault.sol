@@ -132,15 +132,13 @@ interface IAutomationVault {
 
   /**
    * @notice Thrown when the caller is not the owner
-   * @param  _owner The address of the owner
    */
-  error AutomationVault_OnlyOwner(address _owner);
+  error AutomationVault_OnlyOwner();
 
   /**
    * @notice Thrown when the caller is not the pending owner
-   * @param  _pendingOwner The address of the pending owner
    */
-  error AutomationVault_OnlyPendingOwner(address _pendingOwner);
+  error AutomationVault_OnlyPendingOwner();
 
   /*///////////////////////////////////////////////////////////////
                               STRUCTS
@@ -233,7 +231,7 @@ interface IAutomationVault {
    * @param  _amount The amount of tokens
    * @param  _receiver The address of the receiver
    */
-  function withdrawFunds(address _token, uint256 _amount, address _receiver) external payable;
+  function withdrawFunds(address _token, uint256 _amount, address _receiver) external;
 
   /**
    * @notice Approves relay callers which will be able to call a relay to execute jobs
@@ -271,5 +269,5 @@ interface IAutomationVault {
    * @param  _execData The array of exec data
    * @param  _feeData The array of fee data
    */
-  function exec(address _relayCaller, ExecData[] calldata _execData, FeeData[] calldata _feeData) external payable;
+  function exec(address _relayCaller, ExecData[] calldata _execData, FeeData[] calldata _feeData) external;
 }

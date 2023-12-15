@@ -61,7 +61,7 @@ contract UnitXKeeperMetadataGetMetadata is XKeeperMetadataUnitTest {
 }
 
 contract UnitXKeeperMetadataSetAutomationVaultMetadata is XKeeperMetadataUnitTest {
-  IXKeeperMetadata.AutomationVaultMetadata _automationVaultMetadata;
+  IXKeeperMetadata.AutomationVaultMetadata internal _automationVaultMetadata;
 
   modifier happyPath(IAutomationVault _automationVault) {
     vm.mockCall(address(_automationVault), abi.encodeWithSelector(IAutomationVault.owner.selector), abi.encode(owner));

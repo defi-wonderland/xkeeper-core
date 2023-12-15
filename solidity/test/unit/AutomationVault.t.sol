@@ -5,7 +5,7 @@ import {Test} from 'forge-std/Test.sol';
 
 import {AutomationVault, IAutomationVault, EnumerableSet} from '@contracts/AutomationVault.sol';
 import {IERC20} from '@openzeppelin/token/ERC20/IERC20.sol';
-import {_ETH, _NULL} from '@utils/Constants.sol';
+import {_ETH, _ALL} from '@utils/Constants.sol';
 
 contract AutomationVaultForTest is AutomationVault {
   using EnumerableSet for EnumerableSet.AddressSet;
@@ -19,10 +19,12 @@ contract AutomationVaultForTest is AutomationVault {
 
   function addRelayEnabledCallersForTest(address _relay, address _relayCaller) public {
     _relayEnabledCallers[_relay].add(_relayCaller);
+    _relays.add(_relay);
   }
 
   function addJobEnabledSelectorsForTest(address _job, bytes4 _functionSelector) public {
     _jobEnabledSelectors[_job].add(_functionSelector);
+    _jobs.add(_job);
   }
 
   function removeJobEnabledSelectorsForTest(address _job, bytes4 _functionSelector) public {
@@ -99,6 +101,26 @@ contract UnitAutomationVaultConstructor is AutomationVaultUnitTest {
   }
 }
 
+contract UnitAutomationVaultListRelays is AutomationVaultUnitTest {
+  function testRelaysLength(address _relay) public {
+    vm.assume(_relay != address(0));
+
+    automationVault.addRelayEnabledCallersForTest(_relay, owner);
+
+    assertEq(automationVault.relays().length, 1);
+  }
+}
+
+contract UnitAutomationVaultListJobs is AutomationVaultUnitTest {
+  function testJobLength(address _job) public {
+    vm.assume(_job != address(0));
+
+    automationVault.addJobEnabledSelectorsForTest(_job, jobSelector);
+
+    assertEq(automationVault.jobs().length, 1);
+  }
+}
+
 contract UnitAutomationVaultChangeOwner is AutomationVaultUnitTest {
   function setUp() public override {
     AutomationVaultUnitTest.setUp();
@@ -107,7 +129,7 @@ contract UnitAutomationVaultChangeOwner is AutomationVaultUnitTest {
   }
 
   function testRevertIfCallerIsNotOwner() public {
-    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector, owner));
+    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector));
 
     changePrank(pendingOwner);
     automationVault.changeOwner(pendingOwner);
@@ -137,7 +159,7 @@ contract UnitAutomationVaultAcceptOwner is AutomationVaultUnitTest {
   }
 
   function testRevertIfCallerIsNotPendingOwner() public {
-    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyPendingOwner.selector, pendingOwner));
+    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyPendingOwner.selector));
 
     changePrank(owner);
     automationVault.acceptOwner();
@@ -172,7 +194,7 @@ contract UnitAutomationVaultWithdrawFunds is AutomationVaultUnitTest {
 
   function testRevertIfCallerIsNotOwner(uint128 _amount, address _fakeOwner) public {
     vm.assume(_fakeOwner != owner);
-    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector, owner));
+    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector));
 
     changePrank(_fakeOwner);
     automationVault.withdrawFunds(_ETH, _amount, owner);
@@ -226,7 +248,7 @@ contract UnitAutomationVaultApproveRelayCallers is AutomationVaultUnitTest {
   }
 
   function testRevertIfCallerIsNotOwner(address _relay, address[] memory _callers) public {
-    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector, owner));
+    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector));
 
     changePrank(pendingOwner);
     automationVault.approveRelayCallers(_relay, _callers);
@@ -271,7 +293,7 @@ contract UnitAutomationVaultRevokeRelayCallers is AutomationVaultUnitTest {
   }
 
   function testRevertIfCallerIsNotOwner(address _relay, address[] memory _callers) public {
-    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector, owner));
+    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector));
 
     changePrank(pendingOwner);
     automationVault.revokeRelayCallers(_relay, _callers);
@@ -311,7 +333,7 @@ contract UnitAutomationVaultApproveJobSelectors is AutomationVaultUnitTest {
   }
 
   function testRevertIfCallerIsNotOwner(address _job, bytes4[] memory _functionSelectors) public {
-    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector, owner));
+    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector));
 
     changePrank(pendingOwner);
     automationVault.approveJobSelectors(_job, _functionSelectors);
@@ -355,7 +377,7 @@ contract UnitAutomationVaultRevokeJobSelectors is AutomationVaultUnitTest {
   }
 
   function testRevertIfCallerIsNotOwner(address _job, bytes4[] memory _functionSelectors) public {
-    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector, owner));
+    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector));
 
     changePrank(pendingOwner);
     automationVault.revokeJobSelectors(_job, _functionSelectors);
@@ -482,7 +504,7 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     address _sender
   ) public happyPath(_execData, _feeData) {
     vm.assume(_execData.length > 3);
-    automationVault.addRelayEnabledCallersForTest(relay, _NULL);
+    automationVault.addRelayEnabledCallersForTest(relay, _ALL);
 
     for (uint256 _i; _i < _execData.length; ++_i) {
       vm.expectCall(_execData[_i].job, _execData[_i].jobData, 1);

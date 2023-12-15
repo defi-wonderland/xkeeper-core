@@ -111,6 +111,16 @@ interface IAutomationVault {
   //////////////////////////////////////////////////////////////*/
 
   /**
+   * @notice Thrown when the the relay is the zero address
+   */
+  error AutomationVault_RelayZero();
+
+  /**
+   * @notice Thrown when the job is the zero address
+   */
+  error AutomationVault_JobZero();
+
+  /**
    * @notice Thrown when ether transfer fails
    */
   error AutomationVault_ETHTransferFailed();
@@ -166,6 +176,11 @@ interface IAutomationVault {
     uint256 fee;
   }
 
+  struct JobData {
+    address job;
+    bytes4[] functionSelectors;
+  }
+
   /*///////////////////////////////////////////////////////////////
                           VIEW FUNCTIONS
   //////////////////////////////////////////////////////////////*/
@@ -185,28 +200,26 @@ interface IAutomationVault {
   /**
    * @notice Returns the approved relay callers for a specific relay
    * @param  _relay The address of the relay
-   * @return _enabledCallers The array of approved relay callers
-   */
-  function relayEnabledCallers(address _relay) external view returns (address[] memory _enabledCallers);
-
-  /**
-   * @notice Returns the approved job selectors for a specific job
    * @param  _job The address of the job
-   * @return _enabledSelectors The array of approved job selectors
+   * @return _enabledCallers The array of approved relay callers
+   * @return _enabledSelectors The array of approved selectors
    */
-  function jobEnabledSelectors(address _job) external view returns (bytes32[] memory _enabledSelectors);
+  function getRelayData(
+    address _relay,
+    address _job
+  ) external view returns (address[] memory _enabledCallers, bytes32[] memory _enabledSelectors);
 
   /**
    * @notice Returns the approved relays
-   * @return __relays The array of approved relays
+   * @return _listRelays The array of approved relays
    */
-  function relays() external view returns (address[] memory __relays);
+  function relays() external view returns (address[] memory _listRelays);
 
   /**
    * @notice Returns the approved jobs
-   * @return __jobs The array of approved jobs
+   * @return _listJobs The array of approved jobs
    */
-  function jobs() external view returns (address[] memory __jobs);
+  function jobs() external view returns (address[] memory _listJobs);
 
   /*///////////////////////////////////////////////////////////////
                         EXTERNAL FUNCTIONS
@@ -234,32 +247,28 @@ interface IAutomationVault {
   function withdrawFunds(address _token, uint256 _amount, address _receiver) external;
 
   /**
-   * @notice Approves relay callers which will be able to call a relay to execute jobs
+   * @notice Approves relay callers which will be able to call a relay to execute jobs with the specified selectors
    * @param  _relay The address of the relay
    * @param  _callers The array of callers
+   * @param _jobsData The array of job data
    */
-  function approveRelayCallers(address _relay, address[] calldata _callers) external;
+  function approveRelayData(
+    address _relay,
+    address[] calldata _callers,
+    IAutomationVault.JobData[] calldata _jobsData
+  ) external;
 
   /**
-   * @notice Revokes relay callers which will not be able to call a relay to execute jobs
+   * @notice Revokes relay callers which will be able to call a relay to execute jobs with the specified selectors
    * @param  _relay The address of the relay
    * @param  _callers The array of callers
+   * @param _jobsData The array of job data
    */
-  function revokeRelayCallers(address _relay, address[] calldata _callers) external;
-
-  /**
-   * @notice Approves job selectors which could be called to execute the job
-   * @param  _job The address of the job
-   * @param  _functionSelectors The array of function selectors
-   */
-  function approveJobSelectors(address _job, bytes4[] calldata _functionSelectors) external;
-
-  /**
-   * @notice Revokes job selectors which could not be called to execute the job
-   * @param  _job The address of the job
-   * @param  _functionSelectors The array of function selectors
-   */
-  function revokeJobSelectors(address _job, bytes4[] calldata _functionSelectors) external;
+  function revokeRelayData(
+    address _relay,
+    address[] calldata _callers,
+    IAutomationVault.JobData[] calldata _jobsData
+  ) external;
 
   /**
    * @notice Executes a job and issues a payment to the fee data receivers

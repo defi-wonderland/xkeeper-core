@@ -37,7 +37,7 @@ abstract contract Deploy is Script {
     vm.startBroadcast(deployer);
 
     automationVaultFactory = new AutomationVaultFactory();
-    automationVault = automationVaultFactory.deployAutomationVault(owner);
+    automationVault = automationVaultFactory.deployAutomationVault(owner, 0);
 
     openRelay = new OpenRelay();
     gelatoRelay = new GelatoRelay();

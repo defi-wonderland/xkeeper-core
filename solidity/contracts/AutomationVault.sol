@@ -52,7 +52,7 @@ contract AutomationVault is IAutomationVault {
   function getRelayData(
     address _relay,
     address _job
-  ) public returns (address[] memory _callers, bytes32[] memory _selectors) {
+  ) public view returns (address[] memory _callers, bytes32[] memory _selectors) {
     // Get the list of callers
     _callers = _relayCallers[_relay].values();
 

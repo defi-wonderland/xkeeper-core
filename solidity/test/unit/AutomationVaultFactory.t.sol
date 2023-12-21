@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import {Test} from 'forge-std/Test.sol';
 
 import {AutomationVaultFactory, EnumerableSet} from '@contracts/AutomationVaultFactory.sol';
-import {AutomationVault} from '@contracts/AutomationVault.sol';
+import {AutomationVault, IAutomationVault} from '@contracts/AutomationVault.sol';
 
 contract AutomationVaultFactoryForTest is AutomationVaultFactory {
   using EnumerableSet for EnumerableSet.AddressSet;
@@ -13,6 +13,20 @@ contract AutomationVaultFactoryForTest is AutomationVaultFactory {
     for (uint256 _index; _index < _automationVaultsForTest.length; _index++) {
       _automationVaults.add(_automationVaultsForTest[_index]);
     }
+  }
+
+  function preComputeAddressForTest(address _owner, uint256 _salt) public view returns (address _precomputedAddress) {
+    bytes memory _bytecode = type(AutomationVault).creationCode;
+
+    bytes32 _hashed = keccak256(
+      abi.encodePacked(
+        bytes1(0xff),
+        address(this),
+        keccak256(abi.encodePacked(msg.sender, _salt)),
+        keccak256(abi.encodePacked(_bytecode, abi.encode(_owner)))
+      )
+    );
+    _precomputedAddress = address(uint160(uint256(_hashed)));
   }
 }
 
@@ -30,8 +44,6 @@ abstract contract AutomationVaultFactoryUnitTest is Test {
   AutomationVault public automationVault;
 
   function setUp() public virtual {
-    automationVault = AutomationVault(payable(0x104fBc016F4bb334D775a19E8A6510109AC63E00));
-
     automationVaultFactory = new AutomationVaultFactoryForTest();
   }
 }
@@ -79,29 +91,34 @@ contract UnitAutomationVaultFactoryGetAutomationVaults is AutomationVaultFactory
 }
 
 contract UnitAutomationVaultFactoryDeployAutomationVault is AutomationVaultFactoryUnitTest {
-  function testDeployAutomationVault(address _owner) public {
-    automationVaultFactory.deployAutomationVault(_owner);
+  address internal _precomputedAddress;
 
-    assertEq(address(automationVault).code, type(AutomationVault).runtimeCode);
+  modifier happyPath(address _owner, uint256 _salt) {
+    _precomputedAddress = automationVaultFactory.preComputeAddressForTest(_owner, _salt);
+    _;
+  }
+
+  function testDeployAutomationVault(address _owner, uint256 _salt) public happyPath(_owner, _salt) {
+    IAutomationVault _automaitonVault = automationVaultFactory.deployAutomationVault(_owner, _salt);
 
     // params
-    assertEq(automationVault.owner(), _owner);
+    assertEq(_automaitonVault.owner(), _owner);
   }
 
-  function testSetAutomationVaults(address _owner) public {
-    automationVaultFactory.deployAutomationVault(_owner);
+  function testSetAutomationVaults(address _owner, uint256 _salt) public happyPath(_owner, _salt) {
+    automationVaultFactory.deployAutomationVault(_owner, _salt);
 
-    assertEq(automationVaultFactory.automationVaults(0, 1)[0], address(automationVault));
+    assertEq(automationVaultFactory.automationVaults(0, 1)[0], _precomputedAddress);
   }
 
-  function testEmitDeployAutomationVault(address _owner) public {
+  function testEmitDeployAutomationVault(address _owner, uint256 _salt) public happyPath(_owner, _salt) {
     vm.expectEmit();
-    emit DeployAutomationVault(_owner, address(automationVault));
+    emit DeployAutomationVault(_owner, _precomputedAddress);
 
-    automationVaultFactory.deployAutomationVault(_owner);
+    automationVaultFactory.deployAutomationVault(_owner, _salt);
   }
 
-  function testReturnAutomationVault(address _owner) public {
-    assertEq(address(automationVaultFactory.deployAutomationVault(_owner)), address(automationVault));
+  function testReturnAutomationVault(address _owner, uint256 _salt) public happyPath(_owner, _salt) {
+    assertEq(address(automationVaultFactory.deployAutomationVault(_owner, _salt)), _precomputedAddress);
   }
 }

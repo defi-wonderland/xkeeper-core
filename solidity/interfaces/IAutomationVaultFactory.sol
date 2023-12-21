@@ -40,7 +40,8 @@ interface IAutomationVaultFactory {
   /**
    * @notice Deploy a new automation vault
    * @param  _owner The address of the owner
+   * @param  _salt The salt to use for the automation vault deployment
    * @return _automationVault The address of the automation vault deployed
    */
-  function deployAutomationVault(address _owner) external returns (IAutomationVault _automationVault);
+  function deployAutomationVault(address _owner, uint256 _salt) external returns (IAutomationVault _automationVault);
 }

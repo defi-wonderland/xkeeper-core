@@ -198,16 +198,16 @@ interface IAutomationVault {
   function pendingOwner() external view returns (address _pendingOwner);
 
   /**
-   * @notice Returns the approved relay callers for a specific relay
+   * @notice Returns the approved relay callers and selectors for a specific relay and job
    * @param  _relay The address of the relay
    * @param  _job The address of the job
-   * @return _enabledCallers The array of approved relay callers
-   * @return _enabledSelectors The array of approved selectors
+   * @return _callers The array of approved relay callers
+   * @return _selectors The array of approved selectors
    */
   function getRelayData(
     address _relay,
     address _job
-  ) external view returns (address[] memory _enabledCallers, bytes32[] memory _enabledSelectors);
+  ) external returns (address[] memory _callers, bytes32[] memory _selectors);
 
   /**
    * @notice Returns the approved relays

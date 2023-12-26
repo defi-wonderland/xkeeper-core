@@ -10,8 +10,9 @@ import {GelatoRelay, IGelatoRelay} from '@contracts/GelatoRelay.sol';
 import {Keep3rRelay, IKeep3rRelay} from '@contracts/Keep3rRelay.sol';
 import {Keep3rBondedRelay, IKeep3rBondedRelay} from '@contracts/Keep3rBondedRelay.sol';
 import {XKeeperMetadata, IXKeeperMetadata} from '@contracts/XKeeperMetadata.sol';
+import {_ETH} from '@utils/Constants.sol';
 
-abstract contract Deploy is Script {
+abstract contract DeployMainnet is Script {
   // Deployer EOA
   address public deployer;
   uint256 internal _deployerPk;
@@ -37,7 +38,7 @@ abstract contract Deploy is Script {
     vm.startBroadcast(deployer);
 
     automationVaultFactory = new AutomationVaultFactory();
-    automationVault = automationVaultFactory.deployAutomationVault(owner, 0);
+    automationVault = automationVaultFactory.deployAutomationVault(owner, _ETH, 0);
 
     openRelay = new OpenRelay();
     gelatoRelay = new GelatoRelay();
@@ -50,7 +51,7 @@ abstract contract Deploy is Script {
   }
 }
 
-contract DeployMainnet is Deploy {
+contract DeployETH is DeployMainnet {
   function setUp() public {
     // Deployer setup
     _deployerPk = vm.envUint('MAINNET_DEPLOYER_PK');
@@ -60,7 +61,7 @@ contract DeployMainnet is Deploy {
   }
 }
 
-contract DeployGoerli is Deploy {
+contract DeployGoerli is DeployMainnet {
   function setUp() public {
     // Deployer setup
     _deployerPk = vm.envUint('GOERLI_DEPLOYER_PK');

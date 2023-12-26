@@ -1,4 +1,4 @@
-// // SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: AGPL-3.0-only
 // pragma solidity 0.8.19;
 
 // import {Test} from 'forge-std/Test.sol';
@@ -11,7 +11,7 @@
 //   using EnumerableSet for EnumerableSet.AddressSet;
 //   using EnumerableSet for EnumerableSet.Bytes32Set;
 
-//   constructor(address _owner) AutomationVault(_owner) {}
+//   constructor(address _owner, address _nativeToken) AutomationVault(_owner, _nativeToken) {}
 
 //   function setPendingOwnerForTest(address _pendingOwner) public {
 //     pendingOwner = _pendingOwner;
@@ -38,7 +38,7 @@
 //  * @title AutomationVault Unit tests
 //  */
 // abstract contract AutomationVaultUnitTest is Test {
-//   // Events
+//   Events
 //   event ChangeOwner(address indexed _pendingOwner);
 //   event AcceptOwner(address indexed _owner);
 //   event DepositFunds(address indexed _token, uint256 _amount);
@@ -56,21 +56,21 @@
 //     address indexed _relay, address indexed _relayCaller, address indexed _feeRecipient, address _feeToken, uint256 _fee
 //   );
 
-//   // AutomationVault contract
+//   AutomationVault contract
 //   AutomationVaultForTest public automationVault;
 
-//   // Mock contracts
+//   Mock contracts
 //   address public token;
 //   address public job;
 //   address public relay;
 //   address public relayCaller;
 
-//   // EOAs
+//   EOAs
 //   address public owner;
 //   address public pendingOwner;
 //   address public receiver;
 
-//   // Data
+//   Data
 //   bytes4 public jobSelector;
 //   bytes public jobData;
 
@@ -87,7 +87,7 @@
 //     relay = makeAddr('Relay');
 //     relayCaller = makeAddr('RelayCaller');
 
-//     automationVault = new AutomationVaultForTest(owner);
+//     automationVault = new AutomationVaultForTest(owner, _ETH);
 //   }
 
 //   function _mockTokenTransfer(address _token) internal {
@@ -98,6 +98,7 @@
 // contract UnitAutomationVaultConstructor is AutomationVaultUnitTest {
 //   function testParamsAreSet() public {
 //     assertEq(automationVault.owner(), owner);
+//     assertEq(automationVault.nativeToken(), _ETH);
 //   }
 // }
 
@@ -200,15 +201,15 @@
 //     automationVault.withdrawFunds(_ETH, _amount, owner);
 //   }
 
-//   function testRevertIfETHTransferFailed(uint160 _amount) public {
+//   function testRevertIfNativeTokenTransferFailed(uint160 _amount) public {
 //     vm.assume(_amount == type(uint160).max);
 
-//     vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_ETHTransferFailed.selector));
+//     vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_NativeTokenTransferFailed.selector));
 
 //     automationVault.withdrawFunds(_ETH, _amount, address(automationVault));
 //   }
 
-//   function testWithdrawETHAmountUpdateBalances(uint128 _amount) public {
+//   function testWithdrawNativeTokenAmountUpdateBalances(uint128 _amount) public {
 //     vm.assume(_amount > 0);
 
 //     uint256 _balance = address(automationVault).balance;
@@ -218,7 +219,7 @@
 //     assertEq(address(automationVault).balance, _balance - _amount);
 //   }
 
-//   function testEmitWithdrawETHAmount(uint128 _balance, uint128 _amount) public {
+//   function testEmitWithdrawNativeTokenAmount(uint128 _balance, uint128 _amount) public {
 //     vm.assume(_balance > _amount && _amount > 0);
 
 //     vm.expectEmit();
@@ -527,7 +528,7 @@
 //     automationVault.exec(relayCaller, _execData, _feeData);
 //   }
 
-//   function testRevertIfETHTransferFailed(
+//   function testRevertIfNativeTokenTransferFailed(
 //     IAutomationVault.ExecData[] memory _execData,
 //     IAutomationVault.FeeData[] memory _feeData
 //   ) public happyPath(_execData, _feeData) {
@@ -535,12 +536,12 @@
 //     _feeData[1].feeToken = _ETH;
 //     vm.etch(_feeData[1].feeRecipient, type(NoFallbackForTest).runtimeCode);
 
-//     vm.expectRevert(IAutomationVault.AutomationVault_ETHTransferFailed.selector);
+//     vm.expectRevert(IAutomationVault.AutomationVault_NativeTokenTransferFailed.selector);
 
 //     automationVault.exec(relayCaller, _execData, _feeData);
 //   }
 
-//   function testCallETHTransfer(
+//   function testCallNativeTokenTransfer(
 //     IAutomationVault.ExecData[] memory _execData,
 //     IAutomationVault.FeeData[] memory _feeData,
 //     uint128 _fee

@@ -15,7 +15,11 @@ contract AutomationVaultFactoryForTest is AutomationVaultFactory {
     }
   }
 
-  function preComputeAddressForTest(address _owner, uint256 _salt) public view returns (address _precomputedAddress) {
+  function preComputeAddressForTest(
+    address _owner,
+    address _nativeToken,
+    uint256 _salt
+  ) public view returns (address _precomputedAddress) {
     bytes memory _bytecode = type(AutomationVault).creationCode;
 
     bytes32 _hashed = keccak256(
@@ -23,7 +27,7 @@ contract AutomationVaultFactoryForTest is AutomationVaultFactory {
         bytes1(0xff),
         address(this),
         keccak256(abi.encodePacked(msg.sender, _salt)),
-        keccak256(abi.encodePacked(_bytecode, abi.encode(_owner)))
+        keccak256(abi.encodePacked(_bytecode, abi.encode(_owner, _nativeToken)))
       )
     );
     _precomputedAddress = address(uint160(uint256(_hashed)));
@@ -93,32 +97,48 @@ contract UnitAutomationVaultFactoryGetAutomationVaults is AutomationVaultFactory
 contract UnitAutomationVaultFactoryDeployAutomationVault is AutomationVaultFactoryUnitTest {
   address internal _precomputedAddress;
 
-  modifier happyPath(address _owner, uint256 _salt) {
-    _precomputedAddress = automationVaultFactory.preComputeAddressForTest(_owner, _salt);
+  modifier happyPath(address _owner, address _nativeToken, uint256 _salt) {
+    _precomputedAddress = automationVaultFactory.preComputeAddressForTest(_owner, _nativeToken, _salt);
     _;
   }
 
-  function testDeployAutomationVault(address _owner, uint256 _salt) public happyPath(_owner, _salt) {
-    IAutomationVault _automaitonVault = automationVaultFactory.deployAutomationVault(_owner, _salt);
+  function testDeployAutomationVault(
+    address _owner,
+    address _nativeToken,
+    uint256 _salt
+  ) public happyPath(_owner, _nativeToken, _salt) {
+    IAutomationVault _automationVault = automationVaultFactory.deployAutomationVault(_owner, _nativeToken, _salt);
 
     // params
-    assertEq(_automaitonVault.owner(), _owner);
+    assertEq(_automationVault.owner(), _owner);
   }
 
-  function testSetAutomationVaults(address _owner, uint256 _salt) public happyPath(_owner, _salt) {
-    automationVaultFactory.deployAutomationVault(_owner, _salt);
+  function testSetAutomationVaults(
+    address _owner,
+    address _nativeToken,
+    uint256 _salt
+  ) public happyPath(_owner, _nativeToken, _salt) {
+    automationVaultFactory.deployAutomationVault(_owner, _nativeToken, _salt);
 
     assertEq(automationVaultFactory.automationVaults(0, 1)[0], _precomputedAddress);
   }
 
-  function testEmitDeployAutomationVault(address _owner, uint256 _salt) public happyPath(_owner, _salt) {
+  function testEmitDeployAutomationVault(
+    address _owner,
+    address _nativeToken,
+    uint256 _salt
+  ) public happyPath(_owner, _nativeToken, _salt) {
     vm.expectEmit();
     emit DeployAutomationVault(_owner, _precomputedAddress);
 
-    automationVaultFactory.deployAutomationVault(_owner, _salt);
+    automationVaultFactory.deployAutomationVault(_owner, _nativeToken, _salt);
   }
 
-  function testReturnAutomationVault(address _owner, uint256 _salt) public happyPath(_owner, _salt) {
-    assertEq(address(automationVaultFactory.deployAutomationVault(_owner, _salt)), _precomputedAddress);
+  function testReturnAutomationVault(
+    address _owner,
+    address _nativeToken,
+    uint256 _salt
+  ) public happyPath(_owner, _nativeToken, _salt) {
+    assertEq(address(automationVaultFactory.deployAutomationVault(_owner, _nativeToken, _salt)), _precomputedAddress);
   }
 }

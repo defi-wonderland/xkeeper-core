@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
 import {IERC20, SafeERC20} from '@openzeppelin/token/ERC20/utils/SafeERC20.sol';
 import {EnumerableSet} from '@openzeppelin/utils/structs/EnumerableSet.sol';
-import {_ETH, _ALL} from '@utils/Constants.sol';
+import {_ALL} from '@utils/Constants.sol';
 
 /**
  * @title  AutomationVault
@@ -19,7 +19,8 @@ contract AutomationVault is IAutomationVault {
   address public owner;
   /// @inheritdoc IAutomationVault
   address public pendingOwner;
-
+  /// @inheritdoc IAutomationVault
+  address public immutable nativeToken;
   /**
    * @notice Callers that are approved to call a relay
    */
@@ -43,8 +44,9 @@ contract AutomationVault is IAutomationVault {
   /**
    * @param _owner The address of the owner
    */
-  constructor(address _owner) {
+  constructor(address _owner, address _nativeToken) {
     owner = _owner;
+    nativeToken = _nativeToken;
   }
 
   /// @inheritdoc IAutomationVault
@@ -58,13 +60,13 @@ contract AutomationVault is IAutomationVault {
   }
 
   /// @inheritdoc IAutomationVault
-  function relays() external view returns (address[] memory _listRelays) {
-    _listRelays = _relays.values();
+  function relays() external view returns (address[] memory _relayList) {
+    _relayList = _relays.values();
   }
 
   /// @inheritdoc IAutomationVault
-  function jobs() external view returns (address[] memory _listJobs) {
-    _listJobs = _jobs.values();
+  function jobs() external view returns (address[] memory _jobList) {
+    _jobList = _jobs.values();
   }
 
   /// @inheritdoc IAutomationVault
@@ -82,10 +84,10 @@ contract AutomationVault is IAutomationVault {
 
   /// @inheritdoc IAutomationVault
   function withdrawFunds(address _token, uint256 _amount, address _receiver) external onlyOwner {
-    // If the token is ETH, transfer the funds to the receiver, otherwise transfer the tokens
-    if (_token == _ETH) {
+    // If the token is the native token, transfer the funds to the receiver, otherwise transfer the tokens
+    if (_token == nativeToken) {
       (bool _success,) = _receiver.call{value: _amount}('');
-      if (!_success) revert AutomationVault_ETHTransferFailed();
+      if (!_success) revert AutomationVault_NativeTokenTransferFailed();
     } else {
       IERC20(_token).safeTransfer(_receiver, _amount);
     }
@@ -217,24 +219,24 @@ contract AutomationVault is IAutomationVault {
     }
 
     // Create the fee data needed variables
-    FeeData memory _dataToFee;
+    FeeData memory _feeInfo;
     _dataLength = _feeData.length;
     _i = 0;
 
     // Iterate over the fee data to issue the payments
     for (_i; _i < _dataLength;) {
-      _dataToFee = _feeData[_i];
+      _feeInfo = _feeData[_i];
 
-      // If the token is ETH, transfer the funds to the receiver, otherwise transfer the tokens
-      if (_dataToFee.feeToken == _ETH) {
-        (_success,) = _dataToFee.feeRecipient.call{value: _dataToFee.fee}('');
-        if (!_success) revert AutomationVault_ETHTransferFailed();
+      // If the token is the native token, transfer the funds to the receiver, otherwise transfer the tokens
+      if (_feeInfo.feeToken == nativeToken) {
+        (_success,) = _feeInfo.feeRecipient.call{value: _feeInfo.fee}('');
+        if (!_success) revert AutomationVault_NativeTokenTransferFailed();
       } else {
-        IERC20(_dataToFee.feeToken).safeTransfer(_dataToFee.feeRecipient, _dataToFee.fee);
+        IERC20(_feeInfo.feeToken).safeTransfer(_feeInfo.feeRecipient, _feeInfo.fee);
       }
 
       // Emit the event
-      emit IssuePayment(msg.sender, _relayCaller, _dataToFee.feeRecipient, _dataToFee.feeToken, _dataToFee.fee);
+      emit IssuePayment(msg.sender, _relayCaller, _feeInfo.feeRecipient, _feeInfo.feeToken, _feeInfo.fee);
 
       unchecked {
         ++_i;
@@ -261,9 +263,9 @@ contract AutomationVault is IAutomationVault {
   }
 
   /**
-   * @notice Fallback function to receive ETH
+   * @notice Fallback function to receive native tokens
    */
   receive() external payable {
-    emit ETHReceived(msg.sender, msg.value);
+    emit NativeTokenReceived(msg.sender, msg.value);
   }
 }

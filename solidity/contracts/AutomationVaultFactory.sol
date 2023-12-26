@@ -49,9 +49,13 @@ contract AutomationVaultFactory is IAutomationVaultFactory {
   }
 
   /// @inheritdoc IAutomationVaultFactory
-  function deployAutomationVault(address _owner, uint256 _salt) external returns (IAutomationVault _automationVault) {
+  function deployAutomationVault(
+    address _owner,
+    address _nativeToken,
+    uint256 _salt
+  ) external returns (IAutomationVault _automationVault) {
     // Create the new automation vault with the owner
-    _automationVault = new AutomationVault{salt: keccak256(abi.encodePacked(msg.sender, _salt))}(_owner);
+    _automationVault = new AutomationVault{salt: keccak256(abi.encodePacked(msg.sender, _salt))}(_owner, _nativeToken);
 
     // Add the automation vault to the list of automation vaults
     _automationVaults.add(address(_automationVault));

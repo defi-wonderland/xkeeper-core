@@ -100,11 +100,11 @@ interface IAutomationVault {
   );
 
   /**
-   * @notice Emitted when ETH is received in the automation vault
+   * @notice Emitted when native token is received in the automation vault
    * @param  _sender The sender address
-   * @param  _amount The amount of ETH
+   * @param  _amount The amount of native token
    */
-  event ETHReceived(address indexed _sender, uint256 _amount);
+  event NativeTokenReceived(address indexed _sender, uint256 _amount);
 
   /*///////////////////////////////////////////////////////////////
                               ERRORS
@@ -113,7 +113,7 @@ interface IAutomationVault {
   /**
    * @notice Thrown when ether transfer fails
    */
-  error AutomationVault_ETHTransferFailed();
+  error AutomationVault_NativeTokenTransferFailed();
 
   /**
    * @notice Thrown when a not approved relay caller is trying to execute a job
@@ -175,6 +175,13 @@ interface IAutomationVault {
    * @return _owner The address of the owner
    */
   function owner() external view returns (address _owner);
+
+  /**
+   * @notice Returns the address of the native token
+   * @return _nativeToken The address of the native token
+   */
+
+  function nativeToken() external view returns (address _nativeToken);
 
   /**
    * @notice Returns the pending owner address

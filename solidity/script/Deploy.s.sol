@@ -10,6 +10,7 @@ import {GelatoRelay, IGelatoRelay} from '@contracts/GelatoRelay.sol';
 import {Keep3rRelay, IKeep3rRelay} from '@contracts/Keep3rRelay.sol';
 import {Keep3rBondedRelay, IKeep3rBondedRelay} from '@contracts/Keep3rBondedRelay.sol';
 import {XKeeperMetadata, IXKeeperMetadata} from '@contracts/XKeeperMetadata.sol';
+import {_ETH} from '@utils/Constants.sol';
 
 abstract contract Deploy is Script {
   // Deployer EOA
@@ -37,7 +38,7 @@ abstract contract Deploy is Script {
     vm.startBroadcast(deployer);
 
     automationVaultFactory = new AutomationVaultFactory();
-    automationVault = automationVaultFactory.deployAutomationVault(owner, 0);
+    automationVault = automationVaultFactory.deployAutomationVault(owner, _ETH, 0);
 
     openRelay = new OpenRelay();
     gelatoRelay = new GelatoRelay();

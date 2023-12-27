@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import {Test} from 'forge-std/Test.sol';
 
 import {BasicJob} from '@contracts/for-test/BasicJob.sol';
-import {Deploy} from '@script/Deploy.s.sol';
+import {Deploy} from '@script/DeployNativeETH.s.sol';
 
 contract DeployForTest is Deploy {
   uint256 private constant _FORK_BLOCK = 18_500_000;

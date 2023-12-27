@@ -111,6 +111,7 @@ contract UnitAutomationVaultFactoryDeployAutomationVault is AutomationVaultFacto
 
     // params
     assertEq(_automationVault.owner(), _owner);
+    assertEq(_automationVault.nativeToken(), _nativeToken);
   }
 
   function testSetAutomationVaults(

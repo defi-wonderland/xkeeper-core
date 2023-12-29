@@ -12,7 +12,7 @@ import {Keep3rBondedRelay, IKeep3rBondedRelay} from '@contracts/Keep3rBondedRela
 import {XKeeperMetadata, IXKeeperMetadata} from '@contracts/XKeeperMetadata.sol';
 import {_ETH} from '@utils/Constants.sol';
 
-abstract contract DeployMainnet is Script {
+abstract contract DeployNativeETH is Script {
   // Deployer EOA
   address public deployer;
   uint256 internal _deployerPk;
@@ -51,7 +51,7 @@ abstract contract DeployMainnet is Script {
   }
 }
 
-contract DeployETH is DeployMainnet {
+contract DeployMainnet is DeployNativeETH {
   function setUp() public {
     // Deployer setup
     _deployerPk = vm.envUint('MAINNET_DEPLOYER_PK');
@@ -61,7 +61,7 @@ contract DeployETH is DeployMainnet {
   }
 }
 
-contract DeployGoerli is DeployMainnet {
+contract DeployGoerli is DeployNativeETH {
   function setUp() public {
     // Deployer setup
     _deployerPk = vm.envUint('GOERLI_DEPLOYER_PK');

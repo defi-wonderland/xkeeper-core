@@ -4,9 +4,9 @@ pragma solidity 0.8.19;
 import {Test} from 'forge-std/Test.sol';
 
 import {BasicJob} from '@contracts/for-test/BasicJob.sol';
-import {DeployMainnet} from '@script/DeployMainnet.s.sol';
+import {DeployNativeETH} from '@script/DeployNativeETH.s.sol';
 
-contract DeployForTest is DeployMainnet {
+contract DeployForTest is DeployNativeETH {
   uint256 private constant _FORK_BLOCK = 18_500_000;
 
   function setUp() public virtual {

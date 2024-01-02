@@ -57,6 +57,8 @@ contract AutomationVaultFactory is IAutomationVaultFactory {
     // Create the new automation vault with the owner
     _automationVault = new AutomationVault{salt: keccak256(abi.encodePacked(msg.sender, _salt))}(_owner, _nativeToken);
 
+    if (address(_automationVault) == address(0)) revert AutomationVaultFactory_Create2Failed();
+
     // Add the automation vault to the list of automation vaults
     _automationVaults.add(address(_automationVault));
 

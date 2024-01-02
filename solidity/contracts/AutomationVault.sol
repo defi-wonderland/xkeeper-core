@@ -166,12 +166,12 @@ contract AutomationVault is IAutomationVault {
       unchecked {
         ++_i;
       }
+    }
 
-      // If the relay has no enabled callers, remove it from the list of relays
-      if (_relayCallers[_relay].length() == 0) {
-        _relays.remove(_relay);
-        emit RevokeRelay(_relay);
-      }
+    // If the relay has no enabled callers, remove it from the list of relays
+    if (_relayCallers[_relay].length() == 0) {
+      _relays.remove(_relay);
+      emit RevokeRelay(_relay);
     }
 
     // Iterate over the jobs to revoke them and their selectors

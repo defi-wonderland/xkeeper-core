@@ -16,6 +16,15 @@ interface IAutomationVaultFactory {
   event DeployAutomationVault(address indexed _owner, address indexed _automationVault);
 
   /*///////////////////////////////////////////////////////////////
+                              ERRORS
+  //////////////////////////////////////////////////////////////*/
+
+  /**
+   * @notice Thrown when the automation vault factory fails to deploy a new automation vault
+   */
+  error AutomationVaultFactory_Create2Failed();
+
+  /*///////////////////////////////////////////////////////////////
                           VIEW FUNCTIONS
   //////////////////////////////////////////////////////////////*/
 

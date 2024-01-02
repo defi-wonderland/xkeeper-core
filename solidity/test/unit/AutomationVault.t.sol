@@ -96,7 +96,7 @@ contract UnitAutomationVaultConstructor is AutomationVaultUnitTest {
    */
   function testParamsAreSet() public {
     assertEq(automationVault.owner(), owner);
-    assertEq(automationVault.nativeToken(), _ETH);
+    assertEq(automationVault.NATIVE_TOKEN(), _ETH);
   }
 }
 

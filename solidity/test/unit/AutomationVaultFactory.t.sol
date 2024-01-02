@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import {Test} from 'forge-std/Test.sol';
 
-import {AutomationVaultFactory, IAutomationVaultFactory, EnumerableSet} from '@contracts/AutomationVaultFactory.sol';
+import {AutomationVaultFactory, EnumerableSet} from '@contracts/AutomationVaultFactory.sol';
 import {AutomationVault, IAutomationVault} from '@contracts/AutomationVault.sol';
 
 contract AutomationVaultFactoryForTest is AutomationVaultFactory {
@@ -111,7 +111,7 @@ contract UnitAutomationVaultFactoryDeployAutomationVault is AutomationVaultFacto
 
     // params
     assertEq(_automationVault.owner(), _owner);
-    assertEq(_automationVault.nativeToken(), _nativeToken);
+    assertEq(_automationVault.NATIVE_TOKEN(), _nativeToken);
   }
 
   function testSetAutomationVaults(

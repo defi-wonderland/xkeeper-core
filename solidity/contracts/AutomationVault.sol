@@ -16,11 +16,11 @@ contract AutomationVault is IAutomationVault {
   using EnumerableSet for EnumerableSet.Bytes32Set;
 
   /// @inheritdoc IAutomationVault
+  address public immutable NATIVE_TOKEN;
+  /// @inheritdoc IAutomationVault
   address public owner;
   /// @inheritdoc IAutomationVault
   address public pendingOwner;
-  /// @inheritdoc IAutomationVault
-  address public immutable nativeToken;
   /**
    * @notice Callers that are approved to call a relay
    */
@@ -47,7 +47,7 @@ contract AutomationVault is IAutomationVault {
    */
   constructor(address _owner, address _nativeToken) {
     owner = _owner;
-    nativeToken = _nativeToken;
+    NATIVE_TOKEN = _nativeToken;
   }
 
   /// @inheritdoc IAutomationVault
@@ -88,7 +88,7 @@ contract AutomationVault is IAutomationVault {
   /// @inheritdoc IAutomationVault
   function withdrawFunds(address _token, uint256 _amount, address _receiver) external onlyOwner {
     // If the token is the native token, transfer the funds to the receiver, otherwise transfer the tokens
-    if (_token == nativeToken) {
+    if (_token == NATIVE_TOKEN) {
       (bool _success,) = _receiver.call{value: _amount}('');
       if (!_success) revert AutomationVault_NativeTokenTransferFailed();
     } else {
@@ -242,7 +242,7 @@ contract AutomationVault is IAutomationVault {
       _feeInfo = _feeData[_i];
 
       // If the token is the native token, transfer the funds to the receiver, otherwise transfer the tokens
-      if (_feeInfo.feeToken == nativeToken) {
+      if (_feeInfo.feeToken == NATIVE_TOKEN) {
         (_success,) = _feeInfo.feeRecipient.call{value: _feeInfo.fee}('');
         if (!_success) revert AutomationVault_NativeTokenTransferFailed();
       } else {

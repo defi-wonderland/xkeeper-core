@@ -196,7 +196,7 @@ interface IAutomationVault {
    * @return _nativeToken The address of the native token
    */
 
-  function nativeToken() external view returns (address _nativeToken);
+  function NATIVE_TOKEN() external view returns (address _nativeToken);
 
   /**
    * @notice Returns the pending owner address

@@ -108,7 +108,7 @@ contract UnitGetRelayData is AutomationVaultUnitTest {
     automationVault.addRelayEnabledCallersForTest(_relay, _relayCaller);
     automationVault.addJobEnabledSelectorsForTest(_relay, _job, _functionSelector);
 
-    (address[] memory _callers, bytes32[] memory _selectors) = automationVault.getRelayData(_relay, _job);
+    (address[] memory _callers, bytes32[] memory _selectors) = automationVault.getRelayAndJobData(_relay, _job);
 
     assertEq(_callers.length, 1);
     assertEq(_callers[0], _relayCaller);
@@ -600,17 +600,17 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     automationVault.exec(relayCaller, _execData, _feeData);
   }
 
-  //   function testRevertIfNotApprovedJobSelector(
-  //     IAutomationVault.ExecData[] memory _execData,
-  //     IAutomationVault.FeeData[] memory _feeData
-  //   ) public happyPath(_execData, _feeData) {
-  //     vm.assume(_execData.length > 3);
-  //     automationVault.removeJobEnabledSelectorsForTest(_execData[1].job, bytes4(_execData[1].jobData));
+  function testRevertIfNotApprovedJobSelector(
+    IAutomationVault.ExecData[] memory _execData,
+    IAutomationVault.FeeData[] memory _feeData
+  ) public happyPath(_execData, _feeData) {
+    vm.assume(_execData.length > 3);
+    automationVault.removeJobEnabledSelectorsForTest(relay, _execData[1].job, bytes4(_execData[1].jobData));
 
-  //     vm.expectRevert(IAutomationVault.AutomationVault_NotApprovedJobSelector.selector);
+    vm.expectRevert(IAutomationVault.AutomationVault_NotApprovedJobSelector.selector);
 
-  //     automationVault.exec(relayCaller, _execData, _feeData);
-  //   }
+    automationVault.exec(relayCaller, _execData, _feeData);
+  }
 
   /**
    * @notice Checks that the test has to revert if the job call failed

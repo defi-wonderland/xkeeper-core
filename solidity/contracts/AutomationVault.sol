@@ -27,7 +27,7 @@ contract AutomationVault is IAutomationVault {
   mapping(address _relay => EnumerableSet.AddressSet _enabledCallers) internal _relayCallers;
 
   /**
-   * @notice Relays that are approved to execute jobs with an specific selector
+   * @notice Relays that are approved to execute jobs with a specific selector
    */
   mapping(address _relay => mapping(address _job => EnumerableSet.Bytes32Set _enabledSelectors)) internal
     _relayJobSelectors;
@@ -51,7 +51,7 @@ contract AutomationVault is IAutomationVault {
   }
 
   /// @inheritdoc IAutomationVault
-  function getRelayData(
+  function getRelayAndJobData(
     address _relay,
     address _job
   ) public view returns (address[] memory _callers, bytes32[] memory _selectors) {
@@ -127,7 +127,7 @@ contract AutomationVault is IAutomationVault {
     for (uint256 _i; _i < _jobsData.length;) {
       IAutomationVault.JobData memory _jobData = _jobsData[_i];
 
-      // If the job is not approved, add it to the list of relays
+      // If the job is not approved, add it to the list of jobs
       if (_jobs.add(_jobData.job)) {
         emit ApproveJob(_jobData.job);
       }

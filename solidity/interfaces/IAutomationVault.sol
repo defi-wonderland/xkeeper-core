@@ -211,7 +211,7 @@ interface IAutomationVault {
    * @return _callers The array of approved relay callers
    * @return _selectors The array of approved selectors
    */
-  function getRelayData(
+  function getRelayAndJobData(
     address _relay,
     address _job
   ) external returns (address[] memory _callers, bytes32[] memory _selectors);
@@ -255,6 +255,7 @@ interface IAutomationVault {
 
   /**
    * @notice Approves relay callers which will be able to call a relay to execute jobs with the specified selectors
+   * @dev   You can approve all the fields or only the necessary ones, passing the empty argument in the unwanted ones
    * @param  _relay The address of the relay
    * @param  _callers The array of callers
    * @param _jobsData The array of job data
@@ -266,7 +267,8 @@ interface IAutomationVault {
   ) external;
 
   /**
-   * @notice Revokes relay callers which will be able to call a relay to execute jobs with the specified selectors
+   * @notice Revokes both the desired callers to a relay and the jobs and their respective selectors
+   * @dev    You can revoke all the fields or only the necessary ones, passing the empty argument in the unwanted ones
    * @param  _relay The address of the relay
    * @param  _callers The array of callers
    * @param _jobsData The array of job data

@@ -26,6 +26,7 @@ contract IntegrationKeep3rRelay is CommonIntegrationTest {
   address public keep3rGovernor;
 
   function setUp() public override {
+    // AutomationVault setup
     CommonIntegrationTest.setUp();
 
     // Keep3r setup
@@ -36,23 +37,34 @@ contract IntegrationKeep3rRelay is CommonIntegrationTest {
 
     _addJobAndLiquidity(address(automationVault), 1000 ether);
 
-    // AutomationVault setup
+    // Keep3r callers array
     address[] memory _keepers = new address[](1);
     _keepers[0] = bot;
+
+    // Keep3r selectors array
     bytes4[] memory _keep3rSelectors = new bytes4[](2);
     _keep3rSelectors[0] = keep3r.isKeeper.selector;
     _keep3rSelectors[1] = keep3r.worked.selector;
+
+    // Job selectors array
     bytes4[] memory _jobSelectors = new bytes4[](2);
     _jobSelectors[0] = basicJob.work.selector;
     _jobSelectors[1] = basicJob.workHard.selector;
     IKeep3rBondedRelay.Requirements memory _requirements = IKeep3rBondedRelay.Requirements(address(kp3r), 1 ether, 0, 0);
 
+    // Job data array
+    IAutomationVault.JobData[] memory _jobsData = new IAutomationVault.JobData[](2);
+    _jobsData[0] = IAutomationVault.JobData(address(keep3r), _keep3rSelectors);
+    _jobsData[1] = IAutomationVault.JobData(address(basicJob), _jobSelectors);
+
     vm.startPrank(owner);
+
+    // Keep3r bonded relay requirements setup
     keep3rBondedRelay.setAutomationVaultRequirements(automationVault, _requirements);
-    automationVault.approveRelayCallers(address(keep3rRelay), _keepers);
-    automationVault.approveRelayCallers(address(keep3rBondedRelay), _keepers);
-    automationVault.approveJobSelectors(address(keep3r), _keep3rSelectors);
-    automationVault.approveJobSelectors(address(basicJob), _jobSelectors);
+
+    // AutomationVault approve relay data
+    automationVault.approveRelayData(address(keep3rRelay), _keepers, _jobsData);
+    automationVault.approveRelayData(address(keep3rBondedRelay), _keepers, _jobsData);
   }
 
   function _addJobAndLiquidity(address _job, uint256 _amount) internal {

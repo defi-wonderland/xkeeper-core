@@ -9,7 +9,7 @@ import {IKeep3rHelper} from '@interfaces/external/IKeep3rHelper.sol';
 import {IERC20} from '@openzeppelin/token/ERC20/utils/SafeERC20.sol';
 
 address constant _ETH = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-address constant _NULL = 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF;
+address constant _ALL = 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF;
 address constant _KEEP3R_GOVERNOR = 0x0D5Dc686d0a2ABBfDaFDFb4D0533E886517d4E83;
 address constant _KP3R_WHALE = 0x2FC52C61fB0C03489649311989CE2689D93dC1a2;
 address constant _DAI_WHALE = 0xDE228965da0d064b8aE171A02500602e84E8330d;

@@ -17,7 +17,7 @@ contract Keep3rBondedRelay is IKeep3rBondedRelay {
   /// @inheritdoc IKeep3rBondedRelay
   function setAutomationVaultRequirements(
     IAutomationVault _automationVault,
-    IKeep3rBondedRelay.Requirements memory _requirements
+    IKeep3rBondedRelay.Requirements calldata _requirements
   ) external {
     if (_automationVault.owner() != msg.sender) revert Keep3rBondedRelay_NotVaultOwner();
 

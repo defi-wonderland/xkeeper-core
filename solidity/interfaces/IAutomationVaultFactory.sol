@@ -16,13 +16,13 @@ interface IAutomationVaultFactory {
   event DeployAutomationVault(address indexed _owner, address indexed _automationVault);
 
   /*///////////////////////////////////////////////////////////////
-                              ERRORS  
+                              ERRORS
   //////////////////////////////////////////////////////////////*/
 
   /**
-   * @notice Thrown when the amount is zero
+   * @notice Thrown when the automation vault factory fails to deploy a new automation vault
    */
-  error AutomationVaultFactory_AmountZero();
+  error AutomationVaultFactory_Create2Failed();
 
   /*///////////////////////////////////////////////////////////////
                           VIEW FUNCTIONS
@@ -49,7 +49,13 @@ interface IAutomationVaultFactory {
   /**
    * @notice Deploy a new automation vault
    * @param  _owner The address of the owner
+   * @param  _nativeToken The address of the native token
+   * @param  _salt The salt to use for the automation vault deployment
    * @return _automationVault The address of the automation vault deployed
    */
-  function deployAutomationVault(address _owner) external returns (IAutomationVault _automationVault);
+  function deployAutomationVault(
+    address _owner,
+    address _nativeToken,
+    uint256 _salt
+  ) external returns (IAutomationVault _automationVault);
 }

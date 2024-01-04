@@ -7,18 +7,26 @@ import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
 
 contract IntegrationOpenRelay is CommonIntegrationTest {
   function setUp() public override {
+    // AutomationVault setup
     CommonIntegrationTest.setUp();
 
-    // AutomationVault setup
+    // Bot callers array
     address[] memory _bots = new address[](1);
     _bots[0] = bot;
+
+    // Job selectors array
     bytes4[] memory _jobSelectors = new bytes4[](2);
     _jobSelectors[0] = basicJob.work.selector;
     _jobSelectors[1] = basicJob.workHard.selector;
 
+    // Job data array
+    IAutomationVault.JobData[] memory _jobsData = new IAutomationVault.JobData[](1);
+    _jobsData[0] = IAutomationVault.JobData(address(basicJob), _jobSelectors);
+
     startHoax(owner);
-    automationVault.approveRelayCallers(address(openRelay), _bots);
-    automationVault.approveJobSelectors(address(basicJob), _jobSelectors);
+
+    // AutomationVault approve relay data
+    automationVault.approveRelayData(address(openRelay), _bots, _jobsData);
     address(automationVault).call{value: 100 ether}('');
 
     changePrank(bot);
@@ -43,11 +51,15 @@ contract IntegrationOpenRelay is CommonIntegrationTest {
     _execData[0] =
       IAutomationVault.ExecData(address(basicJob), abi.encodeWithSelector(basicJob.workHard.selector, _howHard));
 
+    // Calculate the exec gas cost
     uint256 _gasBeforeExec = gasleft();
     openRelay.exec(automationVault, _execData, bot);
     uint256 _gasAfterExec = gasleft();
 
+    // Calculate tx cost
     uint256 _txCost = (_gasBeforeExec - _gasAfterExec) * block.basefee;
+
+    // Calculate payment
     uint256 _payment = _txCost * openRelay.GAS_MULTIPLIER() / openRelay.BASE();
 
     assertGt(bot.balance, _payment);

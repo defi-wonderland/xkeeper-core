@@ -1,3 +1,2 @@
-solidity/contracts/utils/AutomateReady.sol
-solidity/contracts/utils/Types.sol
+solidity/interfaces/external/**
 *.ignore

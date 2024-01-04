@@ -207,14 +207,12 @@ interface IAutomationVault {
   /**
    * @notice Returns the approved relay callers and selectors for a specific relay and job
    * @param  _relay The address of the relay
-   * @param  _job The address of the job
    * @return _callers The array of approved relay callers
-   * @return _selectors The array of approved selectors
+   * @return _jobsData The array of approved jobs and selectors
    */
-  function getRelayAndJobData(
-    address _relay,
-    address _job
-  ) external returns (address[] memory _callers, bytes32[] memory _selectors);
+  function getRelayData(address _relay)
+    external
+    returns (address[] memory _callers, IAutomationVault.JobData[] memory _jobsData);
 
   /**
    * @notice Returns the approved relays

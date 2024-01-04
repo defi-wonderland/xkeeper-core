@@ -107,14 +107,19 @@ contract UnitGetRelayData is AutomationVaultUnitTest {
   function testRelayData(address _relay, address _relayCaller, address _job, bytes4 _functionSelector) public {
     automationVault.addRelayEnabledCallersForTest(_relay, _relayCaller);
     automationVault.addJobEnabledSelectorsForTest(_relay, _job, _functionSelector);
+    automationVault.addJobEnabledSelectorsForTest(relay, job, jobSelector);
 
-    (address[] memory _callers, bytes32[] memory _selectors) = automationVault.getRelayAndJobData(_relay, _job);
+    (address[] memory _callers, IAutomationVault.JobData[] memory _jobsData) = automationVault.getRelayData(_relay);
 
     assertEq(_callers.length, 1);
     assertEq(_callers[0], _relayCaller);
 
-    assertEq(_selectors.length, 1);
-    assertEq(_selectors[0], _functionSelector);
+    assertEq(_jobsData[0].job, _job);
+
+    assertEq(_jobsData.length, 1);
+
+    assertEq(_jobsData[0].functionSelectors.length, 1);
+    assertEq(_jobsData[0].functionSelectors[0], _functionSelector);
   }
 }
 

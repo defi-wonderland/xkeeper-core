@@ -51,15 +51,65 @@ contract AutomationVault is IAutomationVault {
   }
 
   /// @inheritdoc IAutomationVault
-  function getRelayAndJobData(
-    address _relay,
-    address _job
-  ) public view returns (address[] memory _callers, bytes32[] memory _selectors) {
+  function getRelayData(address _relay)
+    public
+    view
+    returns (address[] memory _callers, IAutomationVault.JobData[] memory _jobsData)
+  {
+    // Counter to get the correct length of the jobs data array
+    uint256 _counter;
+
     // Get the list of callers
     _callers = _relayCallers[_relay].values();
 
-    // Get the list of selectors
-    _selectors = _relayJobSelectors[_relay][_job].values();
+    // Get the list of all jobs
+    address[] memory allJobs = _jobs.values();
+
+    // Create the array of jobs data with the jobs length
+    IAutomationVault.JobData[] memory _preJobsData = new IAutomationVault.JobData[](allJobs.length);
+
+    // Get the list of jobs and their selectors
+    for (uint256 _i; _i < allJobs.length;) {
+      // Create the array of selectors
+      bytes4[] memory _selectors = new bytes4[](_relayJobSelectors[_relay][allJobs[_i]].length());
+
+      // If the job has selectors, get them
+      if (_selectors.length != 0) {
+        // Get the list of selectors
+        for (uint256 _j; _j < _selectors.length;) {
+          // Convert the bytes32 selector to bytes4
+          _selectors[_j] = bytes4(_relayJobSelectors[_relay][allJobs[_i]].at(_j));
+
+          unchecked {
+            ++_j;
+          }
+        }
+
+        // Add the job and its selectors to the full list
+        _preJobsData[_i] = IAutomationVault.JobData(allJobs[_i], _selectors);
+
+        // Increase the counter
+        unchecked {
+          ++_counter;
+        }
+      }
+
+      unchecked {
+        ++_i;
+      }
+    }
+
+    // Create the array of jobs data with the correct length
+    _jobsData = new IAutomationVault.JobData[](_counter);
+
+    // Iterate over the jobs data to add them to the final array
+    for (uint256 _z; _z < _counter;) {
+      _jobsData[_z] = _preJobsData[_z];
+
+      unchecked {
+        ++_z;
+      }
+    }
   }
 
   /// @inheritdoc IAutomationVault

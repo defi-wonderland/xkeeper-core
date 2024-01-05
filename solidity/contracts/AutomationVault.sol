@@ -63,22 +63,22 @@ contract AutomationVault is IAutomationVault {
     _callers = _relayCallers[_relay].values();
 
     // Get the list of all jobs
-    address[] memory allJobs = _jobs.values();
+    address[] memory _allJobs = _jobs.values();
 
     // Create the array of jobs data with the jobs length
-    IAutomationVault.JobData[] memory _preJobsData = new IAutomationVault.JobData[](allJobs.length);
+    IAutomationVault.JobData[] memory _preJobsData = new IAutomationVault.JobData[](_allJobs.length);
 
     // Get the list of jobs and their selectors
-    for (uint256 _i; _i < allJobs.length;) {
+    for (uint256 _i; _i < _allJobs.length;) {
       // Create the array of selectors
-      bytes4[] memory _selectors = new bytes4[](_relayJobSelectors[_relay][allJobs[_i]].length());
+      bytes4[] memory _selectors = new bytes4[](_relayJobSelectors[_relay][_allJobs[_i]].length());
 
       // If the job has selectors, get them
       if (_selectors.length != 0) {
         // Get the list of selectors
         for (uint256 _j; _j < _selectors.length;) {
           // Convert the bytes32 selector to bytes4
-          _selectors[_j] = bytes4(_relayJobSelectors[_relay][allJobs[_i]].at(_j));
+          _selectors[_j] = bytes4(_relayJobSelectors[_relay][_allJobs[_i]].at(_j));
 
           unchecked {
             ++_j;
@@ -86,7 +86,7 @@ contract AutomationVault is IAutomationVault {
         }
 
         // Add the job and its selectors to the full list
-        _preJobsData[_i] = IAutomationVault.JobData(allJobs[_i], _selectors);
+        _preJobsData[_i] = IAutomationVault.JobData(_allJobs[_i], _selectors);
 
         // Increase the counter
         unchecked {

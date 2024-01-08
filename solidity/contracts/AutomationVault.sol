@@ -52,7 +52,7 @@ contract AutomationVault is IAutomationVault {
 
   /// @inheritdoc IAutomationVault
   function getRelayData(address _relay)
-    public
+    external
     view
     returns (address[] memory _callers, IAutomationVault.JobData[] memory _jobsData)
   {
@@ -86,7 +86,7 @@ contract AutomationVault is IAutomationVault {
         }
 
         // Add the job and its selectors to the full list
-        _preJobsData[_i] = IAutomationVault.JobData(_allJobs[_i], _selectors);
+        _preJobsData[_counter] = IAutomationVault.JobData(_allJobs[_i], _selectors);
 
         // Increase the counter
         unchecked {
@@ -157,9 +157,14 @@ contract AutomationVault is IAutomationVault {
   ) external onlyOwner {
     if (_relay == address(0)) revert AutomationVault_RelayZero();
 
-    // If the relay is not approved, add it to the list of relays
-    if (_relays.add(_relay)) {
-      emit ApproveRelay(_relay);
+    if (_callers.length == 0 && _jobsData.length == 0) revert AutomationVault_NoCallersJobsAndSelectors();
+
+    // If callers are not empty, add the relay to the list of relays
+    if (_callers.length != 0) {
+      // If the relay is not approved, add it to the list of relays
+      if (_relays.add(_relay)) {
+        emit ApproveRelay(_relay);
+      }
     }
 
     // Iterate over the callers to approve them
@@ -177,9 +182,12 @@ contract AutomationVault is IAutomationVault {
     for (uint256 _i; _i < _jobsData.length;) {
       IAutomationVault.JobData memory _jobData = _jobsData[_i];
 
-      // If the job is not approved, add it to the list of jobs
-      if (_jobs.add(_jobData.job)) {
-        emit ApproveJob(_jobData.job);
+      // If the function selectors are not empty, add the job to the list of jobs
+      if (_jobData.functionSelectors.length != 0) {
+        // If the job is not approved, add it to the list of jobs
+        if (_jobs.add(_jobData.job)) {
+          emit ApproveJob(_jobData.job);
+        }
       }
 
       // Iterate over the selectors to approve them

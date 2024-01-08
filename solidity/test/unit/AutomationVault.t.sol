@@ -101,25 +101,62 @@ contract UnitAutomationVaultConstructor is AutomationVaultUnitTest {
 }
 
 contract UnitGetRelayData is AutomationVaultUnitTest {
+  using EnumerableSet for EnumerableSet.AddressSet;
+  using EnumerableSet for EnumerableSet.Bytes32Set;
+
+  EnumerableSet.AddressSet internal _cleanCallers;
+  EnumerableSet.Bytes32Set internal _cleanSelectors;
+
+  modifier happyPath(address _relay, address[] memory _relayCallers, address _job, bytes4[] memory _functionSelectors) {
+    vm.assume(_relay != address(0));
+    vm.assume(_job != address(0));
+    vm.assume(_functionSelectors.length > 0 && _functionSelectors.length < 30);
+    vm.assume(_relayCallers.length > 0 && _relayCallers.length < 30);
+
+    // Clean the array to avoid duplicates
+    for (uint256 _i; _i < _relayCallers.length; ++_i) {
+      automationVault.addRelayEnabledCallersForTest(_relay, _relayCallers[_i]);
+      _cleanCallers.add(_relayCallers[_i]);
+    }
+
+    // Clean the array to avoid duplicates
+    for (uint256 _i; _i < _functionSelectors.length; ++_i) {
+      _cleanSelectors.add(_functionSelectors[_i]);
+      automationVault.addJobEnabledSelectorsForTest(_relay, _job, _functionSelectors[_i]);
+    }
+
+    vm.startPrank(owner);
+
+    _;
+  }
   /**
    * @notice Check that the relay data is correct
    */
-  function testRelayData(address _relay, address _relayCaller, address _job, bytes4 _functionSelector) public {
-    automationVault.addRelayEnabledCallersForTest(_relay, _relayCaller);
-    automationVault.addJobEnabledSelectorsForTest(_relay, _job, _functionSelector);
-    automationVault.addJobEnabledSelectorsForTest(relay, job, jobSelector);
 
+  function testRelayData(
+    address _relay,
+    address[] memory _relayCallers,
+    address _job,
+    bytes4[] memory _functionSelector
+  ) public happyPath(_relay, _relayCallers, _job, _functionSelector) {
     (address[] memory _callers, IAutomationVault.JobData[] memory _jobsData) = automationVault.getRelayData(_relay);
 
-    assertEq(_callers.length, 1);
-    assertEq(_callers[0], _relayCaller);
+    // Check the relay callers
+    assertEq(_callers.length, _cleanCallers.length());
 
+    for (uint256 _i; _i < _callers.length; ++_i) {
+      assertEq(_callers[_i], _cleanCallers.at(_i));
+    }
+
+    // Check the jobs
     assertEq(_jobsData[0].job, _job);
 
-    assertEq(_jobsData.length, 1);
+    // Check the function selectors
+    assertEq(_jobsData[0].functionSelectors.length, _cleanSelectors.length());
 
-    assertEq(_jobsData[0].functionSelectors.length, 1);
-    assertEq(_jobsData[0].functionSelectors[0], _functionSelector);
+    for (uint256 _i; _i < _jobsData[0].functionSelectors.length; ++_i) {
+      assertEq(_jobsData[0].functionSelectors[_i], _cleanSelectors.at(_i));
+    }
   }
 }
 
@@ -355,6 +392,16 @@ contract UnitAutomationVaultApproveRelayData is AutomationVaultUnitTest {
 
     vm.prank(owner);
     automationVault.approveRelayData(address(0), _callers, _jobsData);
+  }
+
+  /**
+   * @notice Checks that the test has to revert if the callers, jobs and selectors length is zero
+   */
+  function testRevertIfNoCallersJobsAndSelectors() public {
+    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_NoCallersJobsAndSelectors.selector));
+
+    vm.prank(owner);
+    automationVault.approveRelayData(relay, new address[](0), new IAutomationVault.JobData[](0));
   }
 
   /**

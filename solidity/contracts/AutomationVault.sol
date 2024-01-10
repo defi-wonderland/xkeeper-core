@@ -165,16 +165,16 @@ contract AutomationVault is IAutomationVault {
       if (_relays.add(_relay)) {
         emit ApproveRelay(_relay);
       }
-    }
 
-    // Iterate over the callers to approve them
-    for (uint256 _i; _i < _callers.length;) {
-      if (_relayCallers[_relay].add(_callers[_i])) {
-        emit ApproveRelayCaller(_relay, _callers[_i]);
-      }
+      // Iterate over the callers to approve them
+      for (uint256 _i; _i < _callers.length;) {
+        if (_relayCallers[_relay].add(_callers[_i])) {
+          emit ApproveRelayCaller(_relay, _callers[_i]);
+        }
 
-      unchecked {
-        ++_i;
+        unchecked {
+          ++_i;
+        }
       }
     }
 
@@ -188,16 +188,16 @@ contract AutomationVault is IAutomationVault {
         if (_jobs.add(_jobData.job)) {
           emit ApproveJob(_jobData.job);
         }
-      }
 
-      // Iterate over the selectors to approve them
-      for (uint256 _j; _j < _jobData.functionSelectors.length;) {
-        if (_relayJobSelectors[_relay][_jobData.job].add(_jobData.functionSelectors[_j])) {
-          emit ApproveJobSelector(_jobData.job, _jobData.functionSelectors[_j]);
-        }
+        // Iterate over the selectors to approve them
+        for (uint256 _j; _j < _jobData.functionSelectors.length;) {
+          if (_relayJobSelectors[_relay][_jobData.job].add(_jobData.functionSelectors[_j])) {
+            emit ApproveJobSelector(_jobData.job, _jobData.functionSelectors[_j]);
+          }
 
-        unchecked {
-          ++_j;
+          unchecked {
+            ++_j;
+          }
         }
       }
 

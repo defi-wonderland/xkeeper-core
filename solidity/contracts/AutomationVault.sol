@@ -51,15 +51,65 @@ contract AutomationVault is IAutomationVault {
   }
 
   /// @inheritdoc IAutomationVault
-  function getRelayAndJobData(
-    address _relay,
-    address _job
-  ) public view returns (address[] memory _callers, bytes32[] memory _selectors) {
+  function getRelayData(address _relay)
+    external
+    view
+    returns (address[] memory _callers, IAutomationVault.JobData[] memory _jobsData)
+  {
+    // Counter to get the correct length of the jobs data array
+    uint256 _counter;
+
     // Get the list of callers
     _callers = _relayCallers[_relay].values();
 
-    // Get the list of selectors
-    _selectors = _relayJobSelectors[_relay][_job].values();
+    // Get the list of all jobs
+    address[] memory _allJobs = _jobs.values();
+
+    // Create the array of jobs data with the jobs length
+    IAutomationVault.JobData[] memory _preJobsData = new IAutomationVault.JobData[](_allJobs.length);
+
+    // Get the list of jobs and their selectors
+    for (uint256 _i; _i < _allJobs.length;) {
+      // Create the array of selectors
+      bytes4[] memory _selectors = new bytes4[](_relayJobSelectors[_relay][_allJobs[_i]].length());
+
+      // If the job has selectors, get them
+      if (_selectors.length != 0) {
+        // Get the list of selectors
+        for (uint256 _j; _j < _selectors.length;) {
+          // Convert the bytes32 selector to bytes4
+          _selectors[_j] = bytes4(_relayJobSelectors[_relay][_allJobs[_i]].at(_j));
+
+          unchecked {
+            ++_j;
+          }
+        }
+
+        // Add the job and its selectors to the full list
+        _preJobsData[_counter] = IAutomationVault.JobData(_allJobs[_i], _selectors);
+
+        // Increase the counter
+        unchecked {
+          ++_counter;
+        }
+      }
+
+      unchecked {
+        ++_i;
+      }
+    }
+
+    // Create the array of jobs data with the correct length
+    _jobsData = new IAutomationVault.JobData[](_counter);
+
+    // Iterate over the jobs data to add them to the final array
+    for (uint256 _z; _z < _counter;) {
+      _jobsData[_z] = _preJobsData[_z];
+
+      unchecked {
+        ++_z;
+      }
+    }
   }
 
   /// @inheritdoc IAutomationVault
@@ -107,19 +157,24 @@ contract AutomationVault is IAutomationVault {
   ) external onlyOwner {
     if (_relay == address(0)) revert AutomationVault_RelayZero();
 
-    // If the relay is not approved, add it to the list of relays
-    if (_relays.add(_relay)) {
-      emit ApproveRelay(_relay);
-    }
+    if (_callers.length == 0 && _jobsData.length == 0) revert AutomationVault_NoCallersJobsAndSelectors();
 
-    // Iterate over the callers to approve them
-    for (uint256 _i; _i < _callers.length;) {
-      if (_relayCallers[_relay].add(_callers[_i])) {
-        emit ApproveRelayCaller(_relay, _callers[_i]);
+    // If callers are not empty, add the relay to the list of relays
+    if (_callers.length != 0) {
+      // If the relay is not approved, add it to the list of relays
+      if (_relays.add(_relay)) {
+        emit ApproveRelay(_relay);
       }
 
-      unchecked {
-        ++_i;
+      // Iterate over the callers to approve them
+      for (uint256 _i; _i < _callers.length;) {
+        if (_relayCallers[_relay].add(_callers[_i])) {
+          emit ApproveRelayCaller(_relay, _callers[_i]);
+        }
+
+        unchecked {
+          ++_i;
+        }
       }
     }
 
@@ -127,19 +182,22 @@ contract AutomationVault is IAutomationVault {
     for (uint256 _i; _i < _jobsData.length;) {
       IAutomationVault.JobData memory _jobData = _jobsData[_i];
 
-      // If the job is not approved, add it to the list of jobs
-      if (_jobs.add(_jobData.job)) {
-        emit ApproveJob(_jobData.job);
-      }
-
-      // Iterate over the selectors to approve them
-      for (uint256 _j; _j < _jobData.functionSelectors.length;) {
-        if (_relayJobSelectors[_relay][_jobData.job].add(_jobData.functionSelectors[_j])) {
-          emit ApproveJobSelector(_jobData.job, _jobData.functionSelectors[_j]);
+      // If the function selectors are not empty, add the job to the list of jobs
+      if (_jobData.functionSelectors.length != 0) {
+        // If the job is not approved, add it to the list of jobs
+        if (_jobs.add(_jobData.job)) {
+          emit ApproveJob(_jobData.job);
         }
 
-        unchecked {
-          ++_j;
+        // Iterate over the selectors to approve them
+        for (uint256 _j; _j < _jobData.functionSelectors.length;) {
+          if (_relayJobSelectors[_relay][_jobData.job].add(_jobData.functionSelectors[_j])) {
+            emit ApproveJobSelector(_jobData.job, _jobData.functionSelectors[_j]);
+          }
+
+          unchecked {
+            ++_j;
+          }
         }
       }
 

@@ -116,6 +116,11 @@ interface IAutomationVault {
   error AutomationVault_RelayZero();
 
   /**
+   * @notice Thrown when try to approve a relay without callers, jobs and selectors
+   */
+  error AutomationVault_NoCallersJobsAndSelectors();
+
+  /**
    * @notice Thrown when the job is the zero address
    */
   error AutomationVault_JobZero();
@@ -207,14 +212,12 @@ interface IAutomationVault {
   /**
    * @notice Returns the approved relay callers and selectors for a specific relay and job
    * @param  _relay The address of the relay
-   * @param  _job The address of the job
    * @return _callers The array of approved relay callers
-   * @return _selectors The array of approved selectors
+   * @return _jobsData The array of approved jobs and selectors
    */
-  function getRelayAndJobData(
-    address _relay,
-    address _job
-  ) external returns (address[] memory _callers, bytes32[] memory _selectors);
+  function getRelayData(address _relay)
+    external
+    returns (address[] memory _callers, IAutomationVault.JobData[] memory _jobsData);
 
   /**
    * @notice Returns the approved relays
@@ -256,6 +259,7 @@ interface IAutomationVault {
   /**
    * @notice Approves relay callers which will be able to call a relay to execute jobs with the specified selectors
    * @dev   You can approve all the fields or only the necessary ones, passing the empty argument in the unwanted ones
+   * @dev   If the callers array and the selectors array are empty, the function will revert to avoid wasting gas
    * @param  _relay The address of the relay
    * @param  _callers The array of callers
    * @param _jobsData The array of job data

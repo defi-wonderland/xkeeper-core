@@ -55,7 +55,7 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
     startHoax(owner);
 
     // AutomationVault approve relay data
-    automationVault.approveRelayData(address(gelatoRelay), _whitelistedCallers, _jobsData);
+    automationVault.addRelay(address(gelatoRelay), _whitelistedCallers, _jobsData);
 
     address(automationVault).call{value: 100 ether}('');
 

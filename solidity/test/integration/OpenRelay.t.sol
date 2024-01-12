@@ -26,7 +26,7 @@ contract IntegrationOpenRelay is CommonIntegrationTest {
     startHoax(owner);
 
     // AutomationVault approve relay data
-    automationVault.approveRelayData(address(openRelay), _bots, _jobsData);
+    automationVault.addRelay(address(openRelay), _bots, _jobsData);
     address(automationVault).call{value: 100 ether}('');
 
     changePrank(bot);

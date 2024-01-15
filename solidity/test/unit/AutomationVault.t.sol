@@ -16,6 +16,15 @@ contract AutomationVaultForTest is AutomationVault {
     pendingOwner = _pendingOwner;
   }
 
+  function addRelayCallerForTest(address _relay, address _caller) public {
+    _relayCallers[_relay].add(_caller);
+  }
+
+  function addJobSelectorForTest(address _relay, address _job, bytes4 _selector) public {
+    _relayJobs[_relay].add(_job);
+    _jobSelectors[_job].add(bytes32(_selector));
+  }
+
   function addRelayForTest(address _relay, address[] memory _callers, address _job, bytes4[] memory _selectors) public {
     for (uint256 _i; _i < _callers.length; ++_i) {
       _relayCallers[_relay].add(_callers[_i]);
@@ -584,6 +593,189 @@ contract UnitAutomationVaultDeleteRelay is AutomationVaultUnitTest {
 /**
  * @dev Is not possible to create in the happy path type struct IAutomationVault.JobData memory[] memory to storage because is not yet supported.
  */
+contract UnitAutomationVaultModifyRelay is AutomationVaultUnitTest {
+  using EnumerableSet for EnumerableSet.AddressSet;
+  using EnumerableSet for EnumerableSet.Bytes32Set;
+
+  EnumerableSet.AddressSet internal _cleanCallers;
+  EnumerableSet.Bytes32Set internal _cleanSelectors;
+
+  modifier happyPath(address _relay, address[] memory _callers, address _job, bytes4[] memory _selectors) {
+    /// @dev This is a workaround for the fact that the VM does not support dynamic arrays
+    vm.assume(_relay != address(0));
+    vm.assume(_job != address(0));
+    vm.assume(_callers.length > 0 && _callers.length < 30);
+    vm.assume(_selectors.length > 0 && _selectors.length < 30);
+
+    // Clean the array to avoid duplicates
+    for (uint256 _i; _i < _callers.length; ++_i) {
+      _cleanCallers.add(_callers[_i]);
+    }
+
+    // Clean the array to avoid duplicates
+    for (uint256 _i; _i < _selectors.length; ++_i) {
+      _cleanSelectors.add(_selectors[_i]);
+    }
+
+    automationVault.addRelayForTest(_relay, new address[](0), address(0), new bytes4[](0));
+
+    vm.startPrank(owner);
+    _;
+  }
+  /**
+   * @notice Checks that the test has to revert if the caller is not the owner
+   */
+
+  function testRevertIfCallerIsNotOwner(address _relay) public {
+    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector));
+
+    vm.prank(pendingOwner);
+    automationVault.modifyRelay(_relay, new address[](0), new IAutomationVault.JobData[](0));
+  }
+
+  /**
+   * @notice Checks that the test has to revert if the relay address is zero
+   */
+  function testRevertIfRelayIsZero(address _relay) public {
+    vm.assume(_relay == address(0));
+    vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_RelayZero.selector));
+
+    vm.prank(owner);
+    automationVault.modifyRelay(_relay, new address[](0), new IAutomationVault.JobData[](0));
+  }
+
+  /**
+   * @notice Checks that callers are modified correctly
+   */
+  function testRelayCallersAreModified(
+    address _relay,
+    address[] memory _callers,
+    address _job,
+    bytes4[] memory _selectors
+  ) public happyPath(_relay, _callers, _job, _selectors) {
+    // Get the list of callers
+    (address[] memory _relayCallers,) = automationVault.getRelayDataForTest(_relay);
+
+    // Length should be zero
+    assertEq(_relayCallers.length, 0);
+
+    // Create the array of jobs data with the jobs length
+    IAutomationVault.JobData[] memory _jobsData = new IAutomationVault.JobData[](1);
+    _jobsData[0].job = _job;
+    _jobsData[0].functionSelectors = _selectors;
+
+    // Modify the callers
+    automationVault.modifyRelay(_relay, _callers, _jobsData);
+
+    // Get the list of callers
+    (_relayCallers,) = automationVault.getRelayDataForTest(_relay);
+
+    for (uint256 _i; _i < _relayCallers.length; ++_i) {
+      assertEq(_relayCallers[_i], _cleanCallers.at(_i));
+    }
+  }
+
+  /**
+   * @notice Emit ApproveRelayCaller event when the relay caller is approved
+   */
+  function testEmitApproveRelayCaller(
+    address _relay,
+    address[] memory _callers,
+    address _job,
+    bytes4[] memory _selectors
+  ) public happyPath(_relay, _callers, _job, _selectors) {
+    // Create the array of jobs data with the jobs length
+    IAutomationVault.JobData[] memory _jobsData = new IAutomationVault.JobData[](1);
+    _jobsData[0].job = _job;
+    _jobsData[0].functionSelectors = _selectors;
+
+    for (uint256 _i; _i < _cleanCallers.length(); ++_i) {
+      vm.expectEmit();
+      emit ApproveRelayCaller(_relay, _cleanCallers.at(_i));
+    }
+
+    automationVault.modifyRelay(_relay, _callers, _jobsData);
+  }
+
+  /**
+   * @notice Checks that jobs and selectors are modified correctly
+   */
+  function testRelayJobsAndSelectorsAreModified(
+    address _relay,
+    address[] memory _callers,
+    address _job,
+    bytes4[] memory _selectors
+  ) public happyPath(_relay, _callers, _job, _selectors) {
+    // Get the list of callers
+    (, IAutomationVault.JobData[] memory _jobsData) = automationVault.getRelayDataForTest(_relay);
+
+    // Length should be zero
+    assertEq(_jobsData.length, 0);
+
+    _jobsData = new IAutomationVault.JobData[](1);
+    _jobsData[0].job = _job;
+    _jobsData[0].functionSelectors = _selectors;
+
+    // Modify the callers
+    automationVault.modifyRelay(_relay, _callers, _jobsData);
+
+    // Get the list of callers
+    (, _jobsData) = automationVault.getRelayDataForTest(_relay);
+
+    for (uint256 _i; _i < _jobsData.length; ++_i) {
+      assertEq(_jobsData[_i].job, _job);
+      assertEq(_jobsData[_i].functionSelectors.length, _cleanSelectors.length());
+
+      for (uint256 _j; _j < _jobsData[_i].functionSelectors.length; ++_j) {
+        assertEq(_jobsData[_i].functionSelectors[_j], _cleanSelectors.at(_j));
+      }
+    }
+  }
+
+  /**
+   * @notice Emit ApproveJob event when the job is approved
+   */
+  function testEmitApproveJob(
+    address _relay,
+    address[] memory _callers,
+    address _job,
+    bytes4[] memory _selectors
+  ) public happyPath(_relay, _callers, _job, _selectors) {
+    IAutomationVault.JobData[] memory _jobsData = new IAutomationVault.JobData[](1);
+    _jobsData[0].job = _job;
+    _jobsData[0].functionSelectors = _selectors;
+
+    vm.expectEmit();
+    emit ApproveJob(_job);
+
+    automationVault.modifyRelay(_relay, _callers, _jobsData);
+  }
+
+  /**
+   * @notice Emit ApproveJobSelector event when the job selector is approved
+   */
+  function testEmitApproveFunctionSelector(
+    address _relay,
+    address[] memory _callers,
+    address _job,
+    bytes4[] memory _selectors
+  ) public happyPath(_relay, _callers, _job, _selectors) {
+    IAutomationVault.JobData[] memory _jobsData = new IAutomationVault.JobData[](1);
+    _jobsData[0].job = _job;
+    _jobsData[0].functionSelectors = _selectors;
+
+    for (uint256 _i; _i < _cleanSelectors.length(); ++_i) {
+      vm.expectEmit();
+      emit ApproveJobSelector(_job, bytes4(_cleanSelectors.at(_i)));
+    }
+
+    automationVault.modifyRelayJobs(_relay, _jobsData);
+  }
+}
+
+/**
+ * @dev Is not possible to create in the happy path type struct IAutomationVault.JobData memory[] memory to storage because is not yet supported.
+ */
 contract UnitAutomationVaultModifyRelayCallers is AutomationVaultUnitTest {
   using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -705,9 +897,9 @@ contract UnitAutomationVaultModifyRelayJobs is AutomationVaultUnitTest {
   }
 
   /**
-   * @notice Checks that callers are modified correctly
+   * @notice Checks that jobs and selectors are modified correctly
    */
-  function testRelayCallersAreModified(
+  function testRelayJobsAndSelectorsAreModified(
     address _relay,
     address _job,
     bytes4[] memory _selectors
@@ -777,213 +969,245 @@ contract UnitAutomationVaultModifyRelayJobs is AutomationVaultUnitTest {
   }
 }
 
-// contract UnitAutomationVaultExec is AutomationVaultUnitTest {
-//   modifier happyPath(IAutomationVault.ExecData[] memory _execData, IAutomationVault.FeeData[] memory _feeData) {
-//     vm.assume(_execData.length < 30 && _feeData.length < 30);
+contract UnitAutomationVaultExec is AutomationVaultUnitTest {
+  modifier happyPath(
+    address _relay,
+    address _caller,
+    IAutomationVault.ExecData[] memory _execData,
+    IAutomationVault.FeeData[] memory _feeData
+  ) {
+    vm.assume(_execData.length < 30 && _feeData.length < 30);
 
-//     automationVault.addRelayEnabledCallersForTest(relay, relayCaller);
+    // Add the relay caller
+    automationVault.addRelayCallerForTest(_relay, _caller);
 
-//     for (uint256 _i; _i < _execData.length; ++_i) {
-//       automationVault.addJobEnabledSelectorsForTest(relay, _execData[_i].job, bytes4(_execData[_i].jobData));
-//       assumeNoPrecompiles(_execData[_i].job);
-//       vm.assume(_execData[_i].job != address(vm));
-//       vm.mockCall(_execData[_i].job, abi.encodeWithSelector(bytes4(_execData[_i].jobData)), abi.encode());
-//     }
+    // Add the job and the selector
+    for (uint256 _i; _i < _execData.length; ++_i) {
+      automationVault.addJobSelectorForTest(_relay, _execData[_i].job, bytes4(_execData[_i].jobData));
+      assumeNoPrecompiles(_execData[_i].job);
+      vm.assume(_execData[_i].job != address(vm));
+      vm.mockCall(_execData[_i].job, abi.encodeWithSelector(bytes4(_execData[_i].jobData)), abi.encode());
+    }
 
-//     for (uint256 _i; _i < _feeData.length; ++_i) {
-//       assumeNoPrecompiles(_feeData[_i].feeRecipient);
-//       assumePayable(_feeData[_i].feeRecipient);
-//       assumeNoPrecompiles(_feeData[_i].feeToken);
-//       vm.assume(_feeData[_i].feeToken != address(vm));
-//       vm.mockCall(_feeData[_i].feeToken, abi.encodeWithSelector(IERC20.transfer.selector), abi.encode(true));
-//     }
+    for (uint256 _i; _i < _feeData.length; ++_i) {
+      assumeNoPrecompiles(_feeData[_i].feeRecipient);
+      assumePayable(_feeData[_i].feeRecipient);
+      assumeNoPrecompiles(_feeData[_i].feeToken);
+      vm.assume(_feeData[_i].feeToken != address(vm));
+      vm.mockCall(_feeData[_i].feeToken, abi.encodeWithSelector(IERC20.transfer.selector), abi.encode(true));
+    }
 
-//     deal(address(automationVault), type(uint256).max);
+    deal(address(automationVault), type(uint256).max);
 
-//     vm.startPrank(relay);
-//     _;
-//   }
+    vm.startPrank(_relay);
+    _;
+  }
 
-//   /**
-//    * @notice Checks that the test has to revert if the caller is not the relay caller
-//    */
-//   function testRevertIfNotApprovedRelayCaller(
-//     IAutomationVault.ExecData[] memory _execData,
-//     IAutomationVault.FeeData[] memory _feeData
-//   ) public happyPath(_execData, _feeData) {
-//     vm.expectRevert(IAutomationVault.AutomationVault_NotApprovedRelayCaller.selector);
+  /**
+   * @notice Checks that the test has to revert if the caller is not the relay caller
+   */
+  function testRevertIfNotApprovedRelayCaller(
+    address _relay,
+    address _caller,
+    IAutomationVault.ExecData[] memory _execData,
+    IAutomationVault.FeeData[] memory _feeData
+  ) public happyPath(_relay, _caller, _execData, _feeData) {
+    vm.expectRevert(IAutomationVault.AutomationVault_NotApprovedRelayCaller.selector);
 
-//     changePrank(owner);
-//     automationVault.exec(relayCaller, _execData, _feeData);
-//   }
+    changePrank(owner);
+    automationVault.exec(_caller, _execData, _feeData);
+  }
 
-//   function testRevertIfNotApprovedJobSelector(
-//     IAutomationVault.ExecData[] memory _execData,
-//     IAutomationVault.FeeData[] memory _feeData
-//   ) public happyPath(_execData, _feeData) {
-//     vm.assume(_execData.length > 3);
-//     automationVault.removeJobEnabledSelectorsForTest(relay, _execData[1].job, bytes4(_execData[1].jobData));
+  /**
+   * @notice Checks that the test has to revert if the job is not approved
+   */
+  function testRevertIfNotApprovedJobSelector(
+    address _relay,
+    address _caller,
+    IAutomationVault.ExecData[] memory _execData
+  ) public happyPath(_relay, _caller, new IAutomationVault.ExecData[](0), new IAutomationVault.FeeData[](0)) {
+    vm.assume(_execData.length > 3);
 
-//     vm.expectRevert(IAutomationVault.AutomationVault_NotApprovedJobSelector.selector);
+    for (uint256 _i; _i < _execData.length; ++_i) {
+      automationVault.addJobSelectorForTest(_relay, _execData[_i].job, bytes4(0));
+    }
 
-//     automationVault.exec(relayCaller, _execData, _feeData);
-//   }
+    vm.expectRevert(IAutomationVault.AutomationVault_NotApprovedJobSelector.selector);
 
-//   /**
-//    * @notice Checks that the test has to revert if the job call failed
-//    */
-//   function testRevertIfJobCallFailed(
-//     IAutomationVault.ExecData[] memory _execData,
-//     IAutomationVault.FeeData[] memory _feeData
-//   ) public happyPath(_execData, _feeData) {
-//     vm.assume(_execData.length > 3);
-//     vm.etch(_execData[1].job, type(NoFallbackForTest).runtimeCode);
-//     vm.mockCallRevert(_execData[1].job, abi.encodeWithSelector(bytes4(_execData[1].jobData)), abi.encode());
+    automationVault.exec(_caller, _execData, new IAutomationVault.FeeData[](0));
+  }
 
-//     vm.expectRevert(IAutomationVault.AutomationVault_ExecFailed.selector);
+  /**
+   * @notice Checks that the test has to revert if the job call failed
+   */
+  function testRevertIfJobCallFailed(
+    address _relay,
+    address _caller,
+    IAutomationVault.ExecData[] memory _execData,
+    IAutomationVault.FeeData[] memory _feeData
+  ) public happyPath(_relay, _caller, _execData, _feeData) {
+    vm.assume(_execData.length > 3);
+    vm.etch(_execData[1].job, type(NoFallbackForTest).runtimeCode);
+    vm.mockCallRevert(_execData[1].job, abi.encodeWithSelector(bytes4(_execData[1].jobData)), abi.encode());
 
-//     automationVault.exec(relayCaller, _execData, _feeData);
-//   }
+    vm.expectRevert(IAutomationVault.AutomationVault_ExecFailed.selector);
 
-//   /**
-//    * @notice Checks that call is executed correctly without fees
-//    */
-//   function testCallOnlyJobFunction(IAutomationVault.ExecData[] memory _execData)
-//     public
-//     happyPath(_execData, new IAutomationVault.FeeData[](0))
-//   {
-//     vm.assume(_execData.length > 3);
-//     IAutomationVault.FeeData[] memory _feeData = new IAutomationVault.FeeData[](0);
+    automationVault.exec(_caller, _execData, _feeData);
+  }
 
-//     for (uint256 _i; _i < _execData.length; ++_i) {
-//       vm.expectCall(_execData[_i].job, _execData[_i].jobData, 1);
-//     }
+  /**
+   * @notice Checks that call is executed correctly without fees
+   */
+  function testCallOnlyJobFunction(
+    address _relay,
+    address _caller,
+    IAutomationVault.ExecData[] memory _execData
+  ) public happyPath(_relay, _caller, _execData, new IAutomationVault.FeeData[](0)) {
+    vm.assume(_execData.length > 3);
 
-//     automationVault.exec(relayCaller, _execData, _feeData);
-//   }
+    for (uint256 _i; _i < _execData.length; ++_i) {
+      vm.expectCall(_execData[_i].job, _execData[_i].jobData, 1);
+    }
 
-//   /**
-//    * @notice Checks that call is executed correctly with fees
-//    */
-//   function testCallJobFunction(
-//     IAutomationVault.ExecData[] memory _execData,
-//     IAutomationVault.FeeData[] memory _feeData
-//   ) public happyPath(_execData, _feeData) {
-//     vm.assume(_execData.length > 3);
+    automationVault.exec(_caller, _execData, new IAutomationVault.FeeData[](0));
+  }
 
-//     for (uint256 _i; _i < _execData.length; ++_i) {
-//       vm.expectCall(_execData[_i].job, _execData[_i].jobData, 1);
-//     }
+  /**
+   * @notice Checks that call is executed correctly with fees
+   */
+  function testCallJobFunction(
+    address _relay,
+    address _caller,
+    IAutomationVault.ExecData[] memory _execData,
+    IAutomationVault.FeeData[] memory _feeData
+  ) public happyPath(_relay, _caller, _execData, _feeData) {
+    vm.assume(_execData.length > 3);
 
-//     automationVault.exec(relayCaller, _execData, _feeData);
-//   }
+    for (uint256 _i; _i < _execData.length; ++_i) {
+      vm.expectCall(_execData[_i].job, _execData[_i].jobData, 1);
+    }
 
-//   /**
-//    * @notice Checks that call is executed correctly with fees and open sender
-//    */
-//   function testCallJobFunctionWithOpenSender(
-//     IAutomationVault.ExecData[] memory _execData,
-//     IAutomationVault.FeeData[] memory _feeData,
-//     address _sender
-//   ) public happyPath(_execData, _feeData) {
-//     vm.assume(_execData.length > 3);
-//     automationVault.addRelayEnabledCallersForTest(relay, _ALL);
+    automationVault.exec(_caller, _execData, _feeData);
+  }
 
-//     for (uint256 _i; _i < _execData.length; ++_i) {
-//       vm.expectCall(_execData[_i].job, _execData[_i].jobData, 1);
-//     }
+  /**
+   * @notice Checks that call is executed correctly with fees and open sender
+   */
+  function testCallJobFunctionWithOpenSender(
+    address _relay,
+    IAutomationVault.ExecData[] memory _execData,
+    IAutomationVault.FeeData[] memory _feeData,
+    address _sender
+  ) public happyPath(_relay, _ALL, _execData, _feeData) {
+    vm.assume(_execData.length > 3);
 
-//     automationVault.exec(_sender, _execData, _feeData);
-//   }
+    IAutomationVault.ExecData[] memory _execDataOpen = new IAutomationVault.ExecData[](1);
+    _execDataOpen[0].job = _execData[0].job;
+    _execDataOpen[0].jobData = _execData[0].jobData;
 
-//   /**
-//    * @notice Emit JobExecuted event when the job is executed
-//    */
-//   function testEmitJobExecuted(
-//     IAutomationVault.ExecData[] memory _execData,
-//     IAutomationVault.FeeData[] memory _feeData
-//   ) public happyPath(_execData, _feeData) {
-//     vm.assume(_execData.length > 3);
+    vm.expectCall(_execDataOpen[0].job, _execDataOpen[0].jobData, 1);
 
-//     for (uint256 _i; _i < _execData.length; ++_i) {
-//       vm.expectEmit();
-//       emit JobExecuted(relay, relayCaller, _execData[_i].job, _execData[_i].jobData);
-//     }
+    automationVault.exec(_sender, _execDataOpen, _feeData);
+  }
 
-//     automationVault.exec(relayCaller, _execData, _feeData);
-//   }
+  /**
+   * @notice Emit JobExecuted event when the job is executed
+   */
+  function testEmitJobExecuted(
+    address _relay,
+    address _caller,
+    IAutomationVault.ExecData[] memory _execData,
+    IAutomationVault.FeeData[] memory _feeData
+  ) public happyPath(_relay, _caller, _execData, _feeData) {
+    vm.assume(_execData.length > 3);
 
-//   /**
-//    * @notice Checks that the test has to revert if the native token transfer failed
-//    */
-//   function testRevertIfNativeTokenTransferFailed(
-//     IAutomationVault.ExecData[] memory _execData,
-//     IAutomationVault.FeeData[] memory _feeData
-//   ) public happyPath(_execData, _feeData) {
-//     vm.assume(_feeData.length > 3);
-//     _feeData[1].feeToken = _ETH;
-//     vm.etch(_feeData[1].feeRecipient, type(NoFallbackForTest).runtimeCode);
+    for (uint256 _i; _i < _execData.length; ++_i) {
+      vm.expectEmit();
+      emit JobExecuted(_relay, _caller, _execData[_i].job, _execData[_i].jobData);
+    }
 
-//     vm.expectRevert(IAutomationVault.AutomationVault_NativeTokenTransferFailed.selector);
+    automationVault.exec(_caller, _execData, _feeData);
+  }
 
-//     automationVault.exec(relayCaller, _execData, _feeData);
-//   }
+  /**
+   * @notice Checks that the test has to revert if the native token transfer failed
+   */
+  function testRevertIfNativeTokenTransferFailed(
+    address _relay,
+    address _caller,
+    IAutomationVault.ExecData[] memory _execData,
+    IAutomationVault.FeeData[] memory _feeData
+  ) public happyPath(_relay, _caller, _execData, _feeData) {
+    vm.assume(_feeData.length > 3);
+    _feeData[1].feeToken = _ETH;
+    vm.etch(_feeData[1].feeRecipient, type(NoFallbackForTest).runtimeCode);
 
-//   /**
-//    * @notice Checks that native token transfer is executed correctly
-//    */
-//   function testCallNativeTokenTransfer(
-//     IAutomationVault.ExecData[] memory _execData,
-//     IAutomationVault.FeeData[] memory _feeData,
-//     uint128 _fee
-//   ) public happyPath(_execData, _feeData) {
-//     vm.assume(_feeData.length > 3);
-//     for (uint256 _i; _i < _feeData.length; ++_i) {
-//       _feeData[_i].feeToken = _ETH;
-//       _feeData[_i].fee = _fee;
-//     }
+    vm.expectRevert(IAutomationVault.AutomationVault_NativeTokenTransferFailed.selector);
 
-//     automationVault.exec(relayCaller, _execData, _feeData);
+    automationVault.exec(_caller, _execData, _feeData);
+  }
 
-//     for (uint256 _i; _i < _feeData.length; ++_i) {
-//       assertGe(_feeData[_i].feeRecipient.balance, _feeData[_i].fee);
-//     }
-//   }
+  /**
+   * @notice Checks that native token transfer is executed correctly
+   */
+  function testCallNativeTokenTransfer(
+    address _caller,
+    IAutomationVault.ExecData[] memory _execData,
+    IAutomationVault.FeeData[] memory _feeData,
+    uint128 _fee
+  ) public happyPath(address(0), _caller, _execData, _feeData) {
+    vm.assume(_feeData.length > 3);
+    for (uint256 _i; _i < _feeData.length; ++_i) {
+      _feeData[_i].feeToken = _ETH;
+      _feeData[_i].fee = _fee;
+    }
 
-//   /**
-//    * @notice Checks that token transfer is executed correctly
-//    */
-//   function testCallTokenTransfer(
-//     IAutomationVault.ExecData[] memory _execData,
-//     IAutomationVault.FeeData[] memory _feeData
-//   ) public happyPath(_execData, _feeData) {
-//     vm.assume(_feeData.length > 3);
-//     for (uint256 _i; _i < _feeData.length; ++_i) {
-//       vm.assume(_feeData[_i].feeToken != _ETH);
-//     }
+    automationVault.exec(_caller, _execData, _feeData);
 
-//     for (uint256 _i; _i < _feeData.length; ++_i) {
-//       vm.expectCall(
-//         _feeData[_i].feeToken, abi.encodeCall(IERC20.transfer, (_feeData[_i].feeRecipient, _feeData[_i].fee)), 1
-//       );
-//     }
+    for (uint256 _i; _i < _feeData.length; ++_i) {
+      assertGe(_feeData[_i].feeRecipient.balance, _feeData[_i].fee);
+    }
+  }
 
-//     automationVault.exec(relayCaller, _execData, _feeData);
-//   }
+  /**
+   * @notice Checks that token transfer is executed correctly
+   */
+  function testCallTokenTransfer(
+    address _relay,
+    address _caller,
+    IAutomationVault.ExecData[] memory _execData,
+    IAutomationVault.FeeData[] memory _feeData
+  ) public happyPath(_relay, _caller, _execData, _feeData) {
+    vm.assume(_feeData.length > 3);
+    for (uint256 _i; _i < _feeData.length; ++_i) {
+      vm.assume(_feeData[_i].feeToken != _ETH);
+    }
 
-//   /**
-//    * @notice Emit IssuePayment event when the payment is issued
-//    */
-//   function testEmitIssuePayment(
-//     IAutomationVault.ExecData[] memory _execData,
-//     IAutomationVault.FeeData[] memory _feeData
-//   ) public happyPath(_execData, _feeData) {
-//     vm.assume(_feeData.length > 3);
+    for (uint256 _i; _i < _feeData.length; ++_i) {
+      vm.expectCall(
+        _feeData[_i].feeToken, abi.encodeCall(IERC20.transfer, (_feeData[_i].feeRecipient, _feeData[_i].fee)), 1
+      );
+    }
 
-//     for (uint256 _i; _i < _feeData.length; ++_i) {
-//       vm.expectEmit();
-//       emit IssuePayment(relay, relayCaller, _feeData[_i].feeRecipient, _feeData[_i].feeToken, _feeData[_i].fee);
-//     }
+    automationVault.exec(_caller, _execData, _feeData);
+  }
 
-//     automationVault.exec(relayCaller, _execData, _feeData);
-//   }
+  /**
+   * @notice Emit IssuePayment event when the payment is issued
+   */
+  function testEmitIssuePayment(
+    address _relay,
+    address _caller,
+    IAutomationVault.ExecData[] memory _execData,
+    IAutomationVault.FeeData[] memory _feeData
+  ) public happyPath(_relay, _caller, _execData, _feeData) {
+    vm.assume(_feeData.length > 3);
+
+    for (uint256 _i; _i < _feeData.length; ++_i) {
+      vm.expectEmit();
+      emit IssuePayment(_relay, _caller, _feeData[_i].feeRecipient, _feeData[_i].feeToken, _feeData[_i].fee);
+    }
+
+    automationVault.exec(_caller, _execData, _feeData);
+  }
+}

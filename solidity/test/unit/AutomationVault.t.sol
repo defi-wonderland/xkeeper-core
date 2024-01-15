@@ -17,24 +17,24 @@ contract AutomationVaultForTest is AutomationVault {
   }
 
   function addRelayCallerForTest(address _relay, address _caller) public {
-    _relayCallers[_relay].add(_caller);
+    _approvedCallers[_relay].add(_caller);
   }
 
   function addJobSelectorForTest(address _relay, address _job, bytes4 _selector) public {
-    _relayJobs[_relay].add(_job);
-    _jobSelectors[_job].add(bytes32(_selector));
+    _approvedJobs[_relay].add(_job);
+    _approvedJobSelectors[_relay][_job].add(bytes32(_selector));
   }
 
   function addRelayForTest(address _relay, address[] memory _callers, address _job, bytes4[] memory _selectors) public {
     for (uint256 _i; _i < _callers.length; ++_i) {
-      _relayCallers[_relay].add(_callers[_i]);
+      _approvedCallers[_relay].add(_callers[_i]);
     }
 
     if (_job != address(0)) {
-      _relayJobs[_relay].add(_job);
+      _approvedJobs[_relay].add(_job);
 
       for (uint256 _i; _i < _selectors.length; ++_i) {
-        _jobSelectors[_job].add(_selectors[_i]);
+        _approvedJobSelectors[_relay][_job].add(_selectors[_i]);
       }
     }
 
@@ -47,10 +47,10 @@ contract AutomationVaultForTest is AutomationVault {
     returns (address[] memory _callers, IAutomationVault.JobData[] memory _jobsData)
   {
     // Get the list of callers
-    _callers = _relayCallers[_relay].values();
+    _callers = _approvedCallers[_relay].values();
 
     // Get the list of all jobs
-    address[] memory _jobs = _relayJobs[_relay].values();
+    address[] memory _jobs = _approvedJobs[_relay].values();
 
     // Create the array of jobs data with the jobs length
     _jobsData = new IAutomationVault.JobData[](_jobs.length);
@@ -58,14 +58,14 @@ contract AutomationVaultForTest is AutomationVault {
     // Get the list of jobs and their selectors
     for (uint256 _i; _i < _jobs.length;) {
       // Create the array of selectors
-      bytes4[] memory _selectors = new bytes4[](_jobSelectors[_jobs[_i]].length());
+      bytes4[] memory _selectors = new bytes4[](_approvedJobSelectors[_relay][_jobs[_i]].length());
 
       // If the job has selectors, get them
       if (_selectors.length != 0) {
         // Get the list of selectors
         for (uint256 _j; _j < _selectors.length;) {
           // Convert the bytes32 selector to bytes4
-          _selectors[_j] = bytes4(_jobSelectors[_jobs[_i]].at(_j));
+          _selectors[_j] = bytes4(_approvedJobSelectors[_relay][_jobs[_i]].at(_j));
 
           unchecked {
             ++_j;

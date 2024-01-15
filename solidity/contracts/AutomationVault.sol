@@ -22,19 +22,19 @@ contract AutomationVault is IAutomationVault {
   /// @inheritdoc IAutomationVault
   address public pendingOwner;
   /**
-   * @notice Callers that are approved to call a relay
+   * @notice Callers approved to call a relay
    */
-  mapping(address _relay => EnumerableSet.AddressSet _callers) internal _relayCallers;
+  mapping(address _relay => EnumerableSet.AddressSet _callers) internal _approvedCallers;
 
   /**
-   * @notice Jobs that are approved to be executed by a relay
+   * @notice Jobs approved to be executed by a relay
    */
-  mapping(address _relay => EnumerableSet.AddressSet _jobs) internal _relayJobs;
+  mapping(address _relay => EnumerableSet.AddressSet _jobs) internal _approvedJobs;
 
   /**
-   * @notice Selectors that are approved for a job
+   * @notice Selectors approved for a job to be executed by a relay
    */
-  mapping(address _job => EnumerableSet.Bytes32Set _enabledSelectors) internal _jobSelectors;
+  mapping(address _relay => mapping(address _job => EnumerableSet.Bytes32Set _selectors)) internal _approvedJobSelectors;
 
   /**
    * @notice List of approved relays
@@ -56,10 +56,10 @@ contract AutomationVault is IAutomationVault {
     returns (address[] memory _callers, IAutomationVault.JobData[] memory _jobsData)
   {
     // Get the list of callers
-    _callers = _relayCallers[_relay].values();
+    _callers = _approvedCallers[_relay].values();
 
     // Get the list of all jobs
-    address[] memory _jobs = _relayJobs[_relay].values();
+    address[] memory _jobs = _approvedJobs[_relay].values();
 
     // Create the array of jobs data with the jobs length
     _jobsData = new IAutomationVault.JobData[](_jobs.length);
@@ -67,14 +67,14 @@ contract AutomationVault is IAutomationVault {
     // Get the list of jobs and their selectors
     for (uint256 _i; _i < _jobs.length;) {
       // Create the array of selectors
-      bytes4[] memory _selectors = new bytes4[](_jobSelectors[_jobs[_i]].length());
+      bytes4[] memory _selectors = new bytes4[](_approvedJobSelectors[_relay][_jobs[_i]].length());
 
       // If the job has selectors, get them
       if (_selectors.length != 0) {
         // Get the list of selectors
         for (uint256 _j; _j < _selectors.length;) {
           // Convert the bytes32 selector to bytes4
-          _selectors[_j] = bytes4(_jobSelectors[_jobs[_i]].at(_j));
+          _selectors[_j] = bytes4(_approvedJobSelectors[_relay][_jobs[_i]].at(_j));
 
           unchecked {
             ++_j;
@@ -137,7 +137,7 @@ contract AutomationVault is IAutomationVault {
 
     // Set the callers for the relay
     for (uint256 _i; _i < _callers.length;) {
-      _relayCallers[_relay].add(_callers[_i]);
+      _approvedCallers[_relay].add(_callers[_i]);
       emit ApproveRelayCaller(_relay, _callers[_i]);
 
       unchecked {
@@ -150,12 +150,12 @@ contract AutomationVault is IAutomationVault {
       IAutomationVault.JobData memory _jobData = _jobsData[_i];
 
       // Set the job for the relay
-      _relayJobs[_relay].add(_jobData.job);
+      _approvedJobs[_relay].add(_jobData.job);
       emit ApproveJob(_jobData.job);
 
       // Set the selectors for the job
       for (uint256 _j; _j < _jobData.functionSelectors.length;) {
-        _jobSelectors[_jobData.job].add(_jobData.functionSelectors[_j]);
+        _approvedJobSelectors[_relay][_jobData.job].add(_jobData.functionSelectors[_j]);
         emit ApproveJobSelector(_jobData.job, _jobData.functionSelectors[_j]);
 
         unchecked {
@@ -177,17 +177,17 @@ contract AutomationVault is IAutomationVault {
     _relays.remove(_relay);
 
     // Remove the callers
-    delete _relayCallers[_relay];
+    delete _approvedCallers[_relay];
 
     // Get the list of jobs
-    address[] memory _jobs = _relayJobs[_relay].values();
+    address[] memory _jobs = _approvedJobs[_relay].values();
 
     // Remove the jobs
-    delete _relayJobs[_relay];
+    delete _approvedJobs[_relay];
 
     // Remove the jobs and their selectors
     for (uint256 _i; _i < _jobs.length;) {
-      delete _jobSelectors[_jobs[_i]];
+      delete _approvedJobSelectors[_relay][_jobs[_i]];
 
       unchecked {
         ++_i;
@@ -213,11 +213,11 @@ contract AutomationVault is IAutomationVault {
     if (_relay == address(0)) revert AutomationVault_RelayZero();
 
     // Remove the callers
-    delete _relayCallers[_relay];
+    delete _approvedCallers[_relay];
 
     // Set the callers for the relay
     for (uint256 _i; _i < _callers.length;) {
-      if (_relayCallers[_relay].add(_callers[_i])) {
+      if (_approvedCallers[_relay].add(_callers[_i])) {
         emit ApproveRelayCaller(_relay, _callers[_i]);
       }
 
@@ -232,14 +232,14 @@ contract AutomationVault is IAutomationVault {
     if (_relay == address(0)) revert AutomationVault_RelayZero();
 
     // Get the list of jobs
-    address[] memory _jobs = _relayJobs[_relay].values();
+    address[] memory _jobs = _approvedJobs[_relay].values();
 
     // Remove the jobs
-    delete _relayJobs[_relay];
+    delete _approvedJobs[_relay];
 
     // Remove the jobs and their selectors
     for (uint256 _i; _i < _jobs.length;) {
-      delete _jobSelectors[_jobs[_i]];
+      delete _approvedJobSelectors[_relay][_jobs[_i]];
 
       unchecked {
         ++_i;
@@ -251,13 +251,13 @@ contract AutomationVault is IAutomationVault {
       IAutomationVault.JobData memory _jobData = _jobsData[_i];
 
       // Set the job for the relay
-      if (_relayJobs[_relay].add(_jobData.job)) {
+      if (_approvedJobs[_relay].add(_jobData.job)) {
         emit ApproveJob(_jobData.job);
       }
 
       // Set the selectors for the job
       for (uint256 _j; _j < _jobData.functionSelectors.length;) {
-        if (_jobSelectors[_jobData.job].add(_jobData.functionSelectors[_j])) {
+        if (_approvedJobSelectors[_relay][_jobData.job].add(_jobData.functionSelectors[_j])) {
           emit ApproveJobSelector(_jobData.job, _jobData.functionSelectors[_j]);
         }
 
@@ -275,7 +275,7 @@ contract AutomationVault is IAutomationVault {
   /// @inheritdoc IAutomationVault
   function exec(address _relayCaller, ExecData[] calldata _execData, FeeData[] calldata _feeData) external {
     // Check that the specific caller is approved to call the relay
-    if (!_relayCallers[msg.sender].contains(_relayCaller) && !_relayCallers[msg.sender].contains(_ALL)) {
+    if (!_approvedCallers[msg.sender].contains(_relayCaller) && !_approvedCallers[msg.sender].contains(_ALL)) {
       revert AutomationVault_NotApprovedRelayCaller();
     }
 
@@ -289,17 +289,15 @@ contract AutomationVault is IAutomationVault {
     for (_i; _i < _dataLength;) {
       _dataToExecute = _execData[_i];
 
-      if (_relayJobs[msg.sender].contains(_dataToExecute.job)) {
-        // Check that the selector is approved to be called
-        if (!_jobSelectors[_dataToExecute.job].contains(bytes4(_dataToExecute.jobData))) {
-          revert AutomationVault_NotApprovedJobSelector();
-        }
-        (_success,) = _dataToExecute.job.call(_dataToExecute.jobData);
-        if (!_success) revert AutomationVault_ExecFailed();
-
-        // Emit the event
-        emit JobExecuted(msg.sender, _relayCaller, _dataToExecute.job, _dataToExecute.jobData);
+      // Check that the selector is approved to be called
+      if (!_approvedJobSelectors[msg.sender][_dataToExecute.job].contains(bytes4(_dataToExecute.jobData))) {
+        revert AutomationVault_NotApprovedJobSelector();
       }
+      (_success,) = _dataToExecute.job.call(_dataToExecute.jobData);
+      if (!_success) revert AutomationVault_ExecFailed();
+
+      // Emit the event
+      emit JobExecuted(msg.sender, _relayCaller, _dataToExecute.job, _dataToExecute.jobData);
 
       unchecked {
         ++_i;

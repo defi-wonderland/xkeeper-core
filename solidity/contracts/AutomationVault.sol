@@ -74,10 +74,13 @@ contract AutomationVault is IAutomationVault {
       // Get the length of the selectors array
       _selectorsLength = _approvedJobSelectors[_relay][_jobs[_i]].length();
 
+      // Create the array of selectors
+      bytes4[] memory _selectors;
+
       // If the job has selectors, get them
       if (_selectorsLength != 0) {
-        // Create the array of selectors
-        bytes4[] memory _selectors = new bytes4[](_selectorsLength);
+        // Set the length of the selectors array
+        _selectors = new bytes4[](_selectorsLength);
 
         // Get the list of selectors
         for (uint256 _j; _j < _selectorsLength;) {
@@ -88,13 +91,13 @@ contract AutomationVault is IAutomationVault {
             ++_j;
           }
         }
+      }
 
-        // Add the job and its selectors to the full list
-        _jobsData[_i] = IAutomationVault.JobData(_jobs[_i], _selectors);
+      // Add the job and its selectors to the full list
+      _jobsData[_i] = IAutomationVault.JobData(_jobs[_i], _selectors);
 
-        unchecked {
-          ++_i;
-        }
+      unchecked {
+        ++_i;
       }
     }
   }

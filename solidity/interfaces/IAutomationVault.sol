@@ -232,7 +232,7 @@ interface IAutomationVault {
 
   /**
    * @notice Add a new relay to the automation vault with the desired callers, jobs and selectors
-   * @dev   You can approve all the fields or only the necessary ones, passing the empty argument in the unwanted ones
+   * @dev    If the relay is valid, it can be passed with all the fields or only the necessary ones, passing the empty argument in the unwanted ones
    * @param  _relay The address of the relay
    * @param  _callers The array of callers
    * @param _jobsData The array of job data

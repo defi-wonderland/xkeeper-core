@@ -994,13 +994,11 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     address _caller,
     IAutomationVault.ExecData[] memory _execData,
     IAutomationVault.FeeData[] memory _feeData
-  ) public happyPath(_relay, _caller, new IAutomationVault.ExecData[](4), _feeData) {
-    IAutomationVault.ExecData[] memory _execDataNotApproved = new IAutomationVault.ExecData[](1);
-    _execDataNotApproved[0].job = _execData[0].job;
-    _execDataNotApproved[0].jobData = '0xdead';
+  ) public happyPath(_relay, _caller, _execData, _feeData) {
+    _execData[0].jobData = '0xdead';
 
     vm.expectRevert(IAutomationVault.AutomationVault_NotApprovedJobSelector.selector);
-    automationVault.exec(_caller, _execDataNotApproved, new IAutomationVault.FeeData[](0));
+    automationVault.exec(_caller, _execData, _feeData);
   }
 
   /**

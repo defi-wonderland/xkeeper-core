@@ -128,7 +128,7 @@ abstract contract AutomationVaultUnitTest is Test {
    * @param _job The job address
    * @param _selectors The function selectors
    */
-  function _createAssumes(
+  function _assumeRelayData(
     address _relay,
     address[] memory _callers,
     address _job,
@@ -159,7 +159,7 @@ contract UnitGetRelayData is AutomationVaultUnitTest {
   EnumerableSet.Bytes32Set internal _cleanSelectors;
 
   modifier happyPath(address _relay, address[] memory _callers, address _job, bytes4[] memory _selectors) {
-    _createAssumes(_relay, _callers, _job, _selectors);
+    _assumeRelayData(_relay, _callers, _job, _selectors);
 
     // Clean the array to avoid duplicates
     for (uint256 _i; _i < _callers.length; ++_i) {
@@ -393,7 +393,7 @@ contract UnitAutomationVaultAddRelayData is AutomationVaultUnitTest {
 
   modifier happyPath(address _relay, address[] memory _callers, address _job, bytes4[] memory _selectors) {
     /// @dev This is a workaround for the fact that the VM does not support dynamic arrays
-    _createAssumes(_relay, _callers, _job, _selectors);
+    _assumeRelayData(_relay, _callers, _job, _selectors);
 
     // Clean the array to avoid duplicates
     for (uint256 _i; _i < _callers.length; ++_i) {
@@ -485,8 +485,7 @@ contract UnitAutomationVaultAddRelayData is AutomationVaultUnitTest {
     address _secondJob,
     bytes4[] memory _secondSelectors
   ) public {
-    _createAssumes(_relay, _callers, _job, _selectors);
-    vm.assume(_job != address(0));
+    _assumeRelayData(_relay, _callers, _job, _selectors);
     vm.assume(_secondJob != address(0));
     vm.assume(_job != _secondJob);
 
@@ -511,7 +510,7 @@ contract UnitAutomationVaultAddRelayData is AutomationVaultUnitTest {
 contract UnitAutomationVaultDeleteRelay is AutomationVaultUnitTest {
   modifier happyPath(address _relay, address[] memory _callers, address _job, bytes4[] memory _selectors) {
     /// @dev This is a workaround for the fact that the VM does not support dynamic arrays
-    _createAssumes(_relay, _callers, _job, _selectors);
+    _assumeRelayData(_relay, _callers, _job, _selectors);
 
     automationVault.addRelayForTest(_relay, _callers, _job, _selectors);
 
@@ -582,7 +581,7 @@ contract UnitAutomationVaultModifyRelay is AutomationVaultUnitTest {
 
   modifier happyPath(address _relay, address[] memory _callers, address _job, bytes4[] memory _selectors) {
     /// @dev This is a workaround for the fact that the VM does not support dynamic arrays
-    _createAssumes(_relay, _callers, _job, _selectors);
+    _assumeRelayData(_relay, _callers, _job, _selectors);
 
     // Clean the array to avoid duplicates
     for (uint256 _i; _i < _callers.length; ++_i) {
@@ -722,7 +721,7 @@ contract UnitAutomationVaultModifyRelay is AutomationVaultUnitTest {
     address _secondJob,
     bytes4[] memory _secondSelectors
   ) public {
-    _createAssumes(_relay, _callers, _job, _selectors);
+    _assumeRelayData(_relay, _callers, _job, _selectors);
     vm.assume(_job != address(0));
     vm.assume(_secondJob != address(0));
     vm.assume(_job != _secondJob);
@@ -752,7 +751,7 @@ contract UnitAutomationVaultModifyRelayCallers is AutomationVaultUnitTest {
 
   modifier happyPath(address _relay, address[] memory _callers) {
     /// @dev This is a workaround for the fact that the VM does not support dynamic arrays
-    _createAssumes(_relay, _callers, makeAddr('job'), new bytes4[](1));
+    _assumeRelayData(_relay, _callers, makeAddr('job'), new bytes4[](1));
 
     automationVault.addRelayForTest(_relay, new address[](0), address(0), new bytes4[](0));
 
@@ -824,7 +823,7 @@ contract UnitAutomationVaultModifyRelayJobs is AutomationVaultUnitTest {
 
   modifier happyPath(address _relay, address _job, bytes4[] memory _selectors) {
     /// @dev This is a workaround for the fact that the VM does not support dynamic arrays
-    _createAssumes(_relay, new address[](1), _job, _selectors);
+    _assumeRelayData(_relay, new address[](1), _job, _selectors);
 
     automationVault.addRelayForTest(_relay, new address[](0), address(0), new bytes4[](1));
 
@@ -917,7 +916,7 @@ contract UnitAutomationVaultModifyRelayJobs is AutomationVaultUnitTest {
     address _secondJob,
     bytes4[] memory _secondSelectors
   ) public {
-    _createAssumes(_relay, _callers, _job, _selectors);
+    _assumeRelayData(_relay, _callers, _job, _selectors);
     vm.assume(_job != address(0));
     vm.assume(_secondJob != address(0));
     vm.assume(_job != _secondJob);

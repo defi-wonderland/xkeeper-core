@@ -146,14 +146,15 @@ contract AutomationVault is IAutomationVault {
     if (!_relays.add(_relay)) revert AutomationVault_RelayAlreadyApproved();
     emit ApproveRelay(_relay);
 
-    // Create the counter variable
-    uint256 _i = 0;
+    // Create the counters variables
+    uint256 _i;
+    uint256 _j;
 
     // Create the length variables
-    uint256 _callersLength = _callers.length;
+    uint256 _valuesLength = _callers.length;
 
     // Set the callers for the relay
-    for (_i; _i < _callersLength;) {
+    for (_i; _i < _valuesLength;) {
       if (_approvedCallers[_relay].add(_callers[_i])) {
         emit ApproveRelayCaller(_relay, _callers[_i]);
       }
@@ -163,17 +164,14 @@ contract AutomationVault is IAutomationVault {
       }
     }
 
-    // Set to 0 to reuse the counter
-    _i = 0;
-
     // Get the length of the jobs data array
-    uint256 _jobsLength = _jobsData.length;
+    _valuesLength = _jobsData.length;
 
     // Create the selector length variable
     uint256 _selectorsLength;
 
     // Set the jobs and their selectors for the relay
-    for (_i; _i < _jobsLength;) {
+    for (_i = 0; _i < _valuesLength;) {
       IAutomationVault.JobData memory _jobData = _jobsData[_i];
 
       // Necessary to avoid an empty job from being assigned to selectors
@@ -187,7 +185,7 @@ contract AutomationVault is IAutomationVault {
         _selectorsLength = _jobData.functionSelectors.length;
 
         // Set the selectors for the job
-        for (uint256 _j; _j < _selectorsLength;) {
+        for (_j = 0; _j < _selectorsLength;) {
           if (_approvedJobSelectors[_relay][_jobData.job].add(_jobData.functionSelectors[_j])) {
             emit ApproveJobSelector(_jobData.job, _jobData.functionSelectors[_j]);
           }
@@ -211,21 +209,55 @@ contract AutomationVault is IAutomationVault {
     // Remove the relay from the list of relays
     _relays.remove(_relay);
 
+    // Create the counters variables
+    uint256 _i;
+    uint256 _j;
+
+    // Get the approved callers
+    address[] memory _callers = _approvedCallers[_relay].values();
+
+    // Get the length of the approved callers array
+    uint256 _valuesLength = _callers.length;
+
     // Remove the callers
-    delete _approvedCallers[_relay];
+    for (_i; _i < _valuesLength;) {
+      _approvedCallers[_relay].remove(_callers[_i]);
+
+      unchecked {
+        ++_i;
+      }
+    }
 
     // Get the list of jobs
     address[] memory _jobs = _approvedJobs[_relay].values();
 
-    // Remove the jobs
-    delete _approvedJobs[_relay];
-
     // Get the length of the jobs array
-    uint256 _jobsLength = _jobs.length;
+    _valuesLength = _jobs.length;
 
-    // Remove the jobs and their selectors
-    for (uint256 _i; _i < _jobsLength;) {
-      delete _approvedJobSelectors[_relay][_jobs[_i]];
+    // Create the selector length variable
+    bytes32[] memory _selectors;
+
+    // Create the length variable
+    uint256 _selectorsLength;
+
+    // Remove the jobs
+    for (_i = 0; _i < _valuesLength;) {
+      _approvedJobs[_relay].remove(_jobs[_i]);
+
+      // Get the length of the selectors array
+      _selectorsLength = _approvedJobSelectors[_relay][_jobs[_i]].length();
+
+      // Get the list of selectors
+      _selectors = _approvedJobSelectors[_relay][_jobs[_i]].values();
+
+      // Remove the selectors
+      for (_j = 0; _j < _selectorsLength;) {
+        _approvedJobSelectors[_relay][_jobs[_i]].remove(_selectors[_j]);
+
+        unchecked {
+          ++_j;
+        }
+      }
 
       unchecked {
         ++_i;
@@ -249,15 +281,29 @@ contract AutomationVault is IAutomationVault {
   /// @inheritdoc IAutomationVault
   function modifyRelayCallers(address _relay, address[] memory _callers) public onlyOwner {
     if (_relay == address(0)) revert AutomationVault_RelayZero();
+    // Create the counter variable
+    uint256 _i;
+
+    // Get the approved callers
+    address[] memory _oldApprovedCallers = _approvedCallers[_relay].values();
+
+    // Get the length of the approved callers array
+    uint256 _callersLength = _oldApprovedCallers.length;
 
     // Remove the callers
-    delete _approvedCallers[_relay];
+    for (_i; _i < _callersLength;) {
+      _approvedCallers[_relay].remove(_oldApprovedCallers[_i]);
+
+      unchecked {
+        ++_i;
+      }
+    }
 
     // Get the length of the callers array
-    uint256 _callersLength = _callers.length;
+    _callersLength = _callers.length;
 
     // Set the callers for the relay
-    for (uint256 _i; _i < _callersLength;) {
+    for (_i = 0; _i < _callersLength;) {
       if (_approvedCallers[_relay].add(_callers[_i])) {
         emit ApproveRelayCaller(_relay, _callers[_i]);
       }
@@ -271,39 +317,51 @@ contract AutomationVault is IAutomationVault {
   /// @inheritdoc IAutomationVault
   function modifyRelayJobs(address _relay, IAutomationVault.JobData[] memory _jobsData) public onlyOwner {
     if (_relay == address(0)) revert AutomationVault_RelayZero();
-
-    // Create the counter variable
-    uint256 _i = 0;
+    // Create the counters variables
+    uint256 _i;
+    uint256 _j;
 
     // Get the list of jobs
     address[] memory _jobs = _approvedJobs[_relay].values();
 
-    // Remove the jobs
-    delete _approvedJobs[_relay];
-
     // Get the length of the jobs array
     uint256 _jobsLength = _jobs.length;
 
-    // Remove the jobs and their selectors
+    // Create the selector length variable
+    bytes32[] memory _selectors;
+
+    // Create the length variable
+    uint256 _selectorsLength;
+
+    // Remove the jobs
     for (_i; _i < _jobsLength;) {
-      delete _approvedJobSelectors[_relay][_jobs[_i]];
+      _approvedJobs[_relay].remove(_jobs[_i]);
+
+      // Get the length of the selectors array
+      _selectorsLength = _approvedJobSelectors[_relay][_jobs[_i]].length();
+
+      // Get the list of selectors
+      _selectors = _approvedJobSelectors[_relay][_jobs[_i]].values();
+
+      // Remove the selectors
+      for (_j = 0; _j < _selectorsLength;) {
+        _approvedJobSelectors[_relay][_jobs[_i]].remove(_selectors[_j]);
+
+        unchecked {
+          ++_j;
+        }
+      }
 
       unchecked {
         ++_i;
       }
     }
 
-    // Set to 0 to reuse the counter
-    _i = 0;
-
     // Get the length of the jobs data array
-    uint256 _jobsDataLength = _jobsData.length;
-
-    // Create the selector length variable
-    uint256 _selectorsLength;
+    _jobsLength = _jobsData.length;
 
     // Set the jobs and their selectors for the relay
-    for (_i; _i < _jobsDataLength;) {
+    for (_i = 0; _i < _jobsLength;) {
       IAutomationVault.JobData memory _jobData = _jobsData[_i];
 
       // Necessary to avoid an empty job from being assigned to selectors
@@ -317,7 +375,7 @@ contract AutomationVault is IAutomationVault {
         _selectorsLength = _jobData.functionSelectors.length;
 
         // Set the selectors for the job
-        for (uint256 _j; _j < _selectorsLength;) {
+        for (_j = 0; _j < _selectorsLength;) {
           if (_approvedJobSelectors[_relay][_jobData.job].add(_jobData.functionSelectors[_j])) {
             emit ApproveJobSelector(_jobData.job, _jobData.functionSelectors[_j]);
           }

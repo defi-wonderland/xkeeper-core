@@ -46,48 +46,7 @@ contract AutomationVaultForTest is AutomationVault {
     view
     returns (address[] memory _callers, IAutomationVault.JobData[] memory _jobsData)
   {
-    // Get the list of callers
-    _callers = _approvedCallers[_relay].values();
-
-    // Get the list of all jobs
-    address[] memory _jobs = _approvedJobs[_relay].values();
-
-    // Get the length of the jobs array
-    uint256 _jobsLength = _jobs.length;
-
-    // Create the array of jobs data with the jobs length
-    _jobsData = new IAutomationVault.JobData[](_jobsLength);
-
-    uint256 _selectorsLength;
-
-    // Get the list of jobs and their selectors
-    for (uint256 _i; _i < _jobsLength;) {
-      // Get the length of the selectors array
-      _selectorsLength = _approvedJobSelectors[_relay][_jobs[_i]].length();
-
-      // If the job has selectors, get them
-      if (_selectorsLength != 0) {
-        // Create the array of selectors
-        bytes4[] memory _selectors = new bytes4[](_selectorsLength);
-
-        // Get the list of selectors
-        for (uint256 _j; _j < _selectorsLength;) {
-          // Convert the bytes32 selector to bytes4
-          _selectors[_j] = bytes4(_approvedJobSelectors[_relay][_jobs[_i]].at(_j));
-
-          unchecked {
-            ++_j;
-          }
-        }
-
-        // Add the job and its selectors to the full list
-        _jobsData[_i] = IAutomationVault.JobData(_jobs[_i], _selectors);
-
-        unchecked {
-          ++_i;
-        }
-      }
-    }
+    (_callers, _jobsData) = this.getRelayData(_relay);
   }
 }
 
@@ -481,9 +440,9 @@ contract UnitAutomationVaultAddRelayData is AutomationVaultUnitTest {
   }
 
   /**
-   * @notice Emit ApproveRelay event when the relay is approved
+   * @notice Emit ApproveRelay, ApproveRelayCaller, ApproveJob and ApproveJobSelector events when the relay is approved
    */
-  function testEmitApproveRelay(
+  function testEmitApproveRelayCallerJobAndSelector(
     address _relay,
     address[] memory _callers,
     address _job,
@@ -491,65 +450,58 @@ contract UnitAutomationVaultAddRelayData is AutomationVaultUnitTest {
   ) public happyPath(_relay, _callers, _job, _selectors) {
     IAutomationVault.JobData[] memory _jobsData = _createJobsData(_job, _selectors);
 
+    /// Emit ApproveRelay event
     vm.expectEmit();
     emit ApproveRelay(_relay);
 
-    automationVault.addRelay(_relay, _callers, _jobsData);
-  }
-
-  /**
-   * @notice Emit ApproveRelayCaller event when the relay caller is approved
-   */
-  function testEmitApproveCaller(
-    address _relay,
-    address[] memory _callers,
-    address _job,
-    bytes4[] memory _selectors
-  ) public happyPath(_relay, _callers, _job, _selectors) {
-    IAutomationVault.JobData[] memory _jobsData = _createJobsData(_job, _selectors);
-
+    /// Emit ApproveRelayCaller event
     for (uint256 _i; _i < _cleanCallers.length(); _i++) {
       vm.expectEmit();
       emit ApproveRelayCaller(_relay, _cleanCallers.at(_i));
     }
 
-    automationVault.addRelay(_relay, _callers, _jobsData);
-  }
-
-  /**
-   * @notice Emit ApproveJob event when the job is approved
-   */
-  function testEmitApproveJob(
-    address _relay,
-    address[] memory _callers,
-    address _job,
-    bytes4[] memory _selectors
-  ) public happyPath(_relay, _callers, _job, _selectors) {
-    IAutomationVault.JobData[] memory _jobsData = _createJobsData(_job, _selectors);
-
+    /// Emit ApproveJob event
     vm.expectEmit();
     emit ApproveJob(_job);
 
-    automationVault.addRelay(_relay, _callers, _jobsData);
-  }
-
-  /**
-   * @notice Emit ApproveJobSelector event when the job selector is approved
-   */
-  function testEmitApproveFunctionSelector(
-    address _relay,
-    address[] memory _callers,
-    address _job,
-    bytes4[] memory _selectors
-  ) public happyPath(_relay, _callers, _job, _selectors) {
-    IAutomationVault.JobData[] memory _jobsData = _createJobsData(_job, _selectors);
-
+    /// Emit ApproveJobSelector event
     for (uint256 _i; _i < _cleanSelectors.length(); _i++) {
       vm.expectEmit();
       emit ApproveJobSelector(_job, bytes4(_cleanSelectors.at(_i)));
     }
 
     automationVault.addRelay(_relay, _callers, _jobsData);
+  }
+
+  /**
+   * @notice Test add relay with several jobs
+   * @dev Isolated test to check that more than one job is added
+   */
+  function testAddRelayWithSeveralJobs(
+    address _relay,
+    address[] memory _callers,
+    address _job,
+    bytes4[] memory _selectors,
+    address _secondJob,
+    bytes4[] memory _secondSelectors
+  ) public {
+    _createAssumes(_relay, _callers, _job, _selectors);
+    vm.assume(_job != address(0));
+    vm.assume(_secondJob != address(0));
+    vm.assume(_job != _secondJob);
+
+    IAutomationVault.JobData[] memory _jobsData = new IAutomationVault.JobData[](2);
+    _jobsData[0].job = _job;
+    _jobsData[0].functionSelectors = _selectors;
+    _jobsData[1].job = _secondJob;
+    _jobsData[1].functionSelectors = _secondSelectors;
+
+    vm.prank(owner);
+    automationVault.addRelay(_relay, _callers, _jobsData);
+
+    (, IAutomationVault.JobData[] memory _relayJobsData) = automationVault.getRelayDataForTest(_relay);
+
+    assertEq(_relayJobsData.length, 2);
   }
 }
 
@@ -757,6 +709,37 @@ contract UnitAutomationVaultModifyRelay is AutomationVaultUnitTest {
 
     automationVault.modifyRelay(_relay, _callers, _jobsData);
   }
+
+  /**
+   * @notice Test modify relay with several jobs
+   * @dev Isolated test to check that more than one job is added
+   */
+  function testModifyRelayWithSeveralJobs(
+    address _relay,
+    address[] memory _callers,
+    address _job,
+    bytes4[] memory _selectors,
+    address _secondJob,
+    bytes4[] memory _secondSelectors
+  ) public {
+    _createAssumes(_relay, _callers, _job, _selectors);
+    vm.assume(_job != address(0));
+    vm.assume(_secondJob != address(0));
+    vm.assume(_job != _secondJob);
+
+    IAutomationVault.JobData[] memory _jobsData = new IAutomationVault.JobData[](2);
+    _jobsData[0].job = _job;
+    _jobsData[0].functionSelectors = _selectors;
+    _jobsData[1].job = _secondJob;
+    _jobsData[1].functionSelectors = _secondSelectors;
+
+    vm.prank(owner);
+    automationVault.modifyRelay(_relay, _callers, _jobsData);
+
+    (, IAutomationVault.JobData[] memory _relayJobsData) = automationVault.getRelayDataForTest(_relay);
+
+    assertEq(_relayJobsData.length, 2);
+  }
 }
 
 /**
@@ -902,9 +885,9 @@ contract UnitAutomationVaultModifyRelayJobs is AutomationVaultUnitTest {
   }
 
   /**
-   * @notice Emit ApproveJob event when the job is approved
+   * @notice Emit ApproveJob and ApproveJobSelector events when the relay is modified
    */
-  function testEmitApproveJob(
+  function testEmitApproveJobAndSelector(
     address _relay,
     address _job,
     bytes4[] memory _selectors
@@ -914,25 +897,43 @@ contract UnitAutomationVaultModifyRelayJobs is AutomationVaultUnitTest {
     vm.expectEmit();
     emit ApproveJob(_job);
 
-    automationVault.modifyRelayJobs(_relay, _jobsData);
-  }
-
-  /**
-   * @notice Emit ApproveJobSelector event when the job selector is approved
-   */
-  function testEmitApproveFunctionSelector(
-    address _relay,
-    address _job,
-    bytes4[] memory _selectors
-  ) public happyPath(_relay, _job, _selectors) {
-    IAutomationVault.JobData[] memory _jobsData = _createJobsData(_job, _selectors);
-
     for (uint256 _i; _i < _cleanSelectors.length(); ++_i) {
       vm.expectEmit();
       emit ApproveJobSelector(_job, bytes4(_cleanSelectors.at(_i)));
     }
 
     automationVault.modifyRelayJobs(_relay, _jobsData);
+  }
+
+  /**
+   * @notice Test modify relay jobs with several jobs
+   * @dev Isolated test to check that more than one job is added
+   */
+  function testModifyRelayJobsWithSeveralJobs(
+    address _relay,
+    address[] memory _callers,
+    address _job,
+    bytes4[] memory _selectors,
+    address _secondJob,
+    bytes4[] memory _secondSelectors
+  ) public {
+    _createAssumes(_relay, _callers, _job, _selectors);
+    vm.assume(_job != address(0));
+    vm.assume(_secondJob != address(0));
+    vm.assume(_job != _secondJob);
+
+    IAutomationVault.JobData[] memory _jobsData = new IAutomationVault.JobData[](2);
+    _jobsData[0].job = _job;
+    _jobsData[0].functionSelectors = _selectors;
+    _jobsData[1].job = _secondJob;
+    _jobsData[1].functionSelectors = _secondSelectors;
+
+    vm.prank(owner);
+    automationVault.modifyRelayJobs(_relay, _jobsData);
+
+    (, IAutomationVault.JobData[] memory _relayJobsData) = automationVault.getRelayDataForTest(_relay);
+
+    assertEq(_relayJobsData.length, 2);
   }
 }
 

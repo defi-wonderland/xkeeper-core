@@ -22,6 +22,7 @@ contract IntegrationAutomationVault is CommonIntegrationTest {
     newOwner = makeAddr('NewOwner');
 
     vm.prank(owner);
+
     address(automationVault).call{value: 100 ether}('');
   }
 

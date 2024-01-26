@@ -2,6 +2,8 @@
 pragma solidity 0.8.19;
 
 import {IGelatoRelay, IAutomationVault} from '@interfaces/IGelatoRelay.sol';
+import {IAutomate} from '@interfaces/external/IAutomate.sol';
+import {IGelato} from '@interfaces/external/IGelato.sol';
 
 /**
  * @title  GelatoRelay
@@ -9,11 +11,28 @@ import {IGelatoRelay, IAutomationVault} from '@interfaces/IGelatoRelay.sol';
  */
 contract GelatoRelay is IGelatoRelay {
   /// @inheritdoc IGelatoRelay
-  function exec(
-    IAutomationVault _automationVault,
-    IAutomationVault.ExecData[] calldata _execData,
-    IAutomationVault.FeeData[] calldata _feeData
-  ) external {
+  IAutomate public automate;
+
+  /// @inheritdoc IGelatoRelay
+  IGelato public gelato;
+
+  /// @inheritdoc IGelatoRelay
+  address public feeCollector;
+
+  constructor(address _automate) {
+    automate = IAutomate(_automate);
+    gelato = IGelato(automate.gelato());
+    feeCollector = gelato.feeCollector();
+  }
+
+  function exec(IAutomationVault _automationVault, IAutomationVault.ExecData[] calldata _execData) external {
+    // Get the fee details
+    (uint256 _fee, address _feeToken) = automate.getFeeDetails();
+
+    // Create fee data
+    IAutomationVault.FeeData[] memory _feeData = new IAutomationVault.FeeData[](1);
+    _feeData[0] = IAutomationVault.FeeData({fee: _fee, feeToken: _feeToken, feeRecipient: feeCollector});
+
     // Execute the automation vault
     _automationVault.exec(msg.sender, _execData, _feeData);
 

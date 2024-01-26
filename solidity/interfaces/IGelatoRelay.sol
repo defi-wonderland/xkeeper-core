@@ -2,6 +2,8 @@
 pragma solidity 0.8.19;
 
 import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
+import {IAutomate} from '@interfaces/external/IAutomate.sol';
+import {IGelato} from '@interfaces/external/IGelato.sol';
 
 interface IGelatoRelay {
   /*///////////////////////////////////////////////////////////////
@@ -23,6 +25,28 @@ interface IGelatoRelay {
   );
 
   /*///////////////////////////////////////////////////////////////
+                          VIEW FUNCTIONS  
+  //////////////////////////////////////////////////////////////*/
+
+  /**
+   * @notice Returns the automate contract of the gelato network
+   * @return _automate The address of the automate contract
+   */
+  function automate() external view returns (IAutomate _automate);
+
+  /**
+   * @notice Returns the gelato contract of the gelato network
+   * @return _gelato The address of the gelato contract
+   */
+  function gelato() external view returns (IGelato _gelato);
+
+  /**
+   * @notice Returns the fee collector of the gelato network
+   * @return _feeCollector The address of the fee collector
+   */
+  function feeCollector() external view returns (address _feeCollector);
+
+  /*///////////////////////////////////////////////////////////////
                           EXTERNAL FUNCTIONS
   //////////////////////////////////////////////////////////////*/
 
@@ -30,11 +54,6 @@ interface IGelatoRelay {
    * @notice Execute an automation vault which will execute the jobs and will manage the payment to the fee data receivers
    * @param  _automationVault The automation vault that will be executed
    * @param  _execData The array of exec data
-   * @param  _feeData The array of fee data
    */
-  function exec(
-    IAutomationVault _automationVault,
-    IAutomationVault.ExecData[] calldata _execData,
-    IAutomationVault.FeeData[] calldata _feeData
-  ) external;
+  function exec(IAutomationVault _automationVault, IAutomationVault.ExecData[] calldata _execData) external;
 }

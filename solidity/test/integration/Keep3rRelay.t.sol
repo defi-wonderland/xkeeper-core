@@ -63,8 +63,8 @@ contract IntegrationKeep3rRelay is CommonIntegrationTest {
     keep3rBondedRelay.setAutomationVaultRequirements(automationVault, _requirements);
 
     // AutomationVault approve relay data
-    automationVault.approveRelayData(address(keep3rRelay), _keepers, _jobsData);
-    automationVault.approveRelayData(address(keep3rBondedRelay), _keepers, _jobsData);
+    automationVault.addRelay(address(keep3rRelay), _keepers, _jobsData);
+    automationVault.addRelay(address(keep3rBondedRelay), _keepers, _jobsData);
   }
 
   function _addJobAndLiquidity(address _job, uint256 _amount) internal {

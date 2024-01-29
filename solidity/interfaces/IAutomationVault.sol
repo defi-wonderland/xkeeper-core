@@ -33,24 +33,17 @@ interface IAutomationVault {
   event ApproveRelay(address indexed _relay);
 
   /**
+   * @notice Emitted when a relay is deleted
+   * @param  _relay The address of the relay
+   */
+  event DeleteRelay(address indexed _relay);
+
+  /**
    * @notice Emitted when a relay caller is approved
    * @param  _relay The address of the relay
    * @param  _caller The address of the caller
    */
   event ApproveRelayCaller(address indexed _relay, address indexed _caller);
-
-  /**
-   * @notice Emitted when a relay is revoked
-   * @param  _relay The address of the relay
-   */
-  event RevokeRelay(address indexed _relay);
-
-  /**
-   * @notice Emitted when a relay caller is revoked
-   * @param  _relay The address of the relay
-   * @param  _caller The address of the caller
-   */
-  event RevokeRelayCaller(address indexed _relay, address indexed _caller);
 
   /**
    * @notice Emitted when job is approved
@@ -64,19 +57,6 @@ interface IAutomationVault {
    * @param  _functionSelector The function selector
    */
   event ApproveJobSelector(address indexed _job, bytes4 indexed _functionSelector);
-
-  /**
-   * @notice Emitted when job is revoked
-   * @param  _job The address of the job
-   */
-  event RevokeJob(address indexed _job);
-
-  /**
-   * @notice Emitted when job selector is revoked
-   * @param  _job The address of the job
-   * @param  _functionSelector The function selector
-   */
-  event RevokeJobSelector(address indexed _job, bytes4 indexed _functionSelector);
 
   /**
    * @notice Emitted when a job is executed
@@ -116,14 +96,9 @@ interface IAutomationVault {
   error AutomationVault_RelayZero();
 
   /**
-   * @notice Thrown when try to approve a relay without callers, jobs and selectors
+   * @notice Thrown when the relay is already approved
    */
-  error AutomationVault_NoCallersJobsAndSelectors();
-
-  /**
-   * @notice Thrown when the job is the zero address
-   */
-  error AutomationVault_JobZero();
+  error AutomationVault_RelayAlreadyApproved();
 
   /**
    * @notice Thrown when ether transfer fails
@@ -181,6 +156,11 @@ interface IAutomationVault {
     uint256 fee;
   }
 
+  /**
+   * @notice The data of a job
+   * @param job The address of the job
+   * @param functionSelectors The array of function selectors
+   */
   struct JobData {
     address job;
     bytes4[] functionSelectors;
@@ -225,12 +205,6 @@ interface IAutomationVault {
    */
   function relays() external view returns (address[] memory _listRelays);
 
-  /**
-   * @notice Returns the approved jobs
-   * @return _listJobs The array of approved jobs
-   */
-  function jobs() external view returns (address[] memory _listJobs);
-
   /*///////////////////////////////////////////////////////////////
                         EXTERNAL FUNCTIONS
   //////////////////////////////////////////////////////////////*/
@@ -257,31 +231,53 @@ interface IAutomationVault {
   function withdrawFunds(address _token, uint256 _amount, address _receiver) external;
 
   /**
-   * @notice Approves relay callers which will be able to call a relay to execute jobs with the specified selectors
-   * @dev   You can approve all the fields or only the necessary ones, passing the empty argument in the unwanted ones
-   * @dev   If the callers array and the selectors array are empty, the function will revert to avoid wasting gas
+   * @notice Add a new relay to the automation vault with the desired callers, jobs and selectors
+   * @dev    If the relay is valid, it can be passed with all the fields or only the necessary ones, passing the empty argument in the unwanted ones
    * @param  _relay The address of the relay
    * @param  _callers The array of callers
    * @param _jobsData The array of job data
    */
-  function approveRelayData(
+  function addRelay(
     address _relay,
     address[] calldata _callers,
     IAutomationVault.JobData[] calldata _jobsData
   ) external;
 
   /**
-   * @notice Revokes both the desired callers to a relay and the jobs and their respective selectors
-   * @dev    You can revoke all the fields or only the necessary ones, passing the empty argument in the unwanted ones
+   * @notice Revokes the approval of a specific relay
+   * @dev    The callers, jobs and selectors will be deleted
+   * @param  _relay The address of the relay
+   */
+  function deleteRelay(address _relay) external;
+
+  /**
+   * @notice Modify the callers, jobs and selectors of a specific relay
+   * @dev    If any of the arguments is empty, the data will be deleted
    * @param  _relay The address of the relay
    * @param  _callers The array of callers
    * @param _jobsData The array of job data
    */
-  function revokeRelayData(
+  function modifyRelay(
     address _relay,
     address[] calldata _callers,
     IAutomationVault.JobData[] calldata _jobsData
   ) external;
+
+  /**
+   * @notice Modify the callers of a specific relay
+   * @dev    If the array is empty, the data will be deleted
+   * @param  _relay The address of the relay
+   * @param  _callers The array of callers
+   */
+  function modifyRelayCallers(address _relay, address[] calldata _callers) external;
+
+  /**
+   * @notice Modify the jobs and selectors of a specific relay
+   * @dev    If the array is empty, the data will be deleted, also if the function selectors array is empty
+   * @param  _relay The address of the relay
+   * @param _jobsData The array of job data
+   */
+  function modifyRelayJobs(address _relay, IAutomationVault.JobData[] calldata _jobsData) external;
 
   /**
    * @notice Executes a job and issues a payment to the fee data receivers

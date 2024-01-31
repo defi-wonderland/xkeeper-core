@@ -19,19 +19,24 @@ contract GelatoRelay is IGelatoRelay {
   /// @inheritdoc IGelatoRelay
   address public feeCollector;
 
-  constructor(address _automate) {
-    automate = IAutomate(_automate);
+  /**
+   * @notice Creates the gelato relay contract
+   * @param _automate The automate contract of the gelato network
+   */
+  constructor(IAutomate _automate) {
+    automate = _automate;
     gelato = IGelato(automate.gelato());
     feeCollector = gelato.feeCollector();
   }
 
+  /// @inheritdoc IGelatoRelay
   function exec(IAutomationVault _automationVault, IAutomationVault.ExecData[] calldata _execData) external {
     // Get the fee details
     (uint256 _fee, address _feeToken) = automate.getFeeDetails();
 
     // Create fee data
     IAutomationVault.FeeData[] memory _feeData = new IAutomationVault.FeeData[](1);
-    _feeData[0] = IAutomationVault.FeeData({fee: _fee, feeToken: _feeToken, feeRecipient: feeCollector});
+    _feeData[0] = IAutomationVault.FeeData(feeCollector, _feeToken, _fee);
 
     // Execute the automation vault
     _automationVault.exec(msg.sender, _execData, _feeData);

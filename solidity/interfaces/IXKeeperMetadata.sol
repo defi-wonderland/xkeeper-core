@@ -31,8 +31,8 @@ interface IXKeeperMetadata {
 
   /**
    * @notice The metadata of the automation vault
-   * @param  _name The name of the automation vault
-   * @param  _description The description of the automation vault
+   * @param  name The name of the automation vault
+   * @param  description The description of the automation vault
    */
   struct AutomationVaultMetadata {
     string name;

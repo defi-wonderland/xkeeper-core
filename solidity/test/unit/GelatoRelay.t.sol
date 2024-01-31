@@ -21,7 +21,7 @@ contract GelatoRelayUnitTest is Test {
   GelatoRelay public gelatoRelay;
 
   // Automate contract
-  address public automate;
+  IAutomate public automate;
 
   // Gelato contract
   address public gelato;
@@ -33,12 +33,12 @@ contract GelatoRelayUnitTest is Test {
   address public token;
 
   function setUp() public virtual {
-    automate = makeAddr('Automate');
+    automate = IAutomate(makeAddr('Automate'));
     gelato = makeAddr('Gelato');
     feeCollector = makeAddr('FeeCollector');
     token = makeAddr('Token');
 
-    vm.mockCall(automate, abi.encodeWithSelector(IAutomate.gelato.selector), abi.encode(gelato));
+    vm.mockCall(address(automate), abi.encodeWithSelector(IAutomate.gelato.selector), abi.encode(gelato));
     vm.mockCall(gelato, abi.encodeWithSelector(IGelato.feeCollector.selector), abi.encode(feeCollector));
 
     gelatoRelay = new GelatoRelay(automate);
@@ -51,7 +51,9 @@ contract UnitGelatoRelayExec is GelatoRelayUnitTest {
     vm.assume(address(_automationVault) != address(vm));
     vm.mockCall(address(_automationVault), abi.encodeWithSelector(IAutomationVault.exec.selector), abi.encode());
 
-    vm.mockCall(automate, abi.encodeWithSelector(IAutomate.getFeeDetails.selector), abi.encode(_fee, _feeToken));
+    vm.mockCall(
+      address(automate), abi.encodeWithSelector(IAutomate.getFeeDetails.selector), abi.encode(_fee, _feeToken)
+    );
 
     vm.startPrank(_relayCaller);
     _;

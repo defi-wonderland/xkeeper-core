@@ -46,11 +46,10 @@ interface IKeep3rBondedRelay is IKeep3rRelay {
 
   /**
    * @notice The requirements needed when bonded job is required
-   * @param _keeper The address of the keeper to check
-   * @param _bond The bond token being evaluated
-   * @param _minBond The minimum amount of bonded tokens
-   * @param _earned The minimum funds earned in the keepers lifetime
-   * @param _age The minimum keeper age required
+   * @param bond The bond token being evaluated
+   * @param minBond The minimum amount of bonded tokens
+   * @param earned The minimum funds earned in the keepers lifetime
+   * @param age The minimum keeper age required
    */
   struct Requirements {
     address bond;

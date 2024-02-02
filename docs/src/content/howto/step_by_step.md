@@ -1,43 +1,35 @@
-## Tutorial: Deployment and Configuration of Automation Vault with Relays
+## Tutorial: Deployment and Configuration of Automation Vault
 
-automation vault
+This guide provide all information needed to deploy and configure an `AutomationVault`. You can do it easily using " XKEPPER WEBSITE".
 
 ### Step 1: Deployment of the Automation Vault
 
-1. **Deploy Automation Vault:**
+**Deploy Automation Vault:**
 
-   - Use the `AutomationVaultFactory` contract to deploy a new instance of `AutomationVault`. Make sure to provide the owner parameter.
+- Use the `AutomationVaultFactory` contract to deploy a new instance of `AutomationVault`. Make sure to provide the owner parameter. The native token will be taken directly from the connected network.
 
 ### Step 2: Adding Balance to the Automation Vault
 
-1. **Transfer Funds to the Vault:**
+**Transfer Funds to the Vault:**
 
-   - Transfer the necessary funds to the automation vault to cover the costs associated with task execution. This could include ETH or ERC-20 tokens, depending on the protocol requirements.
+- Transfer the necessary funds to the automation vault to cover the costs associated with task execution. This could include Native token as ETH in Ethereum network or ERC-20 tokens, depending on the protocol requirements.
 
-### Step 3: Approval of Callers and Relays
+### Step 3: Approval of Callers and Relays for a specific relay
 
-1. **Approval of Callers:**
+**Add relay:**
 
-   - Use functions in the automation vault to approve specific callers that should have permissions to interact with the automation vault.
+- Use functions in the automation vault to approve specific relay. This might include relays such as `Keep3rRelay`, `Keep3rBondedRelay`, `GelatoRelay`, or `OpenRelay`, depending on the protocol's needs. The params needed to approve it will be:
 
-2. **Approval of Relays:**
+a) The relay address
 
-   - Ensure approval of relevant relays to be used for task execution. This might include relays such as `Keep3rRelay`, `Keep3rBondedRelay`, `GelatoRelay`, or `OpenRelay`, depending on the protocol's needs.
+b) The callers who will be authorized to call the selected relay.
 
-### Step 4: Configuration of jobs and selectors
+c) The Job Data which contains the job and selectors. To enable task executions, you need to approve specific jobs that the automation vault will interact with and will be allowed. Additionally, you need to approve specific function selectors for each approved job. This ensures that only designated functions within the approved jobs can be executed.
 
-1. **Approval of jobs:**
+### Step 4: Tracking and Monitoring
 
-   - To enable task executions, you need to approve specific jobs that the automation vault will interact with and will be allowed.
+**Tracking and Monitoring:**
 
-2. **Approval of selectors:**
-
-   - Additionally, you need to approve specific function selectors for each approved job. This ensures that only designated functions within the approved jobs can be executed.
-
-### Step 5: Tracking and Monitoring
-
-2. **Tracking and Monitoring:**
-
-   - Monitor task executions through emitted events and other relevant metrics.
+- Monitor task executions through emitted events and other relevant metrics.
 
 With these steps, you should have a solid guide for a protocol to deploy its automation vault, configure necessary permissions and relays, add balance, and execute automated tasks.

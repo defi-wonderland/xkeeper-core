@@ -10,4 +10,6 @@ The `AutomationVault` contract is designed to facilitate the management of job e
 
 - **Ownership Control**: The contract incorporates ownership management to ensure control over its functions. The owner has the authority to approve or revoke relays, callers, and selectors.
 
+- **Multichain Support**: The xKeeper core allows to configure the automation vaults for several chains. The native token is configurable for any automation vault.
+
 - **Flexibility**: Users have the freedom to add or remove relays and select specific functions to be executed by jobs, granting them greater control over their automation processes.

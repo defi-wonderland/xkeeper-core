@@ -1,4 +1,4 @@
-## Tutorial: Automate with Gelato Relay
+## Tutorial: Automate with Open Relay
 
 This guide provides a step-by-step process to create and manage automated tasks using the `OpenRelay`.
 

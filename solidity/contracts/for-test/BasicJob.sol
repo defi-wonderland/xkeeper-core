@@ -14,6 +14,10 @@ contract BasicJob is IBasicJob {
    */
   mapping(uint256 => address) internal _dataset;
 
+  /**
+   * @notice Nonce of the dataset
+   * @dev This nonce is for test a job that uses a lot of gas
+   */
   uint256 internal _nonce;
 
   /// @inheritdoc IBasicJob

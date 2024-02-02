@@ -1,14 +1,14 @@
 {
-  "name": "@keep3r-network/framework",
+  "name": "xkeeper",
   "version": "0.0.1",
   "private": true,
-  "description": "Keep3r framework core",
-  "homepage": "https://github.com/defi-wonderland/keep3r-framework-private#readme",
+  "description": "XKeeper",
+  "homepage": "https://github.com/defi-wonderland/xkeeper-core#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/defi-wonderland/keep3r-framework-private.git"
+    "url": "git+https://github.com/defi-wonderland/xkeeper-core.git"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "author": "Wonderland",
   "scripts": {
     "build": "forge build",

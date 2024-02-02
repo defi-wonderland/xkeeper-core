@@ -3,11 +3,11 @@ pragma solidity 0.8.19;
 
 import {CommonIntegrationTest} from '@test/integration/Common.t.sol';
 
-import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
+import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
 import {IKeep3rV2} from '@interfaces/external/IKeep3rV2.sol';
 import {IKeep3rHelper} from '@interfaces/external/IKeep3rHelper.sol';
 import {IKeep3rV1} from '@interfaces/external/IKeep3rV1.sol';
-import {IKeep3rBondedRelay} from '@interfaces/IKeep3rBondedRelay.sol';
+import {IKeep3rBondedRelay} from '@interfaces/relays/IKeep3rBondedRelay.sol';
 import {_KEEP3R_V2, _KEEP3R_HELPER, _KEEP3R_V1, _KEEP3R_GOVERNOR, _KP3R_WHALE} from '@utils/Constants.sol';
 
 contract IntegrationKeep3rRelay is CommonIntegrationTest {

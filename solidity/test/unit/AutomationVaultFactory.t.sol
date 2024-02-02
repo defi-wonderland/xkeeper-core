@@ -3,8 +3,8 @@ pragma solidity 0.8.19;
 
 import {Test} from 'forge-std/Test.sol';
 
-import {AutomationVaultFactory, EnumerableSet} from '@contracts/AutomationVaultFactory.sol';
-import {AutomationVault, IAutomationVault} from '@contracts/AutomationVault.sol';
+import {AutomationVaultFactory, EnumerableSet} from '@contracts/core/AutomationVaultFactory.sol';
+import {AutomationVault, IAutomationVault} from '@contracts/core/AutomationVault.sol';
 
 contract AutomationVaultFactoryForTest is AutomationVaultFactory {
   using EnumerableSet for EnumerableSet.AddressSet;

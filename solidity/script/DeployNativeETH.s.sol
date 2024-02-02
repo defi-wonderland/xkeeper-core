@@ -3,15 +3,14 @@ pragma solidity 0.8.19;
 
 import {Script} from 'forge-std/Script.sol';
 
-import {AutomationVaultFactory, IAutomationVaultFactory} from '@contracts/AutomationVaultFactory.sol';
-import {AutomationVault, IAutomationVault} from '@contracts/AutomationVault.sol';
-import {OpenRelay, IOpenRelay} from '@contracts/OpenRelay.sol';
-import {GelatoRelay, IGelatoRelay} from '@contracts/GelatoRelay.sol';
-import {Keep3rRelay, IKeep3rRelay} from '@contracts/Keep3rRelay.sol';
-import {Keep3rBondedRelay, IKeep3rBondedRelay} from '@contracts/Keep3rBondedRelay.sol';
-import {XKeeperMetadata, IXKeeperMetadata} from '@contracts/XKeeperMetadata.sol';
+import {AutomationVaultFactory, IAutomationVaultFactory} from '@contracts/core/AutomationVaultFactory.sol';
+import {AutomationVault, IAutomationVault} from '@contracts/core/AutomationVault.sol';
+import {OpenRelay, IOpenRelay} from '@contracts/relays/OpenRelay.sol';
+import {GelatoRelay, IGelatoRelay} from '@contracts/relays/GelatoRelay.sol';
+import {Keep3rRelay, IKeep3rRelay} from '@contracts/relays/Keep3rRelay.sol';
+import {Keep3rBondedRelay, IKeep3rBondedRelay} from '@contracts/relays/Keep3rBondedRelay.sol';
+import {XKeeperMetadata, IXKeeperMetadata} from '@contracts/periphery/XKeeperMetadata.sol';
 import {_ETH, _AUTOMATE} from '@utils/Constants.sol';
-import {BasicJob} from '@contracts/for-test/BasicJob.sol';
 import {BasicJobChecker} from '@contracts/for-test/BasicJobChecker.sol';
 
 abstract contract DeployNativeETH is Script {

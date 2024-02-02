@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IGelatoRelay, IAutomationVault} from '@interfaces/IGelatoRelay.sol';
 import {IAutomate} from '@interfaces/external/IAutomate.sol';
 import {IGelato} from '@interfaces/external/IGelato.sol';
+import {IGelatoRelay, IAutomationVault} from '@interfaces/relays/IGelatoRelay.sol';
 
 /**
  * @title  GelatoRelay

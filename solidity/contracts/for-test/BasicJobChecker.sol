@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.19;
 
-import {IGelatoRelay} from '@interfaces/IGelatoRelay.sol';
+import {IGelatoRelay} from '@interfaces/relays/IGelatoRelay.sol';
 import {IBasicJobChecker, IAutomationVault, IBasicJob} from '@interfaces/for-test/IBasicJobChecker.sol';
 
 /**

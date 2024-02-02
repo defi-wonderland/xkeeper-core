@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
 import {Test} from 'forge-std/Test.sol';
 
-import {GelatoRelay, IAutomationVault, IAutomate, IGelato} from '@contracts/GelatoRelay.sol';
+import {GelatoRelay, IAutomationVault, IAutomate, IGelato} from '@contracts/relays/GelatoRelay.sol';
 
 /**
  * @title GelatoRelay Unit tests

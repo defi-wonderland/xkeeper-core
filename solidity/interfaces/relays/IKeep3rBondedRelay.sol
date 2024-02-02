@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
-import {IKeep3rRelay} from '@interfaces/IKeep3rRelay.sol';
+import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
+import {IKeep3rRelay} from '@interfaces/relays/IKeep3rRelay.sol';
 
 interface IKeep3rBondedRelay is IKeep3rRelay {
   /*///////////////////////////////////////////////////////////////

@@ -20,7 +20,6 @@ contract GelatoRelay is IGelatoRelay {
   address public feeCollector;
 
   /**
-   * @notice Creates the gelato relay contract
    * @param _automate The automate contract of the gelato network
    */
   constructor(IAutomate _automate) {
@@ -42,6 +41,6 @@ contract GelatoRelay is IGelatoRelay {
     _automationVault.exec(msg.sender, _execData, _feeData);
 
     // Emit the event
-    emit AutomationVaultExecuted(address(_automationVault), msg.sender, _execData, _feeData);
+    emit AutomationVaultExecuted(_automationVault, msg.sender, _execData, _feeData);
   }
 }

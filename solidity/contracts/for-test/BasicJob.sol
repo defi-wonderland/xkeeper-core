@@ -14,6 +14,9 @@ contract BasicJob is IBasicJob {
    */
   mapping(uint256 => address) internal _dataset;
 
+  /**
+   * @notice Nonce of the dataset
+   */
   uint256 internal _nonce;
 
   /// @inheritdoc IBasicJob

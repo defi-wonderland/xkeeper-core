@@ -31,11 +31,11 @@ contract Keep3rBondedRelayForTest is Keep3rBondedRelay {
 contract Keep3rBondedRelayUnitTest is Test {
   // Events
   event AutomationVaultExecuted(
-    address indexed _automationVault, address indexed _relayCaller, IAutomationVault.ExecData[] _execData
+    IAutomationVault indexed _automationVault, address indexed _relayCaller, IAutomationVault.ExecData[] _execData
   );
 
   event AutomationVaultRequirementsSetted(
-    address indexed _automationVault, address _bond, uint256 _minBond, uint256 _earned, uint256 _age
+    IAutomationVault indexed _automationVault, address _bond, uint256 _minBond, uint256 _earned, uint256 _age
   );
 
   // Keep3rBondedRelay contract
@@ -94,7 +94,7 @@ contract UnitKeep3rRelaySetAutomationVaultRequirements is Keep3rBondedRelayUnitT
   ) public happyPath(_relayCaller, _automationVault, _requirements) {
     vm.expectEmit();
     emit AutomationVaultRequirementsSetted(
-      address(_automationVault), _requirements.bond, _requirements.minBond, _requirements.earned, _requirements.age
+      _automationVault, _requirements.bond, _requirements.minBond, _requirements.earned, _requirements.age
     );
 
     keep3rBondedRelay.setAutomationVaultRequirements(_automationVault, _requirements);
@@ -223,7 +223,7 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
     IAutomationVault.ExecData[] memory _execDataKeep3rBonded = _buildExecDataKeep3rBonded(_relayCaller, _execData);
 
     vm.expectEmit();
-    emit AutomationVaultExecuted(address(_automationVault), _relayCaller, _execDataKeep3rBonded);
+    emit AutomationVaultExecuted(_automationVault, _relayCaller, _execDataKeep3rBonded);
 
     keep3rBondedRelay.exec(_automationVault, _execData);
   }

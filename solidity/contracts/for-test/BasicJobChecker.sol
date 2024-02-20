@@ -13,7 +13,7 @@ contract BasicJobChecker is IBasicJobChecker {
   function checker(
     IAutomationVault _automationVault,
     IBasicJob _basicJob
-  ) external pure returns (bool canExec, bytes memory execPayload) {
+  ) external pure returns (bool _canExec, bytes memory _execPayload) {
     // Creates exec data for the automation vault
     IAutomationVault.ExecData[] memory _execData = new IAutomationVault.ExecData[](1);
 
@@ -21,9 +21,9 @@ contract BasicJobChecker is IBasicJobChecker {
     _execData[0] = IAutomationVault.ExecData(address(_basicJob), abi.encodeWithSelector(IBasicJob.work.selector));
 
     // Creates exec payload for the relay
-    execPayload = abi.encodeCall(IGelatoRelay.exec, (_automationVault, _execData));
+    _execPayload = abi.encodeCall(IGelatoRelay.exec, (_automationVault, _execData));
 
     // Returns true and the exec payload
-    return (true, execPayload);
+    return (true, _execPayload);
   }
 }

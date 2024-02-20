@@ -195,21 +195,27 @@ contract AutomationVault is IAutomationVault {
 
         // Set the selectors for the job
         for (_j = 0; _j < _selectorsLength;) {
-          // Add the selector to the list of selectors
-          _approvedJobSelectorsList[_relay][_jobData.job].push(_selectorsData[_j].selector);
+          // Check if selector already exists if it does, skip it
+          if (
+            _approvedJobSelectorsWithHooks[_relay][_jobData.job][_selectorsData[_j].selector].selectorType
+              == JobSelectorType.DISABLED
+          ) {
+            // Add the selector to the list of selectors
+            _approvedJobSelectorsList[_relay][_jobData.job].push(_selectorsData[_j].selector);
 
-          // Add the selector to the list of selectors with hooks
-          _approvedJobSelectorsWithHooks[_relay][_jobData.job][_selectorsData[_j].selector] =
-            _selectorsData[_j].hookData;
+            // Add the selector to the list of selectors with hooks
+            _approvedJobSelectorsWithHooks[_relay][_jobData.job][_selectorsData[_j].selector] =
+              _selectorsData[_j].hookData;
 
-          // Emit the event
-          emit ApproveJobSelector(
-            _jobData.job,
-            _selectorsData[_j].selector,
-            _selectorsData[_j].hookData.selectorType,
-            _selectorsData[_j].hookData.preHook,
-            _selectorsData[_j].hookData.postHook
-          );
+            // Emit the event
+            emit ApproveJobSelector(
+              _jobData.job,
+              _selectorsData[_j].selector,
+              _selectorsData[_j].hookData.selectorType,
+              _selectorsData[_j].hookData.preHook,
+              _selectorsData[_j].hookData.postHook
+            );
+          }
 
           unchecked {
             ++_j;
@@ -406,21 +412,26 @@ contract AutomationVault is IAutomationVault {
 
         // Set the selectors for the job
         for (_j = 0; _j < _selectorsLength;) {
-          // Add the selector to the list of selectors
-          _approvedJobSelectorsList[_relay][_jobData.job].push(_selectorsData[_j].selector);
+          if (
+            _approvedJobSelectorsWithHooks[_relay][_jobData.job][_selectorsData[_j].selector].selectorType
+              == JobSelectorType.DISABLED
+          ) {
+            // Add the selector to the list of selectors
+            _approvedJobSelectorsList[_relay][_jobData.job].push(_selectorsData[_j].selector);
 
-          // Add the selector to the list of selectors with hooks
-          _approvedJobSelectorsWithHooks[_relay][_jobData.job][_selectorsData[_j].selector] =
-            _selectorsData[_j].hookData;
+            // Add the selector to the list of selectors with hooks
+            _approvedJobSelectorsWithHooks[_relay][_jobData.job][_selectorsData[_j].selector] =
+              _selectorsData[_j].hookData;
 
-          // Emit the event
-          emit ApproveJobSelector(
-            _jobData.job,
-            _selectorsData[_j].selector,
-            _selectorsData[_j].hookData.selectorType,
-            _selectorsData[_j].hookData.preHook,
-            _selectorsData[_j].hookData.postHook
-          );
+            // Emit the event
+            emit ApproveJobSelector(
+              _jobData.job,
+              _selectorsData[_j].selector,
+              _selectorsData[_j].hookData.selectorType,
+              _selectorsData[_j].hookData.preHook,
+              _selectorsData[_j].hookData.postHook
+            );
+          }
 
           unchecked {
             ++_j;

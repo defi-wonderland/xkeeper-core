@@ -23,7 +23,7 @@ contract AutomationVaultForTest is AutomationVault {
 
   function addJobSelectorForTest(address _relay, address _job, SelectorData memory _selectorData) public {
     _approvedJobs[_relay].add(_job);
-    _approvedJobSelectorsList[_relay][_job].add(bytes32(_selectorData.selector));
+    _approvedJobSelectorsList[_relay][_job].push(_selectorData.selector);
     _approvedJobSelectorsWithHooks[_relay][_job][_selectorData.selector] = _selectorData.hookData;
   }
 
@@ -45,7 +45,7 @@ contract AutomationVaultForTest is AutomationVault {
     }
 
     for (uint256 _i; _i < _selectors.length; ++_i) {
-      _approvedJobSelectorsList[_relay][_job].add(bytes32(_selectors[_i]));
+      _approvedJobSelectorsList[_relay][_job].push(_selectors[_i]);
       _approvedJobSelectorsWithHooks[_relay][_job][_selectors[_i]] =
         IAutomationVault.HookData(_jobSelectorTypes[_i], _preHooks[_i], _postHooks[_i]);
     }

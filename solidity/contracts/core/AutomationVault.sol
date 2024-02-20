@@ -40,8 +40,7 @@ contract AutomationVault is IAutomationVault {
   /**
    * @notice List of approved relays
    */
-  mapping(address _relay => mapping(address _job => EnumerableSet.Bytes32Set _selectors)) internal
-    _approvedJobSelectorsList;
+  mapping(address _relay => mapping(address _job => bytes4[] _selectors)) internal _approvedJobSelectorsList;
 
   /**
    * @notice List of approved relays
@@ -79,7 +78,7 @@ contract AutomationVault is IAutomationVault {
     // Get the list of jobs and their selectors
     for (uint256 _i; _i < _jobsLength;) {
       // Get the length of the selectors array
-      _selectorsLength = _approvedJobSelectorsList[_relay][_jobs[_i]].length();
+      _selectorsLength = _approvedJobSelectorsList[_relay][_jobs[_i]].length;
 
       // Create the array of selectors data with the selectors length
       SelectorData[] memory _selectorsData;
@@ -91,7 +90,7 @@ contract AutomationVault is IAutomationVault {
 
         // Get the list of selectors
         for (uint256 _j; _j < _selectorsLength;) {
-          _selectorsData[_j].selector = bytes4(_approvedJobSelectorsList[_relay][_jobs[_i]].at(_j));
+          _selectorsData[_j].selector = _approvedJobSelectorsList[_relay][_jobs[_i]][_j];
           _selectorsData[_j].hookData = _approvedJobSelectorsWithHooks[_relay][_jobs[_i]][_selectorsData[_j].selector];
 
           unchecked {
@@ -197,7 +196,7 @@ contract AutomationVault is IAutomationVault {
         // Set the selectors for the job
         for (_j = 0; _j < _selectorsLength;) {
           // Add the selector to the list of selectors
-          _approvedJobSelectorsList[_relay][_jobData.job].add(_selectorsData[_j].selector);
+          _approvedJobSelectorsList[_relay][_jobData.job].push(_selectorsData[_j].selector);
 
           // Add the selector to the list of selectors with hooks
           _approvedJobSelectorsWithHooks[_relay][_jobData.job][_selectorsData[_j].selector] =
@@ -257,7 +256,7 @@ contract AutomationVault is IAutomationVault {
     _valuesLength = _jobs.length;
 
     // Create the selector length variable
-    bytes32[] memory _selectors;
+    bytes4[] memory _selectors;
 
     // Create the length variable
     uint256 _selectorsLength;
@@ -267,15 +266,17 @@ contract AutomationVault is IAutomationVault {
       _approvedJobs[_relay].remove(_jobs[_i]);
 
       // Get the length of the selectors array
-      _selectorsLength = _approvedJobSelectorsList[_relay][_jobs[_i]].length();
+      _selectorsLength = _approvedJobSelectorsList[_relay][_jobs[_i]].length;
 
       // Get the list of selectors
-      _selectors = _approvedJobSelectorsList[_relay][_jobs[_i]].values();
+      _selectors = _approvedJobSelectorsList[_relay][_jobs[_i]];
+
+      // Delete selectors list
+      delete _approvedJobSelectorsList[_relay][_jobs[_i]];
 
       // Remove the selectors
       for (_j = 0; _j < _selectorsLength;) {
         delete _approvedJobSelectorsWithHooks[_relay][_jobs[_i]][bytes4(_selectors[_j])];
-        _approvedJobSelectorsList[_relay][_jobs[_i]].remove(_selectors[_j]);
 
         unchecked {
           ++_j;
@@ -351,7 +352,7 @@ contract AutomationVault is IAutomationVault {
     uint256 _jobsLength = _jobs.length;
 
     // Create the selector length variable
-    bytes32[] memory _selectors;
+    bytes4[] memory _selectors;
 
     // Create the length variable
     uint256 _selectorsLength;
@@ -361,15 +362,17 @@ contract AutomationVault is IAutomationVault {
       _approvedJobs[_relay].remove(_jobs[_i]);
 
       // Get the length of the selectors array
-      _selectorsLength = _approvedJobSelectorsList[_relay][_jobs[_i]].length();
+      _selectorsLength = _approvedJobSelectorsList[_relay][_jobs[_i]].length;
 
       // Get the list of selectors
-      _selectors = _approvedJobSelectorsList[_relay][_jobs[_i]].values();
+      _selectors = _approvedJobSelectorsList[_relay][_jobs[_i]];
+
+      // Delete selectors list
+      delete _approvedJobSelectorsList[_relay][_jobs[_i]];
 
       // Remove the selectors
       for (_j = 0; _j < _selectorsLength;) {
         delete _approvedJobSelectorsWithHooks[_relay][_jobs[_i]][bytes4(_selectors[_j])];
-        _approvedJobSelectorsList[_relay][_jobs[_i]].remove(_selectors[_j]);
 
         unchecked {
           ++_j;
@@ -404,7 +407,7 @@ contract AutomationVault is IAutomationVault {
         // Set the selectors for the job
         for (_j = 0; _j < _selectorsLength;) {
           // Add the selector to the list of selectors
-          _approvedJobSelectorsList[_relay][_jobData.job].add(_selectorsData[_j].selector);
+          _approvedJobSelectorsList[_relay][_jobData.job].push(_selectorsData[_j].selector);
 
           // Add the selector to the list of selectors with hooks
           _approvedJobSelectorsWithHooks[_relay][_jobData.job][_selectorsData[_j].selector] =
@@ -448,14 +451,14 @@ contract AutomationVault is IAutomationVault {
     for (_i; _i < _dataLength;) {
       _dataToExecute = _execData[_i];
 
-      // Check that the selector is approved to be called
-      if (!_approvedJobSelectorsList[msg.sender][_dataToExecute.job].contains(bytes4(_dataToExecute.jobData))) {
-        revert AutomationVault_NotApprovedJobSelector();
-      }
-
       // Get the hook data
       HookData memory _hookData =
         _approvedJobSelectorsWithHooks[msg.sender][_dataToExecute.job][bytes4(_dataToExecute.jobData)];
+
+      // Check that the selector is approved to be called
+      if (_hookData.selectorType == JobSelectorType.DISABLED) {
+        revert AutomationVault_NotApprovedJobSelector();
+      }
 
       // If the selector type is enabled, execute the job
       if (_hookData.selectorType == JobSelectorType.ENABLED) {

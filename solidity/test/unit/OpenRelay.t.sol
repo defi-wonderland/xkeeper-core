@@ -3,8 +3,8 @@ pragma solidity 0.8.19;
 
 import {Test} from 'forge-std/Test.sol';
 
-import {OpenRelay, IOpenRelay} from '@contracts/OpenRelay.sol';
-import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
+import {OpenRelay, IOpenRelay} from '@contracts/relays/OpenRelay.sol';
+import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
 import {_ETH} from '@utils/Constants.sol';
 
 /**
@@ -13,7 +13,7 @@ import {_ETH} from '@utils/Constants.sol';
 contract OpenRelayUnitTest is Test {
   // Events
   event AutomationVaultExecuted(
-    address indexed _automationVault,
+    IAutomationVault indexed _automationVault,
     address indexed _relayCaller,
     IAutomationVault.ExecData[] _execData,
     IAutomationVault.FeeData[] _feeData
@@ -110,7 +110,7 @@ contract UnitOpenRelayExec is OpenRelayUnitTest {
     _feeData[0] = IAutomationVault.FeeData(_feeRecipient, _ETH, 0);
 
     vm.expectEmit();
-    emit AutomationVaultExecuted(address(_automationVault), relayCaller, _execData, _feeData);
+    emit AutomationVaultExecuted(_automationVault, relayCaller, _execData, _feeData);
 
     openRelay.exec(_automationVault, _execData, _feeRecipient);
   }

@@ -1,21 +1,21 @@
 {
-  "name": "@keep3r-network/framework",
+  "name": "xkeeper",
   "version": "0.0.1",
   "private": true,
-  "description": "Keep3r framework core",
-  "homepage": "https://github.com/defi-wonderland/keep3r-framework-private#readme",
+  "description": "XKeeper",
+  "homepage": "https://github.com/defi-wonderland/xkeeper-core#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/defi-wonderland/keep3r-framework-private.git"
+    "url": "git+https://github.com/defi-wonderland/xkeeper-core.git"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "author": "Wonderland",
   "scripts": {
     "build": "forge build",
     "build:optimized": "FOUNDRY_PROFILE=optimized forge build",
     "coverage": "forge coverage --match-contract Unit",
-    "deploy:goerli": "bash -c 'source .env && forge script DeployGoerli --rpc-url $GOERLI_RPC --broadcast --private-key $GOERLI_DEPLOYER_PK --verify --etherscan-api-key $ETHERSCAN_API_KEY'",
     "deploy:mainnet": "bash -c 'source .env && forge script DeployMainnet --rpc-url $MAINNET_RPC --broadcast --private-key $MAINNET_DEPLOYER_PK --verify --etherscan-api-key $ETHERSCAN_API_KEY'",
+    "deploy:sepolia": "bash -c 'source .env && forge script DeploySepolia --rpc-url $SEPOLIA_RPC --broadcast --private-key $SEPOLIA_DEPLOYER_PK --verify --etherscan-api-key $ETHERSCAN_API_KEY'",
     "docs:build": "./build-docs.sh",
     "docs:run": "mdbook serve docs",
     "lint:check": "yarn lint:sol-tests && yarn lint:sol-logic && forge fmt check",
@@ -44,6 +44,7 @@
   "devDependencies": {
     "@commitlint/cli": "17.0.3",
     "@commitlint/config-conventional": "17.0.3",
+    "@defi-wonderland/natspec-smells": "^1.0.3",
     "husky": ">=8",
     "lint-staged": ">=10",
     "solhint": "3.6.2",

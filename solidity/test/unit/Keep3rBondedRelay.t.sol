@@ -1,9 +1,14 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
 import {Test} from 'forge-std/Test.sol';
 
-import {Keep3rBondedRelay, IKeep3rRelay, IKeep3rBondedRelay, IAutomationVault} from '@contracts/Keep3rBondedRelay.sol';
+import {
+  Keep3rBondedRelay,
+  IKeep3rRelay,
+  IKeep3rBondedRelay,
+  IAutomationVault
+} from '@contracts/relays/Keep3rBondedRelay.sol';
 import {IKeep3rV2} from '@interfaces/external/IKeep3rV2.sol';
 import {_KEEP3R_V2} from '@utils/Constants.sol';
 
@@ -26,11 +31,11 @@ contract Keep3rBondedRelayForTest is Keep3rBondedRelay {
 contract Keep3rBondedRelayUnitTest is Test {
   // Events
   event AutomationVaultExecuted(
-    address indexed _automationVault, address indexed _relayCaller, IAutomationVault.ExecData[] _execData
+    IAutomationVault indexed _automationVault, address indexed _relayCaller, IAutomationVault.ExecData[] _execData
   );
 
   event AutomationVaultRequirementsSetted(
-    address indexed _automationVault, address _bond, uint256 _minBond, uint256 _earned, uint256 _age
+    IAutomationVault indexed _automationVault, address _bond, uint256 _minBond, uint256 _earned, uint256 _age
   );
 
   // Keep3rBondedRelay contract
@@ -89,7 +94,7 @@ contract UnitKeep3rRelaySetAutomationVaultRequirements is Keep3rBondedRelayUnitT
   ) public happyPath(_relayCaller, _automationVault, _requirements) {
     vm.expectEmit();
     emit AutomationVaultRequirementsSetted(
-      address(_automationVault), _requirements.bond, _requirements.minBond, _requirements.earned, _requirements.age
+      _automationVault, _requirements.bond, _requirements.minBond, _requirements.earned, _requirements.age
     );
 
     keep3rBondedRelay.setAutomationVaultRequirements(_automationVault, _requirements);
@@ -218,7 +223,7 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
     IAutomationVault.ExecData[] memory _execDataKeep3rBonded = _buildExecDataKeep3rBonded(_relayCaller, _execData);
 
     vm.expectEmit();
-    emit AutomationVaultExecuted(address(_automationVault), _relayCaller, _execDataKeep3rBonded);
+    emit AutomationVaultExecuted(_automationVault, _relayCaller, _execDataKeep3rBonded);
 
     keep3rBondedRelay.exec(_automationVault, _execData);
   }

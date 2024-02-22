@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
 import {Test} from 'forge-std/Test.sol';
 
-import {GelatoRelay, IAutomationVault} from '@contracts/GelatoRelay.sol';
+import {GelatoRelay, IAutomationVault, IAutomate, IGelato} from '@contracts/relays/GelatoRelay.sol';
 
 /**
  * @title GelatoRelay Unit tests
@@ -11,7 +11,7 @@ import {GelatoRelay, IAutomationVault} from '@contracts/GelatoRelay.sol';
 contract GelatoRelayUnitTest is Test {
   // Events
   event AutomationVaultExecuted(
-    address indexed _automationVault,
+    IAutomationVault indexed _automationVault,
     address indexed _relayCaller,
     IAutomationVault.ExecData[] _execData,
     IAutomationVault.FeeData[] _feeData
@@ -20,16 +20,40 @@ contract GelatoRelayUnitTest is Test {
   // GelatoRelay contract
   GelatoRelay public gelatoRelay;
 
+  // Automate contract
+  IAutomate public automate;
+
+  // Gelato contract
+  address public gelato;
+
+  // Fee collector
+  address public feeCollector;
+
+  // Token
+  address public token;
+
   function setUp() public virtual {
-    gelatoRelay = new GelatoRelay();
+    automate = IAutomate(makeAddr('Automate'));
+    gelato = makeAddr('Gelato');
+    feeCollector = makeAddr('FeeCollector');
+    token = makeAddr('Token');
+
+    vm.mockCall(address(automate), abi.encodeWithSelector(IAutomate.gelato.selector), abi.encode(gelato));
+    vm.mockCall(gelato, abi.encodeWithSelector(IGelato.feeCollector.selector), abi.encode(feeCollector));
+
+    gelatoRelay = new GelatoRelay(automate);
   }
 }
 
 contract UnitGelatoRelayExec is GelatoRelayUnitTest {
-  modifier happyPath(address _relayCaller, IAutomationVault _automationVault) {
+  modifier happyPath(address _relayCaller, IAutomationVault _automationVault, uint256 _fee, address _feeToken) {
     assumeNoPrecompiles(address(_automationVault));
     vm.assume(address(_automationVault) != address(vm));
     vm.mockCall(address(_automationVault), abi.encodeWithSelector(IAutomationVault.exec.selector), abi.encode());
+
+    vm.mockCall(
+      address(automate), abi.encodeWithSelector(IAutomate.getFeeDetails.selector), abi.encode(_fee, _feeToken)
+    );
 
     vm.startPrank(_relayCaller);
     _;
@@ -38,26 +62,34 @@ contract UnitGelatoRelayExec is GelatoRelayUnitTest {
   function testExpectCallWithCorrectsParams(
     address _relayCaller,
     IAutomationVault _automationVault,
-    IAutomationVault.ExecData[] memory _execData,
-    IAutomationVault.FeeData[] memory _feeData
-  ) public happyPath(_relayCaller, _automationVault) {
+    uint256 _fee,
+    address _feeToken,
+    IAutomationVault.ExecData[] memory _execData
+  ) public happyPath(_relayCaller, _automationVault, _fee, _feeToken) {
+    IAutomationVault.FeeData[] memory _feeData = new IAutomationVault.FeeData[](1);
+    _feeData[0] = IAutomationVault.FeeData({fee: _fee, feeToken: _feeToken, feeRecipient: feeCollector});
+
     vm.expectCall(
       address(_automationVault),
       abi.encodeWithSelector(IAutomationVault.exec.selector, _relayCaller, _execData, _feeData)
     );
 
-    gelatoRelay.exec(_automationVault, _execData, _feeData);
+    gelatoRelay.exec(_automationVault, _execData);
   }
 
   function testEmitJobExecuted(
     address _relayCaller,
     IAutomationVault _automationVault,
-    IAutomationVault.ExecData[] memory _execData,
-    IAutomationVault.FeeData[] memory _feeData
-  ) public happyPath(_relayCaller, _automationVault) {
-    vm.expectEmit();
-    emit AutomationVaultExecuted(address(_automationVault), _relayCaller, _execData, _feeData);
+    uint256 _fee,
+    address _feeToken,
+    IAutomationVault.ExecData[] memory _execData
+  ) public happyPath(_relayCaller, _automationVault, _fee, _feeToken) {
+    IAutomationVault.FeeData[] memory _feeData = new IAutomationVault.FeeData[](1);
+    _feeData[0] = IAutomationVault.FeeData({fee: _fee, feeToken: _feeToken, feeRecipient: feeCollector});
 
-    gelatoRelay.exec(_automationVault, _execData, _feeData);
+    vm.expectEmit();
+    emit AutomationVaultExecuted(_automationVault, _relayCaller, _execData, _feeData);
+
+    gelatoRelay.exec(_automationVault, _execData);
   }
 }

@@ -1,7 +1,9 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
+import {IAutomate} from '@interfaces/external/IAutomate.sol';
+import {IGelato} from '@interfaces/external/IGelato.sol';
+import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
 
 interface IGelatoRelay {
   /*///////////////////////////////////////////////////////////////
@@ -16,11 +18,27 @@ interface IGelatoRelay {
    * @param  _feeData The array of fee data
    */
   event AutomationVaultExecuted(
-    address indexed _automationVault,
+    IAutomationVault indexed _automationVault,
     address indexed _relayCaller,
     IAutomationVault.ExecData[] _execData,
     IAutomationVault.FeeData[] _feeData
   );
+
+  /*///////////////////////////////////////////////////////////////
+                          VIEW FUNCTIONS  
+  //////////////////////////////////////////////////////////////*/
+
+  /**
+   * @notice Returns the automate contract of the gelato network
+   * @return _automate The address of the automate contract
+   */
+  function AUTOMATE() external view returns (IAutomate _automate);
+
+  /**
+   * @notice Returns the fee collector of the gelato network
+   * @return _feeCollector The address of the fee collector
+   */
+  function FEE_COLLECTOR() external view returns (address _feeCollector);
 
   /*///////////////////////////////////////////////////////////////
                           EXTERNAL FUNCTIONS
@@ -30,11 +48,6 @@ interface IGelatoRelay {
    * @notice Execute an automation vault which will execute the jobs and will manage the payment to the fee data receivers
    * @param  _automationVault The automation vault that will be executed
    * @param  _execData The array of exec data
-   * @param  _feeData The array of fee data
    */
-  function exec(
-    IAutomationVault _automationVault,
-    IAutomationVault.ExecData[] calldata _execData,
-    IAutomationVault.FeeData[] calldata _feeData
-  ) external;
+  function exec(IAutomationVault _automationVault, IAutomationVault.ExecData[] calldata _execData) external;
 }

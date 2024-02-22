@@ -3,4 +3,5 @@ pragma solidity 0.8.19;
 
 interface IGelato {
   function gelato() external view returns (address payable);
+  function feeCollector() external view returns (address payable);
 }

@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
 import {Test} from 'forge-std/Test.sol';
 
-import {Keep3rRelay, IKeep3rRelay, IAutomationVault} from '@contracts/Keep3rRelay.sol';
+import {Keep3rRelay, IKeep3rRelay, IAutomationVault} from '@contracts/relays/Keep3rRelay.sol';
 import {IKeep3rV2} from '@interfaces/external/IKeep3rV2.sol';
 import {_KEEP3R_V2} from '@utils/Constants.sol';
 
@@ -13,7 +13,7 @@ import {_KEEP3R_V2} from '@utils/Constants.sol';
 contract Keep3rRelayUnitTest is Test {
   // Events
   event AutomationVaultExecuted(
-    address indexed _automationVault, address indexed _relayCaller, IAutomationVault.ExecData[] _execData
+    IAutomationVault indexed _automationVault, address indexed _relayCaller, IAutomationVault.ExecData[] _execData
   );
 
   // Keep3rRelay contract
@@ -121,7 +121,7 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
     IAutomationVault.ExecData[] memory _execDataKeep3r = _buildExecDataKeep3r(_execData, _relayCaller);
 
     vm.expectEmit();
-    emit AutomationVaultExecuted(address(_automationVault), _relayCaller, _execDataKeep3r);
+    emit AutomationVaultExecuted(_automationVault, _relayCaller, _execDataKeep3r);
 
     keep3rRelay.exec(_automationVault, _execData);
   }

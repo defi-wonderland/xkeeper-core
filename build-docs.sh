@@ -7,14 +7,22 @@ excluded_path="external"
 temp_folder="technical-docs"
 FOUNDRY_PROFILE=docs forge doc --out "$temp_folder"
 
-# exclude the external folder from the generated docs
+# Exclude the external folder from the generated docs
 find "$temp_folder/src/$root_path" -type d -name "$excluded_path" -exec rm -rf {} \;
+
+# Edit the SUMMARY after the Interfaces section
+# https://stackoverflow.com/questions/67086574/no-such-file-or-directory-when-using-sed-in-combination-with-find
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  sed -i '' -e '/Technical Documentation/q' docs/src/SUMMARY.md
+else
+  sed -i -e '/Technical Documentation/q' docs/src/SUMMARY.md
+fi
 
 # Copy the generated SUMMARY, from the tmp directory
 tail -n +4 $temp_folder/src/SUMMARY.md >> docs/src/SUMMARY_TEMP.md
 
 # Remove the external docs from the SUMMARY
-(head -n 1 docs/src/SUMMARY_TEMP.md && tail -n +12 docs/src/SUMMARY_TEMP.md) >> docs/src/SUMMARY.md
+(head -n 4 docs/src/SUMMARY_TEMP.md && tail -n +15 docs/src/SUMMARY_TEMP.md) >> docs/src/SUMMARY.md
 rm docs/src/SUMMARY_TEMP.md
 
 # Delete old generated interfaces docs
@@ -51,4 +59,4 @@ base_folder="docs/src/$root_path"
 replace_text "$base_folder"
 
 # Remove the external docs from the README
-perl -i -ne 'print if $. != 4' docs/src/solidity/interfaces/README.md
+perl -i -ne 'print if $. != 5' docs/src/solidity/interfaces/README.md

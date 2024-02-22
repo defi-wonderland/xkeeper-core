@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import {CommonIntegrationTest} from '@test/integration/Common.t.sol';
 
-import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
+import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
 import {IAutomate, LibDataTypes} from '@interfaces/external/IAutomate.sol';
 import {IGelato} from '@interfaces/external/IGelato.sol';
 import {IOpsProxyFactory} from '@interfaces/external/IOpsProxyFactory.sol';
@@ -113,18 +113,16 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
   function test_executeAndGetPaymentFromGelato(uint16 _howHard) public {
     vm.assume(_howHard <= 1000);
 
-    assertEq(bot.balance, 0);
+    // Get the fee collector balance
+    address _feeCollector = gelato.feeCollector();
+    uint256 _balance = _feeCollector.balance;
 
     IAutomationVault.ExecData[] memory _execData = new IAutomationVault.ExecData[](1);
     _execData[0] =
       IAutomationVault.ExecData(address(basicJob), abi.encodeWithSelector(basicJob.workHard.selector, _howHard));
 
-    IAutomationVault.FeeData[] memory _feeData = new IAutomationVault.FeeData[](1);
-    _feeData[0] = IAutomationVault.FeeData(bot, _ETH, 1 ether);
-
     // Create exec data for Automate
-    bytes memory _execDataAutomate =
-      abi.encodeWithSelector(gelatoRelay.exec.selector, automationVault, _execData, _feeData);
+    bytes memory _execDataAutomate = abi.encodeWithSelector(gelatoRelay.exec.selector, automationVault, _execData);
 
     // Create module data for Automate
     LibDataTypes.ModuleData memory _moduleData = _createModuleData();
@@ -132,6 +130,6 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
     // Execute in Automate and expect Gelato to execute the job
     automate.exec(owner, address(gelatoRelay), _execDataAutomate, _moduleData, 1 ether, _ETH, false, true);
 
-    assertEq(bot.balance, 1 ether);
+    assertEq(_feeCollector.balance, _balance + 1 ether);
   }
 }

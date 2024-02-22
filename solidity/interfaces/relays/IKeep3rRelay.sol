@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
+import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
 
 interface IKeep3rRelay {
   /*///////////////////////////////////////////////////////////////
@@ -15,7 +15,7 @@ interface IKeep3rRelay {
    * @param  _execData The array of exec data
    */
   event AutomationVaultExecuted(
-    address indexed _automationVault, address indexed _relayCaller, IAutomationVault.ExecData[] _execData
+    IAutomationVault indexed _automationVault, address indexed _relayCaller, IAutomationVault.ExecData[] _execData
   );
 
   /*///////////////////////////////////////////////////////////////

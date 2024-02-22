@@ -3,7 +3,8 @@ pragma solidity 0.8.19;
 
 import {Test} from 'forge-std/Test.sol';
 
-import {AutomationVault, IAutomationVault, EnumerableSet, IERC20} from '@contracts/AutomationVault.sol';
+import {AutomationVault, IAutomationVault, EnumerableSet} from '@contracts/core/AutomationVault.sol';
+import {IERC20} from '@openzeppelin/token/ERC20/IERC20.sol';
 import {_ETH, _ALL} from '@utils/Constants.sol';
 
 contract AutomationVaultForTest is AutomationVault {

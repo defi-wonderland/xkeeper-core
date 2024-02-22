@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IAutomationVaultFactory} from '@interfaces/IAutomationVaultFactory.sol';
-import {AutomationVault, IAutomationVault} from '@contracts/AutomationVault.sol';
+import {IAutomationVaultFactory} from '@interfaces/core/IAutomationVaultFactory.sol';
+import {AutomationVault, IAutomationVault} from '@contracts/core/AutomationVault.sol';
 import {EnumerableSet} from '@openzeppelin/utils/structs/EnumerableSet.sol';
 
 /**

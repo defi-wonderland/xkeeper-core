@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IAutomationVault} from '@interfaces/IAutomationVault.sol';
-import {IKeep3rRelay} from '@interfaces/IKeep3rRelay.sol';
+import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
+import {IKeep3rRelay} from '@interfaces/relays/IKeep3rRelay.sol';
 
 interface IKeep3rBondedRelay is IKeep3rRelay {
   /*///////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@ interface IKeep3rBondedRelay is IKeep3rRelay {
    * @param _age The minimum keeper age required
    */
   event AutomationVaultRequirementsSetted(
-    address indexed _automationVault, address _bond, uint256 _minBond, uint256 _earned, uint256 _age
+    IAutomationVault indexed _automationVault, address _bond, uint256 _minBond, uint256 _earned, uint256 _age
   );
 
   /*///////////////////////////////////////////////////////////////
@@ -46,11 +46,10 @@ interface IKeep3rBondedRelay is IKeep3rRelay {
 
   /**
    * @notice The requirements needed when bonded job is required
-   * @param _keeper The address of the keeper to check
-   * @param _bond The bond token being evaluated
-   * @param _minBond The minimum amount of bonded tokens
-   * @param _earned The minimum funds earned in the keepers lifetime
-   * @param _age The minimum keeper age required
+   * @param bond The bond token being evaluated
+   * @param minBond The minimum amount of bonded tokens
+   * @param earned The minimum funds earned in the keepers lifetime
+   * @param age The minimum keeper age required
    */
   struct Requirements {
     address bond;

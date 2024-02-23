@@ -12,12 +12,12 @@ This guide provides a step-by-step process to create and manage automated tasks 
 
 **Register Job**
 
-    - To get started you will need to register your job on Keep3r Network. To do this you can use its UI which facilitates this task: https://keep3r.network/. In addition, you will have to implement the necessary functions for compatibility with Keep3r.
+- To get started you will need to register your job on Keep3r Network. To do this you can use its UI which facilitates this task: https://keep3r.network/. In addition, you will have to implement the necessary functions for compatibility with Keep3r.
 
-    - Once the job is registered, you will have to add the liquidity to automate the payments. Remember, using Keep3r it is not necessary to add liquidity to the `automationVault`.
+- Once the job is registered, you will have to add the liquidity to automate the payments. Remember, using Keep3r it is not necessary to add liquidity to the `automationVault`.
 
 ### Step 3: Tracking and Monitoring
 
 **Tracking and Monitoring:**
 
-    - Once the task is created, you will have information about the executions and logs in [xkeeper.network](https://xkeeper.network/).
+- Once the task is created, you will have information about the executions and logs in [xkeeper.network](https://xkeeper.network/).

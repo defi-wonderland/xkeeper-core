@@ -18,7 +18,7 @@ interface IKeep3rBondedRelay is IKeep3rRelay {
    * @param _age The minimum keeper age required
    */
   event AutomationVaultRequirementsSetted(
-    address indexed _automationVault, address _bond, uint256 _minBond, uint256 _earned, uint256 _age
+    IAutomationVault indexed _automationVault, address _bond, uint256 _minBond, uint256 _earned, uint256 _age
   );
 
   /*///////////////////////////////////////////////////////////////

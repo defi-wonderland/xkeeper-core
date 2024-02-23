@@ -39,6 +39,6 @@ contract OpenRelay is IOpenRelay {
     _automationVault.exec(msg.sender, new IAutomationVault.ExecData[](0), _feeData);
 
     // Emit the event
-    emit AutomationVaultExecuted(address(_automationVault), msg.sender, _execData, _feeData);
+    emit AutomationVaultExecuted(_automationVault, msg.sender, _execData, _feeData);
   }
 }

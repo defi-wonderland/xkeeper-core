@@ -49,6 +49,6 @@ contract Keep3rRelay is IKeep3rRelay {
     _automationVault.exec(msg.sender, _execDataKeep3r, new IAutomationVault.FeeData[](0));
 
     // Emit the event
-    emit AutomationVaultExecuted(address(_automationVault), msg.sender, _execDataKeep3r);
+    emit AutomationVaultExecuted(_automationVault, msg.sender, _execDataKeep3r);
   }
 }

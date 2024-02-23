@@ -11,37 +11,32 @@ import {IGelatoRelay, IAutomationVault} from '@interfaces/relays/IGelatoRelay.so
  */
 contract GelatoRelay is IGelatoRelay {
   /// @inheritdoc IGelatoRelay
-  IAutomate public automate;
+  IAutomate public immutable AUTOMATE;
 
   /// @inheritdoc IGelatoRelay
-  IGelato public gelato;
-
-  /// @inheritdoc IGelatoRelay
-  address public feeCollector;
+  address public immutable FEE_COLLECTOR;
 
   /**
-   * @notice Creates the gelato relay contract
    * @param _automate The automate contract of the gelato network
    */
   constructor(IAutomate _automate) {
-    automate = _automate;
-    gelato = IGelato(automate.gelato());
-    feeCollector = gelato.feeCollector();
+    AUTOMATE = _automate;
+    FEE_COLLECTOR = IGelato(AUTOMATE.gelato()).feeCollector();
   }
 
   /// @inheritdoc IGelatoRelay
   function exec(IAutomationVault _automationVault, IAutomationVault.ExecData[] calldata _execData) external {
     // Get the fee details
-    (uint256 _fee, address _feeToken) = automate.getFeeDetails();
+    (uint256 _fee, address _feeToken) = AUTOMATE.getFeeDetails();
 
     // Create fee data
     IAutomationVault.FeeData[] memory _feeData = new IAutomationVault.FeeData[](1);
-    _feeData[0] = IAutomationVault.FeeData(feeCollector, _feeToken, _fee);
+    _feeData[0] = IAutomationVault.FeeData(FEE_COLLECTOR, _feeToken, _fee);
 
     // Execute the automation vault
     _automationVault.exec(msg.sender, _execData, _feeData);
 
     // Emit the event
-    emit AutomationVaultExecuted(address(_automationVault), msg.sender, _execData, _feeData);
+    emit AutomationVaultExecuted(_automationVault, msg.sender, _execData, _feeData);
   }
 }

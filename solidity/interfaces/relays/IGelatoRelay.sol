@@ -18,7 +18,7 @@ interface IGelatoRelay {
    * @param  _feeData The array of fee data
    */
   event AutomationVaultExecuted(
-    address indexed _automationVault,
+    IAutomationVault indexed _automationVault,
     address indexed _relayCaller,
     IAutomationVault.ExecData[] _execData,
     IAutomationVault.FeeData[] _feeData
@@ -32,19 +32,13 @@ interface IGelatoRelay {
    * @notice Returns the automate contract of the gelato network
    * @return _automate The address of the automate contract
    */
-  function automate() external view returns (IAutomate _automate);
-
-  /**
-   * @notice Returns the gelato contract of the gelato network
-   * @return _gelato The address of the gelato contract
-   */
-  function gelato() external view returns (IGelato _gelato);
+  function AUTOMATE() external view returns (IAutomate _automate);
 
   /**
    * @notice Returns the fee collector of the gelato network
    * @return _feeCollector The address of the fee collector
    */
-  function feeCollector() external view returns (address _feeCollector);
+  function FEE_COLLECTOR() external view returns (address _feeCollector);
 
   /*///////////////////////////////////////////////////////////////
                           EXTERNAL FUNCTIONS

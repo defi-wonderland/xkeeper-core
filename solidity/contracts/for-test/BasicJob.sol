@@ -16,7 +16,10 @@ contract BasicJob is IBasicJob {
 
   /**
    * @notice Nonce of the dataset
+   * <<<<<<< HEAD
    * @dev This nonce is for test a job that uses a lot of gas
+   * =======
+   * >>>>>>> 05cc061d55f0a489e99188dbf7468760af160665
    */
   uint256 internal _nonce;
 

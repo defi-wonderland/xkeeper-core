@@ -11,7 +11,7 @@ import {GelatoRelay, IAutomationVault, IAutomate, IGelato} from '@contracts/rela
 contract GelatoRelayUnitTest is Test {
   // Events
   event AutomationVaultExecuted(
-    address indexed _automationVault,
+    IAutomationVault indexed _automationVault,
     address indexed _relayCaller,
     IAutomationVault.ExecData[] _execData,
     IAutomationVault.FeeData[] _feeData
@@ -88,7 +88,7 @@ contract UnitGelatoRelayExec is GelatoRelayUnitTest {
     _feeData[0] = IAutomationVault.FeeData({fee: _fee, feeToken: _feeToken, feeRecipient: feeCollector});
 
     vm.expectEmit();
-    emit AutomationVaultExecuted(address(_automationVault), _relayCaller, _execData, _feeData);
+    emit AutomationVaultExecuted(_automationVault, _relayCaller, _execData, _feeData);
 
     gelatoRelay.exec(_automationVault, _execData);
   }

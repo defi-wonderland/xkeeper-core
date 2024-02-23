@@ -23,7 +23,7 @@ contract Keep3rBondedRelay is IKeep3rBondedRelay {
 
     automationVaultRequirements[_automationVault] = _requirements;
     emit AutomationVaultRequirementsSetted(
-      address(_automationVault), _requirements.bond, _requirements.minBond, _requirements.earned, _requirements.age
+      _automationVault, _requirements.bond, _requirements.minBond, _requirements.earned, _requirements.age
     );
   }
 
@@ -74,6 +74,6 @@ contract Keep3rBondedRelay is IKeep3rBondedRelay {
     _automationVault.exec(msg.sender, _execDataKeep3r, new IAutomationVault.FeeData[](0));
 
     // Emit necessary event
-    emit AutomationVaultExecuted(address(_automationVault), msg.sender, _execDataKeep3r);
+    emit AutomationVaultExecuted(_automationVault, msg.sender, _execDataKeep3r);
   }
 }

@@ -13,11 +13,11 @@ interface IBasicJobChecker {
    * @notice This function checks whether the job can be executed by the automation vault
    * @param _automationVault The automation vault that will execute the job
    * @param _basicJob The basic job that will be executed
-   * @return canExec Whether the job can be executed
-   * @return execPayload The payload that will be executed by the automation vault
+   * @return _canExec Whether the job can be executed
+   * @return _execPayload The payload that will be executed by the automation vault
    */
   function checker(
     IAutomationVault _automationVault,
     IBasicJob _basicJob
-  ) external pure returns (bool canExec, bytes memory execPayload);
+  ) external pure returns (bool _canExec, bytes memory _execPayload);
 }

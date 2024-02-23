@@ -15,7 +15,7 @@ interface IKeep3rRelay {
    * @param  _execData The array of exec data
    */
   event AutomationVaultExecuted(
-    address indexed _automationVault, address indexed _relayCaller, IAutomationVault.ExecData[] _execData
+    IAutomationVault indexed _automationVault, address indexed _relayCaller, IAutomationVault.ExecData[] _execData
   );
 
   /*///////////////////////////////////////////////////////////////

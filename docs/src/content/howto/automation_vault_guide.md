@@ -1,6 +1,6 @@
 ## Tutorial: Deployment and Configuration of Automation Vault
 
-This guide provide all information needed to deploy and configure an `AutomationVault`. You can do it easily using " XKEPPER WEBSITE".
+This guide provide all information needed to deploy and configure an `AutomationVault`. You can do it easily using [xkeeper.network](https://xkeeper.network/).
 
 ### Step 1: Deployment of the Automation Vault
 

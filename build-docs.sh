@@ -22,7 +22,7 @@ fi
 tail -n +4 $temp_folder/src/SUMMARY.md >> docs/src/SUMMARY_TEMP.md
 
 # Remove the external docs from the SUMMARY
-(head -n 4 docs/src/SUMMARY_TEMP.md && tail -n +15 docs/src/SUMMARY_TEMP.md) >> docs/src/SUMMARY.md
+(head -n 4 docs/src/SUMMARY_TEMP.md && tail -n +18 docs/src/SUMMARY_TEMP.md) >> docs/src/SUMMARY.md
 rm docs/src/SUMMARY_TEMP.md
 
 # Delete old generated interfaces docs
@@ -59,4 +59,4 @@ base_folder="docs/src/$root_path"
 replace_text "$base_folder"
 
 # Remove the external docs from the README
-perl -i -ne 'print if $. != 5' docs/src/solidity/interfaces/README.md
+perl -i -ne 'print if $. != 6' docs/src/solidity/interfaces/README.md

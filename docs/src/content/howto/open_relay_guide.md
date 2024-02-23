@@ -18,4 +18,4 @@ This guide provides a step-by-step process to create and manage automated tasks 
 
 **Tracking and Monitoring:**
 
-    - Once the task is created, you will have information about the executions and logs in XKeeper website.
+    - Once the task is created, you will have information about the executions and logs in [xkeeper.network](https://xkeeper.network/).

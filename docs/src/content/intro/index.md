@@ -12,6 +12,7 @@ xKeeper is a fully modular framework, designed to be the backbone of future onch
 ## Repositories
 
 - [Core Contracts](https://github.com/defi-wonderland/xkeeper-core)
+- [Web Application](https://github.com/defi-wonderland/xkeeper-app)
 
 ## Deployments Addresses
 
@@ -19,26 +20,15 @@ xKeeper is a fully modular framework, designed to be the backbone of future onch
 
 **Sepolia**
 
-- **AutomationVaultFactory**  
-  `0xFfA518751B1489BA60f30274F86C5B2fa67a568b`
-
-- **AutomationVault**  
-  `0x3b383D8493A71c16a2B46a855aB22f896AE2a510`
-
-- **GelatoRelay**  
-  `0x0e35eae5ea725eb86415e99308a460888908753f`
-
-- **OpenRelay**  
-  `0x5f1e19C9748e99ec382F62F2D0988bB83ea2DF9E`
-
-- **Keep3rRelay**  
-  `0xEB069E36C84C67CC524c4E9edB0e00370C4A6370`
-
-- **Keep3rBondedRelay**  
-  `0x8422F45a763a2b608D8a748D52886ab825329d95`
-
-- **XKeeperMetadata**  
-  `0x4208102475d40bE64E8610BA7C87A7F7b961e35d`
+| Contract Name         | Contract Address                                |
+|-----------------------|-------------------------------------------------|
+| AutomationVaultFactory| `0xFfA518751B1489BA60f30274F86C5B2fa67a568b` |
+| AutomationVault       | `0x3b383D8493A71c16a2B46a855aB22f896AE2a510` |
+| GelatoRelay           | `0x0e35eae5ea725eb86415e99308a460888908753f` |
+| OpenRelay             | `0x5f1e19C9748e99ec382F62F2D0988bB83ea2DF9E` |
+| Keep3rRelay           | `0xEB069E36C84C67CC524c4E9edB0e00370C4A6370` |
+| Keep3rBondedRelay     | `0x8422F45a763a2b608D8a748D52886ab825329d95` |
+| XKeeperMetadata       | `0x4208102475d40bE64E8610BA7C87A7F7b961e35d` |
 
 ## Licensing
 

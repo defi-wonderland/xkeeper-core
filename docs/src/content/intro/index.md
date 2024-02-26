@@ -16,19 +16,14 @@ xKeeper is a fully modular framework, designed to be the backbone of future onch
 
 ## Deployments Addresses
 
-**Mainnet**
-
-**Sepolia**
-
 | Contract Name         | Contract Address                                |
 |-----------------------|-------------------------------------------------|
-| AutomationVaultFactory| `0xFfA518751B1489BA60f30274F86C5B2fa67a568b` |
-| AutomationVault       | `0x3b383D8493A71c16a2B46a855aB22f896AE2a510` |
-| GelatoRelay           | `0x0e35eae5ea725eb86415e99308a460888908753f` |
-| OpenRelay             | `0x5f1e19C9748e99ec382F62F2D0988bB83ea2DF9E` |
-| Keep3rRelay           | `0xEB069E36C84C67CC524c4E9edB0e00370C4A6370` |
-| Keep3rBondedRelay     | `0x8422F45a763a2b608D8a748D52886ab825329d95` |
-| XKeeperMetadata       | `0x4208102475d40bE64E8610BA7C87A7F7b961e35d` |
+| AutomationVaultFactory| `0xe1D23cc6F3415d425005454983d4B150786c9240` |
+| GelatoRelay           | `0x29CB3097985b4A3bBe34AFfcE61A4eAC9FE13317` |
+| OpenRelay             | `0x21a3C0E82aFB836B68b9C857901A3fE38352347A` |
+| Keep3rRelay           | `0x06a909dB922eC583B9f3D1597bCE42C97f2371Fb` |
+| Keep3rBondedRelay     | `0xBa6CA456a5E17E6387a233fA14Bf33eefA165ddE` |
+| XKeeperMetadata       | `0x96f57C654f07dda2B7d65dD98150158Bd5d764db` |
 
 ## Licensing
 

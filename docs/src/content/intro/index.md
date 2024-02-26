@@ -1,6 +1,6 @@
 # Getting Started
 
-> [!IMPORTANT]  
+> IMPORTANT: 
 > Docs are a work in progress and will continue to improve.
 
 xKeeper is a keeper network aggregator which aims to decentralise the on-chain automation of DeFi. With xKeeper, using multiple keeper networks, such as Keep3r Network, Gelato, or others, will be a walk in the park.
@@ -38,6 +38,6 @@ The primary license for xKeeper is AGPL-3.0
 
 XKeeper was built with ❤️ by [Wonderland](https://defi.sucks).
 
-Wonderland the largest core development group in web3. Our commitment is to a financial future that's open, decentralized, and accessible to all.
+Wonderland is the largest core development group in web3. Our commitment is to a financial future that's open, decentralized, and accessible to all.
 
 [DeFi sucks](https://defi.sucks), but Wonderland is here to make it better.

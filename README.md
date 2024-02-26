@@ -34,7 +34,7 @@ Make sure to set `MAINNET_RPC` environment variable before running integration t
 | `yarn coverage`         | See `forge coverage` report.                                                                     |
 | `yarn deploy:mainnet`   | Deploy the contracts to mainnet.                                                                 |
 | `yarn deploy:goerli`    | Deploy the contracts to goerli testnet                                                           |
-| `yarn docs:`            | Generate documentation with [`forge doc`](https://book.getfoundry.sh/reference/forge/forge-doc). |
+| `yarn docs:build`       | Generate documentation with [`forge doc`](https://book.getfoundry.sh/reference/forge/forge-doc). |
 | `yarn docs:run`         | Start the documentation server.                                                                  |
 | `yarn test`             | Run all unit and integration tests.                                                              |
 | `yarn test:unit`        | Run unit tests.                                                                                  |

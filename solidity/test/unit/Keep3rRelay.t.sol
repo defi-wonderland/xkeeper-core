@@ -5,7 +5,6 @@ import {Test} from 'forge-std/Test.sol';
 
 import {Keep3rRelay, IKeep3rRelay, IAutomationVault} from '@contracts/relays/Keep3rRelay.sol';
 import {IKeep3rV2} from '@interfaces/external/IKeep3rV2.sol';
-import {_KEEP3R_V2} from '@utils/Constants.sol';
 
 /**
  * @title Keep3rRelay Unit tests
@@ -19,8 +18,12 @@ contract Keep3rRelayUnitTest is Test {
   // Keep3rRelay contract
   Keep3rRelay public keep3rRelay;
 
+  // Keep3r V2 contract
+  IKeep3rV2 public keep3rV2;
+
   function setUp() public virtual {
-    keep3rRelay = new Keep3rRelay();
+    keep3rV2 = IKeep3rV2(makeAddr('KEEP3R_V2'));
+    keep3rRelay = new Keep3rRelay(keep3rV2);
   }
 }
 
@@ -36,12 +39,10 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
 
     vm.assume(_execData.length > 0 && _execData.length < 30);
     for (uint256 _i; _i < _execData.length; ++_i) {
-      vm.assume(_execData[_i].job != address(_KEEP3R_V2));
+      vm.assume(_execData[_i].job != address(keep3rV2));
     }
 
-    vm.mockCall(
-      address(_KEEP3R_V2), abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _relayCaller), abi.encode(true)
-    );
+    vm.mockCall(address(keep3rV2), abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _relayCaller), abi.encode(true));
 
     vm.startPrank(_relayCaller);
     _;
@@ -67,7 +68,7 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
     address _newCaller = makeAddr('newCaller');
     changePrank(_newCaller);
 
-    vm.mockCall(address(_KEEP3R_V2), abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _newCaller), abi.encode(false));
+    vm.mockCall(address(keep3rV2), abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _newCaller), abi.encode(false));
     vm.expectRevert(IKeep3rRelay.Keep3rRelay_NotKeeper.selector);
 
     keep3rRelay.exec(_automationVault, _execData);
@@ -79,7 +80,7 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
     IAutomationVault.ExecData[] memory _execData
   ) public happyPath(_relayCaller, _automationVault, _execData) {
     vm.assume(_execData.length > 3);
-    _execData[1].job = address(_KEEP3R_V2);
+    _execData[1].job = address(keep3rV2);
 
     vm.expectRevert(IKeep3rRelay.Keep3rRelay_Keep3rNotAllowed.selector);
 
@@ -91,7 +92,7 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
     IAutomationVault _automationVault,
     IAutomationVault.ExecData[] memory _execData
   ) public happyPath(_relayCaller, _automationVault, _execData) {
-    vm.expectCall(address(_KEEP3R_V2), abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _relayCaller));
+    vm.expectCall(address(keep3rV2), abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _relayCaller));
 
     keep3rRelay.exec(_automationVault, _execData);
   }
@@ -129,12 +130,12 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
   function _buildExecDataKeep3r(
     IAutomationVault.ExecData[] memory _execData,
     address _relayCaller
-  ) internal pure returns (IAutomationVault.ExecData[] memory _execDataKeep3r) {
+  ) internal view returns (IAutomationVault.ExecData[] memory _execDataKeep3r) {
     uint256 _execDataKeep3rLength = _execData.length + 2;
     _execDataKeep3r = new IAutomationVault.ExecData[](_execDataKeep3rLength);
 
     _execDataKeep3r[0] = IAutomationVault.ExecData({
-      job: address(_KEEP3R_V2),
+      job: address(keep3rV2),
       jobData: abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _relayCaller)
     });
 
@@ -143,7 +144,7 @@ contract UnitKeep3rRelayExec is Keep3rRelayUnitTest {
     }
 
     _execDataKeep3r[_execData.length + 1] = IAutomationVault.ExecData({
-      job: address(_KEEP3R_V2),
+      job: address(keep3rV2),
       jobData: abi.encodeWithSelector(IKeep3rV2.worked.selector, _relayCaller)
     });
   }

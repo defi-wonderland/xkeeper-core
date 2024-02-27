@@ -5,7 +5,7 @@ import {Test} from 'forge-std/Test.sol';
 
 import {OpenRelay, IOpenRelay} from '@contracts/relays/OpenRelay.sol';
 import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
-import {_ETH} from '@utils/Constants.sol';
+import {_NATIVE_TOKEN} from '@utils/Constants.sol';
 
 /**
  * @title OpenRelay Unit tests
@@ -90,7 +90,7 @@ contract UnitOpenRelayExec is OpenRelayUnitTest {
     address _feeRecipient
   ) public happyPath(_automationVault, _execData) {
     IAutomationVault.FeeData[] memory _feeData = new IAutomationVault.FeeData[](1);
-    _feeData[0] = IAutomationVault.FeeData(_feeRecipient, _ETH, 0);
+    _feeData[0] = IAutomationVault.FeeData(_feeRecipient, _NATIVE_TOKEN, 0);
 
     vm.expectCall(
       address(_automationVault),
@@ -107,7 +107,7 @@ contract UnitOpenRelayExec is OpenRelayUnitTest {
     address _feeRecipient
   ) public happyPath(_automationVault, _execData) {
     IAutomationVault.FeeData[] memory _feeData = new IAutomationVault.FeeData[](1);
-    _feeData[0] = IAutomationVault.FeeData(_feeRecipient, _ETH, 0);
+    _feeData[0] = IAutomationVault.FeeData(_feeRecipient, _NATIVE_TOKEN, 0);
 
     vm.expectEmit();
     emit AutomationVaultExecuted(_automationVault, relayCaller, _execData, _feeData);

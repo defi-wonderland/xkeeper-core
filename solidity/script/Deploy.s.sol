@@ -10,9 +10,10 @@ import {GelatoRelay, IGelatoRelay} from '@contracts/relays/GelatoRelay.sol';
 import {Keep3rRelay, IKeep3rRelay} from '@contracts/relays/Keep3rRelay.sol';
 import {Keep3rBondedRelay, IKeep3rBondedRelay} from '@contracts/relays/Keep3rBondedRelay.sol';
 import {XKeeperMetadata, IXKeeperMetadata} from '@contracts/periphery/XKeeperMetadata.sol';
-import {_ETH, _AUTOMATE} from '@utils/Constants.sol';
+import {_NATIVE_TOKEN} from '@utils/Constants.sol';
 import {BasicJobChecker} from '@contracts/for-test/BasicJobChecker.sol';
 import {IAutomate} from '@interfaces/external/IAutomate.sol';
+import {IKeep3rV2} from '@interfaces/external/IKeep3rV2.sol';
 
 abstract contract Deploy is Script {
   // When new contracts need to be deployed, make sure to update the salt version to avoid address collition
@@ -36,6 +37,7 @@ abstract contract Deploy is Script {
 
   // External contracts
   IAutomate public gelatoAutomate;
+  IKeep3rV2 public keep3rV2;
 
   // AutomationVault params
   address public owner;
@@ -51,13 +53,15 @@ abstract contract Deploy is Script {
     automationVaultFactory = new AutomationVaultFactory{salt: _salt}();
 
     // Deploy a sample automation vault for verification purposes
-    automationVault = automationVaultFactory.deployAutomationVault(owner, _ETH, 0);
+    automationVault = automationVaultFactory.deployAutomationVault(owner, _NATIVE_TOKEN, 0);
 
     // Deploy relays
     gelatoRelay = new GelatoRelay{salt: _salt}(gelatoAutomate);
     openRelay = new OpenRelay{salt: _salt}();
-    keep3rRelay = new Keep3rRelay{salt: _salt}();
-    keep3rBondedRelay = new Keep3rBondedRelay{salt: _salt}();
+    if (address(keep3rV2) != address(0)) {
+      keep3rRelay = new Keep3rRelay{salt: _salt}(keep3rV2);
+      keep3rBondedRelay = new Keep3rBondedRelay{salt: _salt}(keep3rV2);
+    }
 
     // Deploy metadata contract
     xKeeperMetadata = new XKeeperMetadata{salt: _salt}();
@@ -79,6 +83,7 @@ contract DeployEthereumMainnet is Deploy {
 
     // Chain specific setup
     gelatoAutomate = IAutomate(0x2A6C106ae13B558BB9E2Ec64Bd2f1f7BEFF3A5E0);
+    keep3rV2 = IKeep3rV2(0xeb02addCfD8B773A5FFA6B9d1FE99c566f8c44CC);
     vm.createSelectFork(vm.envString('ETHEREUM_MAINNET_RPC'));
   }
 }

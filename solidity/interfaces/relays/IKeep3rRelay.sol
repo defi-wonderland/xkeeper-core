@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
+import {IKeep3rV2} from '@interfaces/external/IKeep3rV2.sol';
 
 interface IKeep3rRelay {
   /*///////////////////////////////////////////////////////////////
@@ -36,6 +37,16 @@ interface IKeep3rRelay {
    * @notice Thrown when the exec data contains Keep3r V2
    */
   error Keep3rRelay_Keep3rNotAllowed();
+
+  /*///////////////////////////////////////////////////////////////
+                          VIEW FUNCTIONS
+  //////////////////////////////////////////////////////////////*/
+
+  /**
+   * @notice Get the keep3rV2 contract
+   * @return _keep3rV2 The keep3rV2 contract
+   */
+  function KEEP3R_V2() external view returns (IKeep3rV2 _keep3rV2);
 
   /*///////////////////////////////////////////////////////////////
                           EXTERNAL FUNCTIONS

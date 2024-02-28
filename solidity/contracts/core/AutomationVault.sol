@@ -472,7 +472,10 @@ contract AutomationVault is IAutomationVault {
       }
 
       // If the selector type is enabled, execute the job
-      if (_hookData.selectorType == JobSelectorType.ENABLED) {
+      if (
+        _hookData.selectorType == JobSelectorType.ENABLED
+          || _hookData.selectorType == JobSelectorType.ENABLED_WITH_POSTHOOK
+      ) {
         (_success,) = _dataToExecute.job.call(_dataToExecute.jobData);
         if (!_success) revert AutomationVault_ExecFailed();
 

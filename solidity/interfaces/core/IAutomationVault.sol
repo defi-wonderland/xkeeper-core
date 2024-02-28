@@ -140,6 +140,26 @@ interface IAutomationVault {
   error AutomationVault_OnlyPendingOwner();
 
   /*///////////////////////////////////////////////////////////////
+                              ENUMS
+  //////////////////////////////////////////////////////////////*/
+
+  /**
+   * @notice The type of the job selector
+   * @param DISABLED The job selector is disabled
+   * @param ENABLED The job selector is enabled
+   * @param ENABLED_WITH_PREHOOK The job selector is enabled with a prehook
+   * @param ENABLED_WITH_POSTHOOK The job selector is enabled with a posthook
+   * @param ENABLED_WITH_BOTHHOOKS The job selector is enabled with both hooks
+   */
+  enum JobSelectorType {
+    DISABLED,
+    ENABLED,
+    ENABLED_WITH_PREHOOK,
+    ENABLED_WITH_POSTHOOK,
+    ENABLED_WITH_BOTHHOOKS
+  }
+
+  /*///////////////////////////////////////////////////////////////
                               STRUCTS
   //////////////////////////////////////////////////////////////*/
 
@@ -198,26 +218,6 @@ interface IAutomationVault {
   }
 
   /*///////////////////////////////////////////////////////////////
-                              ENUMS
-  //////////////////////////////////////////////////////////////*/
-
-  /**
-   * @notice The type of the job selector
-   * @param DISABLED The job selector is disabled
-   * @param ENABLED The job selector is enabled
-   * @param ENABLED_WITH_PREHOOK The job selector is enabled with a prehook
-   * @param ENABLED_WITH_POSTHOOK The job selector is enabled with a posthook
-   * @param ENABLED_WITH_BOTHHOOKS The job selector is enabled with both hooks
-   */
-  enum JobSelectorType {
-    DISABLED,
-    ENABLED,
-    ENABLED_WITH_PREHOOK,
-    ENABLED_WITH_POSTHOOK,
-    ENABLED_WITH_BOTHHOOKS
-  }
-
-  /*///////////////////////////////////////////////////////////////
                           VIEW FUNCTIONS
   //////////////////////////////////////////////////////////////*/
 
@@ -231,7 +231,6 @@ interface IAutomationVault {
    * @notice Returns the address of the native token
    * @return _nativeToken The address of the native token
    */
-
   function NATIVE_TOKEN() external view returns (address _nativeToken);
 
   /**

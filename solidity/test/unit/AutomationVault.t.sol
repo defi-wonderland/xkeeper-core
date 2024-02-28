@@ -7,8 +7,6 @@ import {AutomationVault, IAutomationVault, EnumerableSet} from '@contracts/core/
 import {IERC20} from '@openzeppelin/token/ERC20/IERC20.sol';
 import {_ETH, _ALL} from '@utils/Constants.sol';
 
-import {console} from 'forge-std/Console.sol';
-
 contract AutomationVaultForTest is AutomationVault {
   using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -184,7 +182,7 @@ abstract contract AutomationVaultUnitTest is Test {
     IAutomationVault.JobSelectorType[] memory _jobSelectorTypes,
     address[] memory _preHooks,
     address[] memory _postHooks
-  ) internal pure returns (IAutomationVault.SelectorData[] memory) {
+  ) internal pure returns (IAutomationVault.SelectorData[] memory _selectorsData) {
     IAutomationVault.SelectorData[] memory _selectorsData = new IAutomationVault.SelectorData[](_selectors.length);
 
     for (uint256 _i; _i < _selectors.length; ++_i) {
@@ -1035,7 +1033,7 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
   function _createRandomSelectorsData(
     IAutomationVault.ExecData[] memory _randomExecData,
     uint8 _selectorTypeId
-  ) internal pure returns (IAutomationVault.SelectorData[] memory) {
+  ) internal pure returns (IAutomationVault.SelectorData[] memory _selectorsData) {
     // create selectors for each job
     bytes4[] memory _selectors = new bytes4[](_randomExecData.length);
     for (uint256 _i; _i < _randomExecData.length; ++_i) {
@@ -1070,7 +1068,7 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
   function _createRandomExecData(bytes32[] memory _randomBytes32)
     internal
     pure
-    returns (IAutomationVault.ExecData[] memory)
+    returns (IAutomationVault.ExecData[] memory _randomExecData)
   {
     IAutomationVault.ExecData[] memory _randomExecData = new IAutomationVault.ExecData[](_randomBytes32.length);
     for (uint256 _i; _i < _randomBytes32.length; ++_i) {
@@ -1088,7 +1086,7 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
   function _createRandomFeeData(bytes32[] memory _randomBytes32)
     internal
     pure
-    returns (IAutomationVault.FeeData[] memory)
+    returns (IAutomationVault.FeeData[] memory _randomFeeData)
   {
     IAutomationVault.FeeData[] memory _randomFeeData = new IAutomationVault.FeeData[](_randomBytes32.length);
     for (uint256 _i; _i < _randomBytes32.length; ++_i) {

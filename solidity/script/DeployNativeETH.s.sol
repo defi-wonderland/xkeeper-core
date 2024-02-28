@@ -37,15 +37,15 @@ abstract contract DeployNativeETH is Script {
     deployer = vm.rememberKey(_deployerPk);
     vm.startBroadcast(deployer);
 
-    automationVaultFactory = new AutomationVaultFactory();
-    automationVault = automationVaultFactory.deployAutomationVault(owner, _ETH, 0);
+    // automationVaultFactory = new AutomationVaultFactory();
+    // automationVault = automationVaultFactory.deployAutomationVault(owner, _ETH, 0);
 
     gelatoRelay = new GelatoRelay(_AUTOMATE);
-    openRelay = new OpenRelay();
-    keep3rRelay = new Keep3rRelay();
-    keep3rBondedRelay = new Keep3rBondedRelay();
+    // openRelay = new OpenRelay();
+    // keep3rRelay = new Keep3rRelay();
+    // keep3rBondedRelay = new Keep3rBondedRelay();
 
-    xKeeperMetadata = new XKeeperMetadata();
+    // xKeeperMetadata = new XKeeperMetadata();
 
     vm.stopBroadcast();
   }

@@ -15,9 +15,7 @@ out-via-ir
 # Not ignore gitkeep
 !/**/.gitkeep
 
-# Keep the latest deployment only
 broadcast/**
-!broadcast/**/run-latest.json
 
 # Docs build files
 docs/book

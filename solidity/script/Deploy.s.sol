@@ -95,6 +95,7 @@ contract DeployEthereumSepolia is Deploy {
 
     // Chain specific setup
     gelatoAutomate = IAutomate(0x2A6C106ae13B558BB9E2Ec64Bd2f1f7BEFF3A5E0);
+    keep3rV2 = IKeep3rV2(0x12C471f8db6763e83cb20C5A41a91506f744b346);
     vm.createSelectFork(vm.envString('ETHEREUM_SEPOLIA_RPC'));
   }
 }
@@ -107,6 +108,20 @@ contract DeployPolygonMainnet is Deploy {
 
     // Chain specific setup
     gelatoAutomate = IAutomate(0x2A6C106ae13B558BB9E2Ec64Bd2f1f7BEFF3A5E0);
+    keep3rV2 = IKeep3rV2(0x745a50320B6eB8FF281f1664Fc6713991661B129);
     vm.createSelectFork(vm.envString('POLYGON_MAINNET_RPC'));
+  }
+}
+
+contract DeployOptimismMainnet is Deploy {
+  function setUp() public {
+    // Deployer setup
+    _deployerPk = vm.envUint('DEPLOYER_PK');
+    owner = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
+    // Chain specific setup
+    gelatoAutomate = IAutomate(0x2A6C106ae13B558BB9E2Ec64Bd2f1f7BEFF3A5E0);
+    keep3rV2 = IKeep3rV2(0x745a50320B6eB8FF281f1664Fc6713991661B129);
+    vm.createSelectFork(vm.envString('OPTIMISM_MAINNET_RPC'));
   }
 }

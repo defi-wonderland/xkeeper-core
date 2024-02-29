@@ -57,8 +57,7 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
     // AutomationVault approve relay data
     automationVault.addRelay(address(gelatoRelay), _whitelistedCallers, _jobsData);
 
-    (bool _success,) = address(automationVault).call{value: 100 ether}('');
-    if (!_success) revert();
+    address(automationVault).call{value: 100 ether}('');
 
     changePrank(address(gelato));
   }
@@ -104,7 +103,7 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
     vm.expectEmit(address(automate));
     emit ExecSuccess(1 ether, _NATIVE_TOKEN, address(gelatoRelay), _execDataAutomate, taskId, true);
 
-    //Execute in Automate and expect Gelato to execute the job
+    // Execute in Automate and expect Gelato to execute the job
     automate.exec(owner, address(gelatoRelay), _execDataAutomate, _moduleData, 1 ether, _NATIVE_TOKEN, true);
   }
 

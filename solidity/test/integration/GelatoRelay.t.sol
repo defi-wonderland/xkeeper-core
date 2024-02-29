@@ -45,9 +45,8 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
     _whitelistedCallers[0] = _getDedicatedMsgSender(owner);
 
     // Job selectors array
-    bytes4[] memory _jobSelectors = new bytes4[](2);
+    bytes4[] memory _jobSelectors = new bytes4[](1);
     _jobSelectors[0] = basicJob.work.selector;
-    _jobSelectors[1] = basicJob.workHard.selector;
 
     // Job data array
     IAutomationVault.JobData[] memory _jobsData = new IAutomationVault.JobData[](1);
@@ -59,7 +58,7 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
     automationVault.addRelay(address(gelatoRelay), _whitelistedCallers, _jobsData);
 
     (bool _success,) = address(automationVault).call{value: 100 ether}('');
-    require(_success);
+    if (!_success) revert();
 
     changePrank(address(gelato));
   }
@@ -94,12 +93,8 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
     IAutomationVault.ExecData[] memory _execData = new IAutomationVault.ExecData[](1);
     _execData[0] = IAutomationVault.ExecData(address(basicJob), abi.encodeWithSelector(basicJob.work.selector));
 
-    IAutomationVault.FeeData[] memory _feeData = new IAutomationVault.FeeData[](1);
-    _feeData[0] = IAutomationVault.FeeData(bot, _NATIVE_TOKEN, 1 ether);
-
     // Create exec data for Automate
-    bytes memory _execDataAutomate =
-      abi.encodeWithSelector(gelatoRelay.exec.selector, automationVault, _execData, _feeData);
+    bytes memory _execDataAutomate = abi.encodeWithSelector(gelatoRelay.exec.selector, automationVault, _execData);
 
     // Create module data for Automate
     LibDataTypes.ModuleData memory _moduleData = _createModuleData();
@@ -109,20 +104,17 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
     vm.expectEmit(address(automate));
     emit ExecSuccess(1 ether, _NATIVE_TOKEN, address(gelatoRelay), _execDataAutomate, taskId, true);
 
-    // Execute in Automate and expect Gelato to execute the job
-    automate.exec(owner, address(gelatoRelay), _execDataAutomate, _moduleData, 1 ether, _NATIVE_TOKEN, false, true);
+    //Execute in Automate and expect Gelato to execute the job
+    automate.exec(owner, address(gelatoRelay), _execDataAutomate, _moduleData, 1 ether, _NATIVE_TOKEN, true);
   }
 
-  function test_executeAndGetPaymentFromGelato(uint16 _howHard) public {
-    vm.assume(_howHard <= 1000);
-
+  function test_executeAndGetPaymentFromGelato() public {
     // Get the fee collector balance
     address _feeCollector = gelato.feeCollector();
     uint256 _balance = _feeCollector.balance;
 
     IAutomationVault.ExecData[] memory _execData = new IAutomationVault.ExecData[](1);
-    _execData[0] =
-      IAutomationVault.ExecData(address(basicJob), abi.encodeWithSelector(basicJob.workHard.selector, _howHard));
+    _execData[0] = IAutomationVault.ExecData(address(basicJob), abi.encodeWithSelector(basicJob.work.selector));
 
     // Create exec data for Automate
     bytes memory _execDataAutomate = abi.encodeWithSelector(gelatoRelay.exec.selector, automationVault, _execData);
@@ -131,7 +123,7 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
     LibDataTypes.ModuleData memory _moduleData = _createModuleData();
 
     // Execute in Automate and expect Gelato to execute the job
-    automate.exec(owner, address(gelatoRelay), _execDataAutomate, _moduleData, 1 ether, _NATIVE_TOKEN, false, true);
+    automate.exec(owner, address(gelatoRelay), _execDataAutomate, _moduleData, 1 ether, _NATIVE_TOKEN, true);
 
     assertEq(_feeCollector.balance, _balance + 1 ether);
   }

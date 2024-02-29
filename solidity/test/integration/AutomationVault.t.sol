@@ -5,7 +5,7 @@ import {CommonIntegrationTest} from '@test/integration/Common.t.sol';
 
 import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
 import {IERC20, SafeERC20} from '@openzeppelin/token/ERC20/utils/SafeERC20.sol';
-import {_DAI_WHALE, _DAI, _NATIVE_TOKEN} from './Constants.sol';
+import {_DAI_WHALE, _DAI} from './Constants.sol';
 
 contract IntegrationAutomationVault is CommonIntegrationTest {
   using SafeERC20 for IERC20;

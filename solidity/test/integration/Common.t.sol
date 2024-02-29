@@ -7,7 +7,7 @@ import {BasicJob} from '@contracts/for-test/BasicJob.sol';
 import {Deploy} from '@script/Deploy.s.sol';
 import {IAutomate} from '@interfaces/external/IAutomate.sol';
 import {IKeep3rV2} from '@interfaces/external/IKeep3rV2.sol';
-import {_AUTOMATE, _KEEP3R_V2} from './Constants.sol';
+import {_KEEP3R_V2} from './Constants.sol';
 
 contract DeployForTest is Deploy {
   uint256 private constant _FORK_BLOCK = 18_500_000;
@@ -37,7 +37,7 @@ abstract contract CommonIntegrationTest is DeployForTest, Test {
   function setUp() public virtual override {
     DeployForTest.setUp();
 
-    gelatoAutomate = IAutomate(_AUTOMATE); // TODO: check with 0x2A6C106ae13B558BB9E2Ec64Bd2f1f7BEFF3A5E0
+    gelatoAutomate = IAutomate(0x2A6C106ae13B558BB9E2Ec64Bd2f1f7BEFF3A5E0);
     keep3rV2 = IKeep3rV2(_KEEP3R_V2);
 
     bot = makeAddr('Bot');

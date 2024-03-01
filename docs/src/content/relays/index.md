@@ -1,6 +1,6 @@
 # Relays Contracts
 
-Relay contracts in the XKeeper project play a key role in facilitating automated task executions from different networks. Each of these contracts provides specialized solutions to optimize task execution and manage the associated payments.
+Relay contracts in the xKeeper project play a key role in facilitating automated task executions from different networks. Each of these contracts provides specialized solutions to optimize task execution and manage the associated payments.
 
 ## Relays Contracts
 

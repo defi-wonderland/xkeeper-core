@@ -6,14 +6,10 @@ This guide provides a step-by-step process to create and manage automated tasks 
 
 **Automation Vault**
 
-<<<<<<< HEAD
-- If you already have an automation vault, you can skip this step, if not, deploy and configure the automation vault. You can follow the guide in step by step (./step_by_step.md). Using this relay you need to configure the relay for any caller.
-=======
 > **NOTE:**
-> If you already have an automation vault, you can skip this step. 
+> If you already have an automation vault, you can skip this step.
 
 - Deploy and configure the automation vault. You can follow the guide in step by step `(./step_by_step.md)`. Using this relay you need to configure the relay for any caller.
->>>>>>> b96f1144c06270baf6c013af36b8d80d57e4b9d9
 
 ### Step 2: Register Job in Keep3r Network
 

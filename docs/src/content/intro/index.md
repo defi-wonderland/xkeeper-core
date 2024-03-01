@@ -12,30 +12,97 @@ xKeeper is a fully modular framework, designed to be the backbone of future onch
 
 ## Deployments Addresses
 
-**Mainnet**
-
-**Sepolia**
+**Ethereum Mainnet**
 
 - **AutomationVaultFactory**  
-  `0xFfA518751B1489BA60f30274F86C5B2fa67a568b`
+  `0xa9C4c7295519C8aE3A69D6d84252de6948666bd4`
 
 - **AutomationVault**  
-  `0x3b383D8493A71c16a2B46a855aB22f896AE2a510`
+  `0x0901Ca7a25E3FA4BFcB779faDC51a9e1Fd04bd5C`
 
 - **GelatoRelay**  
-  `0x0e35eae5ea725eb86415e99308a460888908753f`
+  `0xe012118BA9678ceB3B7104C9bD7cc6b8Cf0a90DC`
 
 - **OpenRelay**  
-  `0x5f1e19C9748e99ec382F62F2D0988bB83ea2DF9E`
+  `0xc461d22DCDd8538E8025AAfA439B5BddA8C69B15`
 
 - **Keep3rRelay**  
-  `0xEB069E36C84C67CC524c4E9edB0e00370C4A6370`
+  `0xeBe2B03A83FAF02C0f4f113E6C85a3A95f107E51`
 
 - **Keep3rBondedRelay**  
-  `0x8422F45a763a2b608D8a748D52886ab825329d95`
+  `0x5b564DA8EA72b79676EA9a6571DA0d62D29B6AA2`
 
 - **XKeeperMetadata**  
-  `0x4208102475d40bE64E8610BA7C87A7F7b961e35d`
+  `0x96f57C654f07dda2B7d65dD98150158Bd5d764db`
+
+**Polygon Mainnet**
+
+- **AutomationVaultFactory**  
+  `0xa9C4c7295519C8aE3A69D6d84252de6948666bd4`
+
+- **AutomationVault**  
+  `0x0901Ca7a25E3FA4BFcB779faDC51a9e1Fd04bd5C`
+
+- **GelatoRelay**  
+  `0xe012118BA9678ceB3B7104C9bD7cc6b8Cf0a90DC`
+
+- **OpenRelay**  
+  `0xc461d22DCDd8538E8025AAfA439B5BddA8C69B15`
+
+- **Keep3rRelay**  
+  `0xfACd8867002605d16DaEb87955F443EE53a0893b`
+
+- **Keep3rBondedRelay**  
+  `0x10Ddf0A7051e238311A1b858acA26C4115f1c3EF`
+
+- **XKeeperMetadata**  
+  `0x96f57C654f07dda2B7d65dD98150158Bd5d764db`
+
+**Optimism Mainnet**
+
+- **AutomationVaultFactory**  
+  `0xa9C4c7295519C8aE3A69D6d84252de6948666bd4`
+
+- **AutomationVault**  
+  `0x0901Ca7a25E3FA4BFcB779faDC51a9e1Fd04bd5C`
+
+- **GelatoRelay**  
+  `0xe012118BA9678ceB3B7104C9bD7cc6b8Cf0a90DC`
+
+- **OpenRelay**  
+  `0xc461d22DCDd8538E8025AAfA439B5BddA8C69B15`
+
+- **Keep3rRelay**  
+  `0xfACd8867002605d16DaEb87955F443EE53a0893b`
+
+- **Keep3rBondedRelay**  
+  `0x10Ddf0A7051e238311A1b858acA26C4115f1c3EF`
+
+- **XKeeperMetadata**  
+  `0x96f57C654f07dda2B7d65dD98150158Bd5d764db`
+
+**Ethereum Sepolia**
+
+- **AutomationVaultFactory**  
+  `0xa9C4c7295519C8aE3A69D6d84252de6948666bd4`
+
+- **AutomationVault**  
+  `0x0901Ca7a25E3FA4BFcB779faDC51a9e1Fd04bd5C`
+
+- **GelatoRelay**  
+  `0xe012118BA9678ceB3B7104C9bD7cc6b8Cf0a90DC`
+
+- **OpenRelay**  
+  `0xc461d22DCDd8538E8025AAfA439B5BddA8C69B15`
+
+- **Keep3rRelay**  
+  `0xB0CB8E6Fe8F655d46eE0910332C263ddB61FF9a0`
+
+- **Keep3rBondedRelay**  
+  `0xaDe1cE131609702FdDb68f6142fc1c74f80F4c5f`
+
+- **XKeeperMetadata**  
+  `0x96f57C654f07dda2B7d65dD98150158Bd5d764db`
 
 ## Licensing
 

@@ -34,7 +34,7 @@ Make sure to set `MAINNET_RPC` environment variable before running integration t
 | `yarn coverage`         | See `forge coverage` report.                                                                     |
 | `yarn deploy:mainnet`   | Deploy the contracts to mainnet.                                                                 |
 | `yarn deploy:goerli`    | Deploy the contracts to goerli testnet                                                           |
-| `yarn docs:`            | Generate documentation with [`forge doc`](https://book.getfoundry.sh/reference/forge/forge-doc). |
+| `yarn docs:build`       | Generate documentation with [`forge doc`](https://book.getfoundry.sh/reference/forge/forge-doc). |
 | `yarn docs:run`         | Start the documentation server.                                                                  |
 | `yarn test`             | Run all unit and integration tests.                                                              |
 | `yarn test:unit`        | Run unit tests.                                                                                  |
@@ -49,6 +49,6 @@ The primary license for xKeeper contracts is AGPL-3.0, see [`LICENSE`](./LICENSE
 
 xKeeper was built with ❤️ by [Wonderland](https://defi.sucks).
 
-Wonderland the largest core development group in web3. Our commitment is to a financial future that's open, decentralized, and accessible to all.
+Wonderland is the largest core development group in web3. Our commitment is to a financial future that's open, decentralized, and accessible to all.
 
 [DeFi sucks](https://defi.sucks), but Wonderland is here to make it better.

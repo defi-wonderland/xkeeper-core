@@ -20,11 +20,11 @@ This guide provide all information needed to deploy and configure an `Automation
 
 - Use functions in the automation vault to approve specific relay. This might include relays such as `Keep3rRelay`, `Keep3rBondedRelay`, `GelatoRelay`, or `OpenRelay`, depending on the protocol's needs. The params needed to approve it will be:
 
-a) The relay address
+    a. The relay address
 
-b) The callers who will be authorized to call the selected relay.
+    b. The callers who will be authorized to call the selected relay.
 
-c) The Job Data which contains the job and selectors. To enable task executions, you need to approve specific jobs that the automation vault will interact with and will be allowed. Additionally, you need to approve specific function selectors for each approved job. This ensures that only designated functions within the approved jobs can be executed.
+    c. The Job Data which contains the job and selectors. To enable task executions, you need to approve specific jobs that the automation vault will interact with and will be allowed. Additionally, you need to approve specific function selectors for each approved job. This ensures that only designated functions within the approved jobs can be executed.
 
 ### Step 4: Tracking and Monitoring
 

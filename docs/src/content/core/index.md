@@ -1,6 +1,6 @@
 # Core Contracts
 
-The core contracts of the XKeeper project are the backbone of the framework. They can be used to generate new vaults, manage balances and approve and revoke permissions for callers and relays.
+The core contracts of the xKeeper project are the backbone of the framework. They can be used to generate new vaults, manage balances and approve and revoke permissions for callers and relays.
 
 ## Core Contracts
 

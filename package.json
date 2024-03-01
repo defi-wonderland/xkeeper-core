@@ -1,8 +1,7 @@
 {
   "name": "xkeeper",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
-  "description": "XKeeper",
   "homepage": "https://github.com/defi-wonderland/xkeeper-core#readme",
   "repository": {
     "type": "git",

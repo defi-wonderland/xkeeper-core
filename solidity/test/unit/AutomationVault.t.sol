@@ -1130,7 +1130,7 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     address _caller,
     bytes32[] memory _randomBytes32
   ) public happyPath(_relay, _caller, _randomBytes32, IAutomationVault.JobSelectorType.ENABLED) {
-    _execData[0].jobData = '0xdead';
+    _execData = new IAutomationVault.ExecData[](1);
 
     vm.expectRevert(IAutomationVault.AutomationVault_NotApprovedJobSelector.selector);
     automationVault.exec(_caller, _execData, _feeData);

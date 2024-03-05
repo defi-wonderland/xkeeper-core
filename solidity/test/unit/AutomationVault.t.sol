@@ -777,6 +777,8 @@ contract UnitAutomationVaultModifyRelay is AutomationVaultUnitTest {
     (, IAutomationVault.JobData[] memory _relayJobsData) = automationVault.getRelayDataForTest(_relay);
 
     assertEq(_relayJobsData.length, 2);
+    assertEq(_relayJobsData[0].job, _job);
+    assertEq(_relayJobsData[1].job, _secondJob);
   }
 }
 
@@ -968,6 +970,8 @@ contract UnitAutomationVaultModifyRelayJobs is AutomationVaultUnitTest {
     (, IAutomationVault.JobData[] memory _relayJobsData) = automationVault.getRelayDataForTest(_relay);
 
     assertEq(_relayJobsData.length, 2);
+    assertEq(_relayJobsData[0].job, _job);
+    assertEq(_relayJobsData[1].job, _secondJob);
   }
 }
 

@@ -466,39 +466,32 @@ contract AutomationVault is IAutomationVault {
       HookData memory _hookData =
         _approvedJobSelectorsWithHooks[msg.sender][_dataToExecute.job][bytes4(_dataToExecute.jobData)];
 
+      bytes memory _executeData = _dataToExecute.jobData;
+
       // Check that the selector is approved to be called
       if (_hookData.selectorType == JobSelectorType.DISABLED) {
         revert AutomationVault_NotApprovedJobSelector();
       }
 
-      // If the selector type is enabled, execute the job
+      // EXECUTE PRE-HOOK IF ENABLED
       if (
-        _hookData.selectorType == JobSelectorType.ENABLED
-          || _hookData.selectorType == JobSelectorType.ENABLED_WITH_POSTHOOK
-      ) {
-        (_success,) = _dataToExecute.job.call(_dataToExecute.jobData);
-        if (!_success) revert AutomationVault_ExecFailed();
-
-        // Otherwise execute the pre hook and then the job
-      } else if (
         _hookData.selectorType == JobSelectorType.ENABLED_WITH_PREHOOK
           || _hookData.selectorType == JobSelectorType.ENABLED_WITH_BOTHHOOKS
       ) {
-        bytes memory _returnData;
-        // Execute the pre hook and then the job if the pre hook is successful with the returned data
-        (_success, _returnData) = _hookData.preHook.call(_dataToExecute.jobData);
-        if (!_success) revert AutomationVault_ExecFailed();
-
-        (_success,) = _dataToExecute.job.call(_returnData);
+        // change execute data to pre-hook return data
+        (_success, _executeData) = _hookData.preHook.call(_dataToExecute.jobData);
         if (!_success) revert AutomationVault_ExecFailed();
       }
 
-      // If the selector type is enabled to execute the post hook, execute it
+      // EXECUTE MAIN JOB
+      (_success,) = _dataToExecute.job.call(_executeData);
+      if (!_success) revert AutomationVault_ExecFailed();
+
+      // Execute prost-hook if enabled
       if (
         _hookData.selectorType == JobSelectorType.ENABLED_WITH_POSTHOOK
           || _hookData.selectorType == JobSelectorType.ENABLED_WITH_BOTHHOOKS
       ) {
-        // Execute the post hook and check if it was successful
         (_success,) = _hookData.postHook.call('');
         if (!_success) revert AutomationVault_ExecFailed();
       }

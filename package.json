@@ -18,7 +18,7 @@
     "deploy:sepolia": "bash -c 'source .env && forge script DeploySepolia --rpc-url $SEPOLIA_RPC --broadcast --private-key $SEPOLIA_DEPLOYER_PK --verify --etherscan-api-key $ETHERSCAN_API_KEY'",
     "docs:build": "./build-docs.sh",
     "docs:run": "mdbook serve docs",
-    "lint:check": "yarn lint:sol-tests && yarn lint:sol-logic && forge fmt check",
+    "lint:check": "yarn lint:sol-tests && yarn lint:sol-logic && forge fmt --check",
     "lint:fix": "sort-package-json && forge fmt && yarn lint:sol-tests --fix && yarn lint:sol-logic --fix",
     "lint:sol-logic": "solhint -c .solhint.json 'solidity/contracts/**/*.sol' 'solidity/interfaces/**/*.sol'",
     "lint:sol-tests": "solhint 'solidity/test/**/*.sol'",
@@ -26,8 +26,11 @@
     "test": "forge test -vvv",
     "test:gas": "forge test --match-contract Integration -vvv --gas-report",
     "test:integration": "forge test --match-contract Integration -vvv",
+    "test:integration:optimized": "FOUNDRY_PROFILE=optimized forge test --match-contract Integration -vvv",
+    "test:optimized": "FOUNDRY_PROFILE=optimized forge test -vvv",
     "test:unit": "forge test --match-contract Unit -vvv",
-    "test:unit:deep": "FOUNDRY_FUZZ_RUNS=5000 yarn test:unit"
+    "test:unit:deep": "FOUNDRY_FUZZ_RUNS=5000 yarn test:unit",
+    "test:unit:optimized": "FOUNDRY_PROFILE=optimized forge test --match-contract Unit -vvv"
   },
   "lint-staged": {
     "*.{js,css,md,ts,sol}": "forge fmt",

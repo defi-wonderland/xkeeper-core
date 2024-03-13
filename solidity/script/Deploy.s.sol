@@ -125,3 +125,16 @@ contract DeployOptimismMainnet is Deploy {
     vm.createSelectFork(vm.envString('OPTIMISM_MAINNET_RPC'));
   }
 }
+
+contract DeployOptimismSepolia is Deploy {
+  function setUp() public {
+    // Deployer setup
+    _deployerPk = vm.envUint('DEPLOYER_PK');
+    owner = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
+    // Chain specific setup
+    gelatoAutomate = IAutomate(0x2A6C106ae13B558BB9E2Ec64Bd2f1f7BEFF3A5E0);
+    keep3rV2 = IKeep3rV2(0xC3377b30feD174e65778e7E1DaFBb7686082B428);
+    vm.createSelectFork(vm.envString('OPTIMISM_SEPOLIA_RPC'));
+  }
+}

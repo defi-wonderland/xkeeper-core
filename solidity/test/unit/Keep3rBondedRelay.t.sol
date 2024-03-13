@@ -7,12 +7,13 @@ import {
   Keep3rBondedRelay,
   IKeep3rRelay,
   IKeep3rBondedRelay,
-  IAutomationVault
+  IAutomationVault,
+  IKeep3rV2
 } from '@contracts/relays/Keep3rBondedRelay.sol';
-import {IKeep3rV2} from '@interfaces/external/IKeep3rV2.sol';
-import {_KEEP3R_V2} from '@utils/Constants.sol';
 
 contract Keep3rBondedRelayForTest is Keep3rBondedRelay {
+  constructor(IKeep3rV2 _keep3rV2) Keep3rBondedRelay(_keep3rV2) {}
+
   function setAutomationVaultRequirementsForTest(
     IAutomationVault _automationVault,
     address _bond,
@@ -41,8 +42,12 @@ contract Keep3rBondedRelayUnitTest is Test {
   // Keep3rBondedRelay contract
   Keep3rBondedRelayForTest public keep3rBondedRelay;
 
+  // Keep3rV2 contract
+  IKeep3rV2 public keep3rV2;
+
   function setUp() public virtual {
-    keep3rBondedRelay = new Keep3rBondedRelayForTest();
+    keep3rV2 = IKeep3rV2(makeAddr('KEEP3R_V2'));
+    keep3rBondedRelay = new Keep3rBondedRelayForTest(keep3rV2);
   }
 }
 
@@ -119,7 +124,7 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
     );
 
     vm.mockCall(
-      address(_KEEP3R_V2),
+      address(keep3rV2),
       abi.encodeWithSelector(
         IKeep3rV2.isBondedKeeper.selector,
         _relayCaller,
@@ -133,7 +138,7 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
 
     vm.assume(_execData.length > 0 && _execData.length < 30);
     for (uint256 _i; _i < _execData.length; ++_i) {
-      vm.assume(_execData[_i].job != address(_KEEP3R_V2));
+      vm.assume(_execData[_i].job != address(keep3rV2));
     }
 
     vm.startPrank(_relayCaller);
@@ -176,7 +181,7 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
     changePrank(_newCaller);
 
     vm.mockCall(
-      address(_KEEP3R_V2), abi.encodeWithSelector(IKeep3rV2.isBondedKeeper.selector, _newCaller), abi.encode(false)
+      address(keep3rV2), abi.encodeWithSelector(IKeep3rV2.isBondedKeeper.selector, _newCaller), abi.encode(false)
     );
     vm.expectRevert(IKeep3rBondedRelay.Keep3rBondedRelay_NotBondedKeeper.selector);
 
@@ -190,7 +195,7 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
     IKeep3rBondedRelay.Requirements memory _requirements
   ) public happyPath(_relayCaller, _automationVault, _execData, _requirements) {
     vm.assume(_execData.length > 3);
-    _execData[1].job = address(_KEEP3R_V2);
+    _execData[1].job = address(keep3rV2);
 
     vm.expectRevert(IKeep3rRelay.Keep3rRelay_Keep3rNotAllowed.selector);
 
@@ -231,12 +236,12 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
   function _buildExecDataKeep3rBonded(
     address _relayCaller,
     IAutomationVault.ExecData[] memory _execData
-  ) internal pure returns (IAutomationVault.ExecData[] memory _execDataKeep3rBonded) {
+  ) internal view returns (IAutomationVault.ExecData[] memory _execDataKeep3rBonded) {
     uint256 _execDataKeep3rLength = _execData.length + 2;
     _execDataKeep3rBonded = new IAutomationVault.ExecData[](_execDataKeep3rLength);
 
     _execDataKeep3rBonded[0] = IAutomationVault.ExecData({
-      job: address(_KEEP3R_V2),
+      job: address(keep3rV2),
       jobData: abi.encodeWithSelector(IKeep3rV2.isKeeper.selector, _relayCaller)
     });
 
@@ -245,7 +250,7 @@ contract UnitKeep3rBondedRelayExec is Keep3rBondedRelayUnitTest {
     }
 
     _execDataKeep3rBonded[_execData.length + 1] = IAutomationVault.ExecData({
-      job: address(_KEEP3R_V2),
+      job: address(keep3rV2),
       jobData: abi.encodeWithSelector(IKeep3rV2.worked.selector, _relayCaller)
     });
   }

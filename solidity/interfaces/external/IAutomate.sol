@@ -78,7 +78,6 @@ interface IAutomate {
    * @param moduleData Conditional modules that will be used. {See LibDataTypes-ModuleData}
    * @param txFee Fee paid to Gelato for execution, deducted on the TaskTreasury or transfered to Gelato.
    * @param feeToken Token used to pay for the execution. ETH = 0xeeeeee...
-   * @param useTaskTreasuryFunds If taskCreator's balance on TaskTreasury should pay for the tx.
    * @param revertOnFailure To revert or not if call to execAddress fails. (Used for off-chain simulations)
    */
   function exec(
@@ -88,7 +87,6 @@ interface IAutomate {
     LibDataTypes.ModuleData calldata moduleData,
     uint256 txFee,
     address feeToken,
-    bool useTaskTreasuryFunds,
     bool revertOnFailure
   ) external;
 

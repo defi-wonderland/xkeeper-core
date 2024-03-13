@@ -5,7 +5,7 @@ import {Test} from 'forge-std/Test.sol';
 
 import {AutomationVault, IAutomationVault, EnumerableSet} from '@contracts/core/AutomationVault.sol';
 import {IERC20} from '@openzeppelin/token/ERC20/IERC20.sol';
-import {_ETH, _ALL} from '@utils/Constants.sol';
+import {_NATIVE_TOKEN, _ALL} from '@utils/Constants.sol';
 
 contract AutomationVaultForTest is AutomationVault {
   using EnumerableSet for EnumerableSet.AddressSet;
@@ -89,7 +89,7 @@ abstract contract AutomationVaultUnitTest is Test {
     receiver = makeAddr('Receiver');
     token = makeAddr('Token');
 
-    automationVault = new AutomationVaultForTest(owner, _ETH);
+    automationVault = new AutomationVaultForTest(owner, _NATIVE_TOKEN);
   }
 
   /**
@@ -148,7 +148,7 @@ contract UnitAutomationVaultConstructor is AutomationVaultUnitTest {
    */
   function testParamsAreSet() public {
     assertEq(automationVault.owner(), owner);
-    assertEq(automationVault.NATIVE_TOKEN(), _ETH);
+    assertEq(automationVault.NATIVE_TOKEN(), _NATIVE_TOKEN);
   }
 }
 
@@ -329,7 +329,7 @@ contract UnitAutomationVaultWithdrawFunds is AutomationVaultUnitTest {
    */
   function testRevertIfCallerIsNotOwner(uint128 _amount) public {
     _revertOnlyOwner();
-    automationVault.withdrawFunds(_ETH, _amount, owner);
+    automationVault.withdrawFunds(_NATIVE_TOKEN, _amount, owner);
   }
 
   /**
@@ -339,14 +339,14 @@ contract UnitAutomationVaultWithdrawFunds is AutomationVaultUnitTest {
     vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_NativeTokenTransferFailed.selector));
 
     vm.prank(owner);
-    automationVault.withdrawFunds(_ETH, type(uint160).max, address(automationVault));
+    automationVault.withdrawFunds(_NATIVE_TOKEN, type(uint160).max, address(automationVault));
   }
 
   /**
    * @notice Checks that the balances are updated correctly
    */
   function testWithdrawNativeTokenAmountUpdateBalances(uint128 _amount) public happyPath(_amount) {
-    automationVault.withdrawFunds(_ETH, _amount, receiver);
+    automationVault.withdrawFunds(_NATIVE_TOKEN, _amount, receiver);
 
     assertEq(receiver.balance, _amount);
     assertEq(address(automationVault).balance, _balance - _amount);
@@ -366,9 +366,9 @@ contract UnitAutomationVaultWithdrawFunds is AutomationVaultUnitTest {
    */
   function testEmitWithdrawNativeTokenAmount(uint128 _amount) public happyPath(_amount) {
     vm.expectEmit();
-    emit WithdrawFunds(_ETH, _amount, receiver);
+    emit WithdrawFunds(_NATIVE_TOKEN, _amount, receiver);
 
-    automationVault.withdrawFunds(_ETH, _amount, receiver);
+    automationVault.withdrawFunds(_NATIVE_TOKEN, _amount, receiver);
   }
 
   /**
@@ -429,7 +429,6 @@ contract UnitAutomationVaultAddRelayData is AutomationVaultUnitTest {
   /**
    * @notice Checks that revert if the relay is already approved
    */
-
   function testRevertIfRelayAlreadyApproved(address _relay) public {
     vm.assume(_relay != address(0));
 
@@ -1095,7 +1094,7 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     IAutomationVault.ExecData[] memory _execData,
     IAutomationVault.FeeData[] memory _feeData
   ) public happyPath(_relay, _caller, _execData, _feeData) {
-    _feeData[1].feeToken = _ETH;
+    _feeData[1].feeToken = _NATIVE_TOKEN;
     vm.etch(_feeData[1].feeRecipient, type(NoFallbackForTest).runtimeCode);
 
     vm.expectRevert(IAutomationVault.AutomationVault_NativeTokenTransferFailed.selector);
@@ -1114,7 +1113,7 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     uint128 _fee
   ) public happyPath(_relay, _caller, _execData, _feeData) {
     for (uint256 _i; _i < _feeData.length; ++_i) {
-      _feeData[_i].feeToken = _ETH;
+      _feeData[_i].feeToken = _NATIVE_TOKEN;
       _feeData[_i].fee = _fee;
     }
 
@@ -1135,7 +1134,7 @@ contract UnitAutomationVaultExec is AutomationVaultUnitTest {
     IAutomationVault.FeeData[] memory _feeData
   ) public happyPath(_relay, _caller, _execData, _feeData) {
     for (uint256 _i; _i < _feeData.length; ++_i) {
-      vm.assume(_feeData[_i].feeToken != _ETH);
+      vm.assume(_feeData[_i].feeToken != _NATIVE_TOKEN);
     }
 
     for (uint256 _i; _i < _feeData.length; ++_i) {

@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import {IOpenRelay} from '@interfaces/relays/IOpenRelay.sol';
 import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
-import {_ETH} from '@utils/Constants.sol';
+import {_NATIVE_TOKEN} from '@utils/Constants.sol';
 
 /**
  * @title  OpenRelay
@@ -35,7 +35,7 @@ contract OpenRelay is IOpenRelay {
 
     // Send the payment to the relayer
     IAutomationVault.FeeData[] memory _feeData = new IAutomationVault.FeeData[](1);
-    _feeData[0] = IAutomationVault.FeeData(_feeRecipient, _ETH, _payment);
+    _feeData[0] = IAutomationVault.FeeData(_feeRecipient, _NATIVE_TOKEN, _payment);
     _automationVault.exec(msg.sender, new IAutomationVault.ExecData[](0), _feeData);
 
     // Emit the event

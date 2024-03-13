@@ -15,8 +15,7 @@ out-via-ir
 # Not ignore gitkeep
 !/**/.gitkeep
 
-# Ignore the deployment files
-broadcast/*/*/*
+broadcast/**
 
 # Docs build files
 docs/book

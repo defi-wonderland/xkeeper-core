@@ -26,7 +26,7 @@ yarn build
 
 ### Available Commands
 
-Make sure to set `MAINNET_RPC` environment variable before running integration tests.
+Make sure to set `ETHEREUM_MAINNET_RPC` environment variable before running integration tests.
 
 | Yarn Command            | Description                                                                                      |
 | ----------------------- | ------------------------------------------------------------------------------------------------ |

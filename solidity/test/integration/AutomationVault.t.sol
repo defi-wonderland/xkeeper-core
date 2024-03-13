@@ -5,7 +5,7 @@ import {CommonIntegrationTest} from '@test/integration/Common.t.sol';
 
 import {IAutomationVault} from '@interfaces/core/IAutomationVault.sol';
 import {IERC20, SafeERC20} from '@openzeppelin/token/ERC20/utils/SafeERC20.sol';
-import {_DAI_WHALE, _DAI, _ETH} from '@utils/Constants.sol';
+import {_DAI_WHALE, _DAI} from './Constants.sol';
 
 contract IntegrationAutomationVault is CommonIntegrationTest {
   using SafeERC20 for IERC20;
@@ -20,10 +20,6 @@ contract IntegrationAutomationVault is CommonIntegrationTest {
   function setUp() public override {
     CommonIntegrationTest.setUp();
     newOwner = makeAddr('NewOwner');
-
-    vm.prank(owner);
-
-    address(automationVault).call{value: 100 ether}('');
   }
 
   function test_changeOwnerAndWithdrawFunds(uint64 _amount, uint64 _amountToWithdraw) public {
@@ -57,6 +53,6 @@ contract IntegrationAutomationVault is CommonIntegrationTest {
     // Check that the old owner can't withdraw funds
     changePrank(owner);
     vm.expectRevert(abi.encodeWithSelector(IAutomationVault.AutomationVault_OnlyOwner.selector));
-    automationVault.withdrawFunds(_ETH, 100 ether, owner);
+    automationVault.withdrawFunds(address(_DAI), _balance - _amountToWithdraw, owner);
   }
 }

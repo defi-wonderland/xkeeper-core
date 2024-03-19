@@ -12,6 +12,7 @@ import {EnumerableSet} from '@openzeppelin/utils/structs/EnumerableSet.sol';
 contract Keep3rSponsor is Ownable, IKeep3rSponsor {
   using EnumerableSet for EnumerableSet.AddressSet;
 
+  /// @notice _sponsoredJobs Set of approved job addresses
   EnumerableSet.AddressSet private _sponsoredJobs;
   IOpenRelay public relay;
 

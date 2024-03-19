@@ -1,10 +1,10 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
 import {IKeep3rSponsor} from '@interfaces/core/IKeep3rSponsor.sol';
 
 import {IAutomationVault, IOpenRelay} from '@interfaces/relays/IOpenRelay.sol';
-import {IKeep3rV2} from '@interfaces/external/IKeep3rV2.sol';
-import {_KEEP3R_V2, _ETH} from '@utils/Constants.sol';
+import {_KEEP3R_V2} from '@utils/Constants.sol';
 
 import {Ownable} from '@openzeppelin/access/Ownable.sol';
 import {EnumerableSet} from '@openzeppelin/utils/structs/EnumerableSet.sol';
@@ -13,20 +13,16 @@ contract Keep3rSponsor is Ownable, IKeep3rSponsor {
   using EnumerableSet for EnumerableSet.AddressSet;
 
   EnumerableSet.AddressSet private _sponsoredJobs;
-  IOpenRelay immutable RELAY;
+  IOpenRelay public relay;
 
-  constructor(address relay) Ownable() {
-    RELAY = IOpenRelay(relay);
+  constructor(address _relay) Ownable() {
+    relay = IOpenRelay(_relay);
   }
 
-  modifier validateAndPayKeeper() {
-    if (!_KEEP3R_V2.isKeeper(msg.sender)) revert KeeperNotValid();
-    _;
-    // @note payment amount is questionable
-    _KEEP3R_V2.worked(msg.sender);
+  function setRelay(address _relay) external onlyOwner {
+    relay = IOpenRelay(_relay);
   }
 
-  // @note unsure if jobs should also be added to automation vault or if assumed to already be in approvedJobs list
   function addJobs(address[] calldata _jobs) public onlyOwner {
     for (uint256 _i; _i < _jobs.length;) {
       _sponsoredJobs.add(_jobs[_i]);
@@ -47,24 +43,19 @@ contract Keep3rSponsor is Ownable, IKeep3rSponsor {
     }
   }
 
-  function exec(IAutomationVault.ExecData[] calldata _execData, IAutomationVault _vault) external validateAndPayKeeper {
-    // @note if _execData holds data for just 1 job, this is unnecessary
+  function exec(IAutomationVault.ExecData[] calldata _execData, IAutomationVault _vault) external {
+    if (!_KEEP3R_V2.isKeeper(msg.sender)) revert Keep3rSponsor_NotKeeper();
+
     for (uint256 _i; _i < _execData.length;) {
-      if (!_sponsoredJobs.contains(_execData[_i].job)) revert JobNotSponsored();
+      if (!_sponsoredJobs.contains(_execData[_i].job)) revert Keep3rSponsor_NotSponsored();
 
       unchecked {
         ++_i;
       }
     }
 
-    RELAY.exec(_vault, _execData, msg.sender);
+    relay.exec(_vault, _execData, owner());
 
-    for (uint256 _i; _i < _execData.length;) {
-      emit JobExecuted(_execData[_i].job);
-
-      unchecked {
-        ++_i;
-      }
-    }
+    _KEEP3R_V2.worked(msg.sender);
   }
 }

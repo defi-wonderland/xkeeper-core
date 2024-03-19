@@ -1,18 +1,9 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
 import {IAutomationVault} from '@interfaces/relays/IOpenRelay.sol';
 
 interface IKeep3rSponsor {
-  /*///////////////////////////////////////////////////////////////
-                              EVENTS
-  //////////////////////////////////////////////////////////////*/
-
-  /**
-   * @notice Emitted when a job is executed
-   * @param  _job The address of the job
-   */
-  event JobExecuted(address _job);
-
   /*///////////////////////////////////////////////////////////////
                               ERRORS
   //////////////////////////////////////////////////////////////*/
@@ -20,16 +11,22 @@ interface IKeep3rSponsor {
   /**
    * @notice Thrown when the caller is not a valid keeper
    */
-  error KeeperNotValid();
+  error Keep3rSponsor_NotKeeper();
 
   /**
    * @notice Thrown when the job executed is not in the list of sponsored jobs
    */
-  error JobNotSponsored();
+  error Keep3rSponsor_NotSponsored();
 
   /*///////////////////////////////////////////////////////////////
                           EXTERNAL FUNCTIONS
   //////////////////////////////////////////////////////////////*/
+
+  /**
+   * @notice Sets the relay to forward calls to
+   * @param  _relay Address of relay to set
+   */
+  function setRelay(address _relay) external;
 
   /**
    * @notice Adds a job to the sponsored list

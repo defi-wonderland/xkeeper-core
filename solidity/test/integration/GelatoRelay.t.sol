@@ -43,14 +43,28 @@ contract IntegrationGelatoRelay is CommonIntegrationTest {
     address[] memory _whitelistedCallers = new address[](1);
     _whitelistedCallers[0] = _getDedicatedMsgSender(owner);
 
-    // Job selectors array
-    bytes4[] memory _jobSelectors = new bytes4[](2);
-    _jobSelectors[0] = basicJob.work.selector;
-    _jobSelectors[1] = basicJob.workHard.selector;
+    IAutomationVault.SelectorData[] memory _jobSelectorsData = new IAutomationVault.SelectorData[](2);
+    _jobSelectorsData[0] = IAutomationVault.SelectorData(
+      basicJob.work.selector,
+      IAutomationVault.HookData({
+        selectorType: IAutomationVault.JobSelectorType.ENABLED,
+        preHook: address(0),
+        postHook: address(0)
+      })
+    );
+
+    _jobSelectorsData[1] = IAutomationVault.SelectorData(
+      basicJob.workHard.selector,
+      IAutomationVault.HookData({
+        selectorType: IAutomationVault.JobSelectorType.ENABLED,
+        preHook: address(0),
+        postHook: address(0)
+      })
+    );
 
     // Job data array
     IAutomationVault.JobData[] memory _jobsData = new IAutomationVault.JobData[](1);
-    _jobsData[0] = IAutomationVault.JobData(address(basicJob), _jobSelectors);
+    _jobsData[0] = IAutomationVault.JobData(address(basicJob), _jobSelectorsData);
 
     startHoax(owner);
 

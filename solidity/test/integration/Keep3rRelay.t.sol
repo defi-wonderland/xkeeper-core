@@ -41,21 +41,52 @@ contract IntegrationKeep3rRelay is CommonIntegrationTest {
     address[] memory _keepers = new address[](1);
     _keepers[0] = bot;
 
-    // Keep3r selectors array
-    bytes4[] memory _keep3rSelectors = new bytes4[](2);
-    _keep3rSelectors[0] = keep3r.isKeeper.selector;
-    _keep3rSelectors[1] = keep3r.worked.selector;
+    // Keep3r selectors data array
+    IAutomationVault.SelectorData[] memory _keep3rSelectorsData = new IAutomationVault.SelectorData[](2);
+    _keep3rSelectorsData[0] = IAutomationVault.SelectorData(
+      keep3r.isKeeper.selector,
+      IAutomationVault.HookData({
+        selectorType: IAutomationVault.JobSelectorType.ENABLED,
+        preHook: address(0),
+        postHook: address(0)
+      })
+    );
 
-    // Job selectors array
-    bytes4[] memory _jobSelectors = new bytes4[](2);
-    _jobSelectors[0] = basicJob.work.selector;
-    _jobSelectors[1] = basicJob.workHard.selector;
+    _keep3rSelectorsData[1] = IAutomationVault.SelectorData(
+      keep3r.worked.selector,
+      IAutomationVault.HookData({
+        selectorType: IAutomationVault.JobSelectorType.ENABLED,
+        preHook: address(0),
+        postHook: address(0)
+      })
+    );
+
+    // Job selectors data array
+    IAutomationVault.SelectorData[] memory _jobSelectorsData = new IAutomationVault.SelectorData[](2);
+    _jobSelectorsData[0] = IAutomationVault.SelectorData(
+      basicJob.work.selector,
+      IAutomationVault.HookData({
+        selectorType: IAutomationVault.JobSelectorType.ENABLED,
+        preHook: address(0),
+        postHook: address(0)
+      })
+    );
+
+    _jobSelectorsData[1] = IAutomationVault.SelectorData(
+      basicJob.workHard.selector,
+      IAutomationVault.HookData({
+        selectorType: IAutomationVault.JobSelectorType.ENABLED,
+        preHook: address(0),
+        postHook: address(0)
+      })
+    );
+
     IKeep3rBondedRelay.Requirements memory _requirements = IKeep3rBondedRelay.Requirements(address(kp3r), 1 ether, 0, 0);
 
     // Job data array
     IAutomationVault.JobData[] memory _jobsData = new IAutomationVault.JobData[](2);
-    _jobsData[0] = IAutomationVault.JobData(address(keep3r), _keep3rSelectors);
-    _jobsData[1] = IAutomationVault.JobData(address(basicJob), _jobSelectors);
+    _jobsData[0] = IAutomationVault.JobData(address(keep3r), _keep3rSelectorsData);
+    _jobsData[1] = IAutomationVault.JobData(address(basicJob), _jobSelectorsData);
 
     vm.startPrank(owner);
 

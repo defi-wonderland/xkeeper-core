@@ -55,8 +55,17 @@ interface IAutomationVault {
    * @notice Emitted when job selector is approved
    * @param  _job The address of the job
    * @param  _functionSelector The function selector
+   * @param  _selectorType The type of the job selector
+   * @param  _preHook The address of the prehook
+   * @param  _postHook The address of the posthook
    */
-  event ApproveJobSelector(address indexed _job, bytes4 indexed _functionSelector);
+  event ApproveJobSelector(
+    address indexed _job,
+    bytes4 indexed _functionSelector,
+    JobSelectorType _selectorType,
+    address _preHook,
+    address _postHook
+  );
 
   /**
    * @notice Emitted when a job is executed
@@ -131,8 +140,50 @@ interface IAutomationVault {
   error AutomationVault_OnlyPendingOwner();
 
   /*///////////////////////////////////////////////////////////////
+                              ENUMS
+  //////////////////////////////////////////////////////////////*/
+
+  /**
+   * @notice The type of the job selector
+   * @param DISABLED The job selector is disabled
+   * @param ENABLED The job selector is enabled
+   * @param ENABLED_WITH_PREHOOK The job selector is enabled with a prehook
+   * @param ENABLED_WITH_POSTHOOK The job selector is enabled with a posthook
+   * @param ENABLED_WITH_BOTHHOOKS The job selector is enabled with both hooks
+   */
+  enum JobSelectorType {
+    DISABLED,
+    ENABLED,
+    ENABLED_WITH_PREHOOK,
+    ENABLED_WITH_POSTHOOK,
+    ENABLED_WITH_BOTHHOOKS
+  }
+
+  /*///////////////////////////////////////////////////////////////
                               STRUCTS
   //////////////////////////////////////////////////////////////*/
+
+  /**
+   * @notice The data to execute a hook
+   * @param selectorType The type of the job selector
+   * @param preHook The address of the prehook
+   * @param postHook The address of the posthook
+   */
+  struct HookData {
+    JobSelectorType selectorType;
+    address preHook;
+    address postHook;
+  }
+
+  /**
+   * @notice The data to execute a job selector
+   * @param selector The function selector
+   * @param hookData The hook data
+   */
+  struct SelectorData {
+    bytes4 selector;
+    HookData hookData;
+  }
 
   /**
    * @notice The data to execute a job
@@ -159,11 +210,11 @@ interface IAutomationVault {
   /**
    * @notice The data of a job
    * @param job The address of the job
-   * @param functionSelectors The array of function selectors
+   * @param selectorsData The array of job selectors data
    */
   struct JobData {
     address job;
-    bytes4[] functionSelectors;
+    SelectorData[] selectorsData;
   }
 
   /*///////////////////////////////////////////////////////////////
@@ -180,7 +231,6 @@ interface IAutomationVault {
    * @notice Returns the address of the native token
    * @return _nativeToken The address of the native token
    */
-
   function NATIVE_TOKEN() external view returns (address _nativeToken);
 
   /**

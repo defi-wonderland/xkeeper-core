@@ -8,7 +8,7 @@ concurrency:
 
 jobs:
   forge:
-    name: Run Unit and E2E Tests
+    name: Run Optimized Integration Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -22,15 +22,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "yarn"
+          cache: 'yarn'
 
       - name: Install dependencies
         run: yarn --frozen-lockfile --network-concurrency 1
 
       - name: Precompile using 0.8.14 and via-ir=false
-        run: yarn build
+        run: yarn build:optimized
 
-      - name: "Create env file"
+      - name: 'Create env file'
         run: |
           touch .env
           echo MAINNET_RPC="${{ secrets.MAINNET_RPC }}" >> .env
@@ -39,7 +39,7 @@ jobs:
 
       - name: Run tests
         shell: bash
-        run: yarn test
+        run: yarn test:integration:optimized
 
   forge-optimized:
     name: Run Optimized Unit Tests
@@ -56,7 +56,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "yarn"
+          cache: 'yarn'
 
       - name: Install dependencies
         run: yarn --frozen-lockfile --network-concurrency 1
@@ -65,7 +65,8 @@ jobs:
         run: yarn build:optimized
 
       - name: Run tests
-        run: yarn test:unit
+        run: yarn test:unit:optimized
+
   # coverage:
   #   name: Run Coverage Tests
   #   runs-on: ubuntu-latest

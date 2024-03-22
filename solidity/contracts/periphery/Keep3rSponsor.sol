@@ -10,6 +10,7 @@ import {_KEEP3R_V2} from '@utils/Constants.sol';
  * @title  Keep3rSponsor
  * @notice This contract managed by Keep3r Network will sponsor some execution in determined jobs
  */
+
 contract Keep3rSponsor is IKeep3rSponsor {
   using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -31,10 +32,11 @@ contract Keep3rSponsor is IKeep3rSponsor {
   EnumerableSet.AddressSet private _sponsoredJobs;
 
   /**
-   * @param _openRelay The address of the open relay
    * @param _owner The address of the owner
+   * @param _feeRecipient The address of the fee recipient
+   * @param _openRelay The address of the open relay
    */
-  constructor(IOpenRelay _openRelay, address _owner, address _feeRecipient) {
+  constructor(address _owner, address _feeRecipient, IOpenRelay _openRelay) {
     openRelay = _openRelay;
     owner = _owner;
     feeRecipient = _feeRecipient;

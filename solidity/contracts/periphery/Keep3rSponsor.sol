@@ -29,7 +29,7 @@ contract Keep3rSponsor is IKeep3rSponsor {
   /**
    * @notice List of sponsored jobs
    */
-  EnumerableSet.AddressSet private _sponsoredJobs;
+  EnumerableSet.AddressSet internal _sponsoredJobs;
 
   /**
    * @param _owner The address of the owner
